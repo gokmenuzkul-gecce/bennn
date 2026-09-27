@@ -1,164 +1,189 @@
-﻿# 🎰 Promex Gaming Suite v2.0
+# PROMEX Gaming Suite
 
-### Next-Gen Turnkey Social Gaming, Sportsbook & Prediction Platform
-**Built with Laravel 12 & PHP 8.2+**
+### Your brand. Your platform. A growing world of social games.
 
-[![Laravel 12](https://img.shields.io/badge/Laravel-12.x-red?style=for-the-badge&logo=laravel)](https://laravel.com)
-[![PHP 8.2+](https://img.shields.io/badge/PHP-8.2%20%7C%208.4-blue?style=for-the-badge&logo=php)](https://php.net)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
-[![Release](https://img.shields.io/badge/Release-v2.0-orange?style=for-the-badge)](https://github.com/promexdotme/laravel-social-gaming/releases/tag/v2.0)
-[![Live Demo](https://img.shields.io/badge/Demo-casinoduliban.com-blueviolet?style=for-the-badge)](https://casinoduliban.com)
+Build a self-hosted social-gaming experience with a customizable player lobby,
+the Liteback operator console, sports and prediction modules, virtual trading,
+and an optional licensed CEDAR ecosystem.
+
+**V2.0.0 · Laravel 13 · PHP 8.3 minimum · Source available for own use**
+
+[Product and licensing](https://promex.me/platforms/promex-gaming-suite/) ·
+[GitHub releases](https://github.com/promexdotme/laravel-social-gaming/releases) ·
+[Backup and updates](PATCHES.md) · [Source-use terms](LICENSE)
+
+> Features can require configuration, provider accounts or licensed
+> services; source availability does not mean every hosted service is enabled.
+
+## Make it your own
+
+Customize your platform name, tagline and logo for your own operation. Give players
+a responsive, dark-themed lobby and manage the experience through Liteback.
+Player and operator Help pages support English, French, Spanish, Russian, Turkish,
+Arabic and Hebrew; this does not imply every interface string is translated.
+
+## One operator console, many experiences
+
+- **Players and virtual balances:** user administration, balance controls,
+  transaction visibility and operator tools.
+- **Sportsbook:** sports/event management, odds configuration, betslips and
+  settlement workflows. Live feeds require a configured provider/service.
+- **Prediction markets:** event-based virtual predictions and market management.
+- **Jackpot Zone:** lotto games, ticket purchases, scheduled draws and results.
+- **Crypto and stock simulations:** virtual positions with market-data-backed
+  experiences—not brokerage or exchange accounts.
+- **VIP and referrals:** player progression, bonus/rakeback controls and referral
+  features for community engagement.
+- **Payments and top-ups:** configurable Stripe, PayPal and BTCPay integrations,
+  plus manual-deposit review. Provider accounts, approvals and fees are separate.
+- **Delivery settings:** connect your own transactional email through Brevo,
+  Resend, Postmark or a compatible custom API. WhatsApp OTP supports PROMEX/custom
+  routing; the PROMEX route depends on entitlement, configuration and rollout.
+
+## CEDAR: a protected game ecosystem
+
+CEDAR brings together original arcade experiences, card games and slots through
+the protected PROMEX Service Hub.
+
+Protected CEDAR assets and engines stay on our infrastructure. They are excluded
+from public source and customer installation packages.
+Access depends on an active license and its game/service entitlements.
+
+Central fixes can improve shared services without replacing every customer's
+application. Games needing local registration, handlers or database changes get
+a separate integration patch with declared prerequisites.
+
+**Roadmap:** expand the CEDAR catalog with new games and updates, followed by a
+planned daily game-release cadence after the patch system and release pipeline
+pass testing. This is a plan, not a current daily-release or game-count guarantee.
+
+## Licensing is optional. Managed services make it worthwhile.
+
+You can install the community application without buying a PROMEX service license.
+Use and customize the covered source for your own operation under the restricted
+[own-use terms](LICENSE), configure supported services and apply GitHub updates
+manually. This is **source-available software, not MIT/GNU or unrestricted open source**.
+
+Choose a PROMEX annual license when you want the connected service experience:
+
+| Community / self-managed | With an eligible active PROMEX license |
+| --- | --- |
+| Install without a paid service license | Connect a domain-bound installation to the Hub |
+| Operate and customize your own platform | Access entitled protected CEDAR games and services |
+| Apply file/database updates manually | Fetch signed patches inside Backup & Update |
+| Configure supported providers yourself | Use available PROMEX services included in your plan |
+| Maintain your own update procedure | Review patch files, prerequisites and history |
+
+Licensing does not replace hosting, backups, provider accounts or operating
+responsibilities. Not every service is necessarily included in every plan.
+
+### Annual launch offer
+
+**$99 USD for an annual license purchased through October 31, 2026.**
+**From November 1, 2026, the annual purchase price becomes $239 USD**, alongside
+the planned expansion of games and updates.
+
+This offer does not promise a lifetime renewal-price lock. Check the product's
+checkout terms for renewal pricing, taxes and the services included.
+
+[Get the annual PROMEX license](https://promex.me/platforms/promex-gaming-suite/)
+
+## Your platform—not a product to resell
+
+The source-use policy permits personal use and operation of your own business's
+platform, including your own branding. It does not permit selling or sublicensing
+the platform, white-labelling installations for clients, or using covered code to
+create a product offered to other operators. An annual hosted-service license
+does not grant resale rights. See [LICENSE](LICENSE) for scope and third-party exceptions.
+
+## Legacy games stay on your domain
+
+Legacy slots are operator-hosted under `/games/GameName/`. Obtain and host only
+assets you are authorized to use. Legacy assets are not included in the core
+package and are not provided through a PROMEX legacy-games CDN. There is no
+`.htaccess` or reverse-proxy source switch.
+
+A legacy patch targets one exact game folder and version. Download the reviewed
+patch, replace its declared files, then verify the replacement in the backend.
+Updating one game does not change every other game's version.
+
+## Smaller updates, clearer control
+
+**Check available patches → Download & review → Install**
+
+- Signed packages contain selected changed files and new migrations when needed,
+  rather than a complete application archive every time.
+- Core updates enforce their required sequence. Optional features and individual
+  games have independent versions and explicit prerequisites.
+- Wrong baselines, locally modified files and duplicate installs are checked.
+- Installed Patches records results. Customer ZIP uploads are not part of this flow.
+
+An update that fails after mutation can leave the site in maintenance mode for
+operator recovery. There is no automatic backup or restore. Read [PATCHES.md](PATCHES.md)
+before your first update.
+
+## Backups stay under your control
+
+The manual backup tool exports core code, SQL and patch history. It excludes vendor,
+legacy games, CEDAR assets, uploads and environment secrets. Retain your original
+`.env`/APP_KEY, uploads, games and matching dependencies separately.
+
+Use a quiet backup window and test recovery. A core backup alone is not a complete,
+ready-to-restore website.
+
+## Installation
+
+### Operators
+
+Use a verified installation prepack from an approved release. Prepacks include
+PHP dependencies: no Composer command is needed after extraction. GitHub's
+automatically generated source ZIP is not an installation prepack.
+
+1. Prepare a fresh site/database with compatible PHP and MySQL or MariaDB.
+2. Configure HTTPS; make the application URL match the browser address.
+3. Extract the package and open `/install` on a correctly configured web server.
+4. Complete the environment/database checks. Leave the license blank for community
+   setup, or activate a license for that domain.
+5. Change the temporary administrator password immediately and finish installer cleanup.
+6. Configure branding, delivery and providers; add only authorized games/services.
+
+The installer checks PHP CLI readiness for managed updates, migrations and cache
+cleanup. This is advisory: missing CLI does not block initial installation.
+Manual updates remain an alternative with release-specific file/database instructions.
+
+Website PHP and CLI can differ. Configure `PROMEX_PHP_BINARY` when the host's
+default CLI is unsuitable. Never copy a Laragon PHP path onto a live server.
+
+### Developers
+
+The application lives in `casino/`. Composer targets PHP `^8.3`; the current
+lockfile selects Laravel 13. Keep platform checks enabled and test your runtime;
+the version constraint is not certification of every future PHP release.
+
+A Git clone is a source checkout, not necessarily a complete prepack. Do not assume
+the general seeder reproduces the curated installer database. Use the setup procedure
+for the approved release. Apache `.htaccess` protections do not automatically apply
+to Nginx: keep internal code/configuration, SQL, storage and secrets inaccessible.
+
+## Release and rights notice
+
+The product baseline is **2.0.0**, distinct from the historical `v2.0` tag.
+The root `VERSION` file records the core version; a release tag identifies the
+complete source snapshot. Dependency versions and historical migrations keep
+their original identifiers. Existing unversioned legacy game folders use the
+2.0.0 baseline; subsequent patches advance only the targeted component.
+
+The licensor of covered PROMEX code is **PROMEX DOT ME INC**. The own-use license
+does not revoke rights already granted under earlier licenses or replace
+third-party terms. See [LICENSE](LICENSE).
+
+The product is intended for social-gaming and virtual-currency experiences.
+Content rights, operating permissions, provider eligibility and compliance remain
+the operator's responsibility. No gaming authorization, financial return or
+production certification is implied.
 
 ---
 
-## 🌐 Live Interactive Demo
-
-Experience the full frontend player experience, sportsbook lobby, and provably fair games:
-👉 **[https://casinoduliban.com](https://casinoduliban.com)**
-
----
-
-## 📖 Overview
-
-**Promex Gaming Suite v2.0** is an enterprise-grade, modular social gaming engine built on **Laravel 12**. Re-architected from the ground up for extreme performance and effortless deployment, v2.0 shifts heavy assets to high-speed cloud infrastructure while giving you total control over user management, virtual ledger economies, sports odds feeds, and game logic.
-
-### 💡 Open-Source Philosophy: 100% Free Core Engine
-The platform engine is **completely free and open-source**. 
-* **Self-Host & Build**: You can download, deploy, self-host, and inspect 100% of the core backend and frontend code.
-* **Your Own Games**: Add your own custom HTML5 games, build bespoke RNG slots, or integrate third-party game providers with **zero licensing fees or platform lock-in**.
-
----
-
-## 💎 Cloud Ecosystem & Pricing Plans
-
-While the core platform is free for your own games and custom development, we provide managed high-speed cloud infrastructure so you can launch a production-ready casino in minutes without managing 40GB+ of local storage or real-time sports feed parsers.
-
-👉 **Get Your License & Cloud Access:** **[promex.me/platforms/promex-gaming-suite/](https://promex.me/platforms/promex-gaming-suite/)**
-
-| Plan | Price | What's Included |
-| :--- | :--- | :--- |
-| **Free / Open Source** | **$0** | Complete Laravel 12 source code, Liteback admin console, virtual economy, user management, and ability to add unlimited custom games. |
-| **Cloud CDN Monthly** | **$10 / mo** | Instant access to our hosted Games CDN (hundreds of top-tier slots streamed on demand), automated live sports odds feeds, central licensor sync, and ongoing cloud patches. |
-| **Cloud CDN Annual** | **$100 / yr** | All Cloud CDN features with 2 months free ($20 savings), priority cloud node routing, and store add-on compatibility. |
-| **Full Studio Lifetime Access** | **$499 one-time** | **Total Ownership:** Complete direct Google Drive download access to the entire **40GB+ raw offline game asset pack**, offline websocket server source code, legacy editions, and **all future releases & updates included forever**. |
-
-> 🛠️ **Custom Development Available:**  
-> Need a bespoke frontend theme, proprietary custom mini-games, specialized crypto gateway integrations, or custom sports/prediction market feeds? We offer custom development and white-label turnkey deployments upon request. Inquire at [promex.me](https://promex.me).
-
----
-
-## 🚀 Key Features in v2.0
-
-### 1. ⚡ Laravel 12 Modernized Engine
-* **Clean Architecture:** Upgraded to **Laravel 12** on PHP 8.2+ / 8.4 with streamlined migrations and strict typing.
-* **Single Tenant Simplicity:** Focused shop-first architecture (`shop_id = 1`) eliminating legacy multi-tier distributor/agent bloat for blistering fast SQL query execution.
-* **Dark-Mode Liteback Admin:** Modern, responsive operator console at `/liteback` with live dashboard analytics, game activation toggles, user balance adjustment tools, and audit logs.
-
-### 2. ☁️ Hosted Games CDN (Zero Local Storage Required)
-* **No 40GB Downloads:** Heavy game binaries, sound stems, and sprite sheets are streamed instantly from our global CDN or reverse-proxied seamlessly via your web server (`/games/`).
-* **Instant Deployments:** Launch your entire platform on a low-cost VPS or standard server in under 5 minutes without exhausting disk space.
-
-### 3. ⚽ Real-Time Sportsbook & Prediction Markets
-* **Live Odds Feeds:** Automated fixture sync and real-time odds parsing powered by Redis caching.
-* **Dynamic Odds Formatting:** Automatic American to Decimal odds conversion with automatic kickoff-time match expirations.
-* **Single & Multi-Selection Betslips:** Interactive floating betslip drawer with real-time payout calculators and automated settlement engines.
-* **Polymarket Prediction Markets:** Integrated real-world event predictions, crypto milestones, and political outcome markets.
-
-### 4. 🎲 Provably Fair Mini-Games
-* Built-in instant arcade games powered by provably fair cryptographic RNG algorithms:
-  * **Plinko**, **Crash**, **Mines**, **Dice**, and **Wheel of Fortune**.
-  * Players can verify seed hashes directly in their client for complete transparency.
-
-### 5. 💳 Web3 & Virtual Economy Gateways
-* Native integrations with **CryptoGateway**, **BTCPay Server**, **Stripe Checkout**, and **PayPal**.
-* Multi-chain cryptocurrency support (USDT, USDC, BTC, ETH, SOL, MATIC, TRX).
-* Manual bank transfer receipts review queue with instant operator balance credit.
-
----
-
-## 🔮 Roadmap: Upcoming Features
-
-* 📈 **Simulated Stocks & Equities Trading:** Virtual stock market sandbox with real-time candlestick charts and order executions.
-* 🪙 **Crypto Spot & Futures Trading:** Live crypto pair trading engine with virtual leverage, stop-loss, and simulated order books.
-* 📱 **PWA 2.0 Mobile Experience:** Enhanced installable Progressive Web App with haptic feedback and offline caching.
-
----
-
-## 📦 Quick Installation
-
-For full production deployment and Nginx reverse proxy instructions, see [INSTALL.md](INSTALL.md) and [REVERSE_PROXY_GAMES.md](REVERSE_PROXY_GAMES.md).
-
-### 1. Clone & Install
-```bash
-# Clone the repository
-git clone https://github.com/promexdotme/laravel-social-gaming.git /var/www/casino
-cd /var/www/casino/casino
-
-# Install Composer dependencies
-composer install --no-dev --optimize-autoloader
-
-# Environment configuration
-cp .env.example .env
-php artisan key:generate
-```
-
-### 2. Database & Setup
-Configure your MySQL database in `casino/.env`:
-```env
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=casino
-DB_USERNAME=your_db_user
-DB_PASSWORD=your_db_password
-APP_URL=https://yourdomain.com
-```
-
-Run database migrations:
-```bash
-php artisan migrate --seed
-```
-
-### 3. Nginx Reverse Proxy for CDN Games
-Add the following block to your Nginx site configuration so your players load cloud games seamlessly from your own domain:
-```nginx
-location /games/ {
-    proxy_pass https://clients.377.live/games/;
-    proxy_set_header Host clients.377.live;
-    proxy_set_header X-Real-IP $remote_addr;
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    proxy_set_header X-Forwarded-Proto $scheme;
-    proxy_ssl_server_name on;
-    proxy_buffering off;
-}
-```
-
-### 4. Activate License Key
-1. Obtain your key from [promex.me/platforms/promex-gaming-suite/](https://promex.me/platforms/promex-gaming-suite/).
-2. Navigate to your operator console: `https://yourdomain.com/liteback`.
-3. Go to **Store & License** (`/liteback/store`), input your key (`PROMEX-XXXX-XXXX-XXXX`), and click **Activate**.
-
----
-
-## 🏛️ Legacy Versions & Lite 13
-Need access to the legacy standalone Lite 13 release or earlier v10 monolithic distributions?
-* You can switch to the archived branch:
-  ```bash
-  git checkout lite-13
-  ```
-* Or download the [Lite 13 Release](https://github.com/promexdotme/laravel-social-gaming/releases/tag/lite-13).
-
----
-
-## ⚠️ Compliance & Legal Disclaimer
-
-This software is designed strictly for **Social Gaming**, **Virtual Currency**, and **Amusement** purposes.
-* It does not process real-money wagering natively.
-* It is provided as-is for educational, amusement, and sandbox platform development under the MIT License.
-* Operators are solely responsible for ensuring compliance with all local laws and regulations in their respective jurisdictions.
-
----
-
-<div align="center">
-  <sub>Developed & Maintained by <a href="https://promex.me">Promex.me</a> • Built with ❤️ for the global gaming community</sub>
-</div>
+Built by [PROMEX](https://promex.me) ·
+[Product and licensing](https://promex.me/platforms/promex-gaming-suite/) ·
+[Project source](https://github.com/promexdotme/laravel-social-gaming)

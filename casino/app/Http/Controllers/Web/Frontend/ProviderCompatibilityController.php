@@ -5,6 +5,8 @@ namespace VanguardLTE\Http\Controllers\Web\Frontend;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use VanguardLTE\Http\Controllers\Controller;
+use VanguardLTE\Game;
+use VanguardLTE\Services\LegacyCompatibilityService;
 use VanguardLTE\Services\LicenseService;
 
 /**
@@ -92,6 +94,15 @@ final class ProviderCompatibilityController extends Controller
         }
         if (!LicenseService::canPlayGame($game)) {
             abort(403, 'An active game entitlement is required.');
+        }
+        $record = Game::where('name', $game)->first();
+        if (!$record || $record->source_type !== LegacyCompatibilityService::SOURCE_TYPE) {
+            abort(403, 'Register this operator-supplied game through Legacy Compatibility.');
+        }
+        try {
+            (new LegacyCompatibilityService())->assertPlayable($record);
+        } catch (\RuntimeException) {
+            abort(403, 'Legacy Compatibility rejected this game.');
         }
 
         return $game;

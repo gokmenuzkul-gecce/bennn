@@ -17,6 +17,8 @@ class LottoGame extends Model
         'jackpot_pool',
         'draw_interval',
         'draw_time',
+        'draw_source',
+        'result_columns_json',
         'is_active',
     ];
 
@@ -26,6 +28,7 @@ class LottoGame extends Model
         'entry_fee' => 'float',
         'jackpot_pool' => 'float',
         'is_active' => 'boolean',
+        'result_columns_json' => 'array',
     ];
 
     public function tickets()

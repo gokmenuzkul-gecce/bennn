@@ -3,82 +3,57 @@
 namespace VanguardLTE\Console\Commands;
 
 use Illuminate\Console\Command;
-use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
+use Illuminate\Support\Facades\DB;
+use VanguardLTE\Services\LegacyCompatibilityService;
 
-class InjectMockWebSocket extends Command
+/** Optional, explicit adapter injection for operator-owned legacy HTML. */
+final class InjectMockWebSocket extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    protected $signature = 'games:inject-mock {--dir= : Custom directory to scan under the public root}';
+    protected $signature = 'games:legacy-adapter {game* : Registered Legacy Compatibility game names}';
+    protected $description = 'Inject the Promex compatibility adapter into explicitly selected operator-supplied games.';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Injects the mock-websocket.js script tag into all game HTML entry files.';
-
-    /**
-     * Execute the console command.
-     *
-     * @return int
-     */
-    public function handle()
+    public function handle(): int
     {
-        $customDir = $this->option('dir');
-        $gamesPath = $customDir ? base_path('../' . $customDir) : base_path('../games');
-
-        $this->info("Scanning directory: " . $gamesPath);
-
-        if (!file_exists($gamesPath)) {
-            $this->error("Directory does not exist: " . $gamesPath);
-            return 1;
+        $service = new LegacyCompatibilityService();
+        if (!$service->enabled()) {
+            $this->error('Legacy Compatibility is disabled.');
+            return self::FAILURE;
         }
-
-        $files = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($gamesPath, RecursiveDirectoryIterator::SKIP_DOTS)
-        );
-
-        $injectedCount = 0;
-        $skippedCount = 0;
-
-        foreach ($files as $file) {
-            if ($file->isFile() && strtolower($file->getExtension()) === 'html') {
-                $filePath = $file->getRealPath();
-                $content = file_get_contents($filePath);
-
-                // Check if already injected
-                if (strpos($content, 'mock-websocket.js') !== false) {
-                    $skippedCount++;
-                    continue;
-                }
-
-                // Inject tag as the very first script in head, body, or top of file
-                $scriptTag = "\n\t<!-- Mock WebSocket Bridge Injection -->\n\t<script src=\"/js/mock-websocket.js\"></script>\n";
-
-                if (strpos($content, '<head>') !== false) {
-                    $content = str_replace('<head>', "<head>" . $scriptTag, $content);
-                } elseif (strpos($content, '<HEAD>') !== false) {
-                    $content = str_replace('<HEAD>', "<HEAD>" . $scriptTag, $content);
-                } elseif (strpos($content, '<body>') !== false) {
-                    $content = str_replace('<body>', "<body>" . $scriptTag, $content);
-                } elseif (strpos($content, '<BODY>') !== false) {
-                    $content = str_replace('<BODY>', "<BODY>" . $scriptTag, $content);
-                } else {
-                    $content = $scriptTag . $content;
-                }
-
-                file_put_contents($filePath, $content);
-                $this->line("Injected: " . str_replace(base_path('../'), '', $filePath));
-                $injectedCount++;
+        $discovered = [];
+        foreach ($service->discover() as $row) $discovered[$row['name']] = $row;
+        $changed = 0;
+        $skipped = 0;
+        foreach (array_unique($this->argument('game')) as $name) {
+            if (!is_string($name) || !preg_match('/^[A-Za-z][A-Za-z0-9_]{1,99}$/D', $name)) {
+                $this->warn('Skipped invalid game name.'); ++$skipped; continue;
             }
+            $game = DB::table('games')->where('name', $name)->first();
+            if (!$game || ($game->source_type ?? '') !== LegacyCompatibilityService::SOURCE_TYPE
+                || empty($game->legacy_rights_attested_at) || !isset($discovered[$name])) {
+                $this->warn("Skipped {$name}: register it with rights attestation first."); ++$skipped; continue;
+            }
+            $path = base_path('../games/' . $name . '/' . $discovered[$name]['entry']);
+            $content = file_get_contents($path);
+            if (!is_string($content)) { $this->warn("Skipped {$name}: entry is unreadable."); ++$skipped; continue; }
+            if (stripos($content, 'mock-websocket.js') !== false) {
+                $this->line("Already adapted: {$name}"); ++$skipped; continue;
+            }
+            $tag = "\n\t<!-- Promex Legacy Compatibility Adapter -->\n\t<script src=\"/js/mock-websocket.js\"></script>\n";
+            $adapted = preg_replace('/<head\b[^>]*>/i', '$0' . $tag, $content, 1, $count);
+            if (!$count) $adapted = $tag . $content;
+            $backup = $path . '.promex-original';
+            if (!is_file($backup) && !copy($path, $backup)) {
+                $this->warn("Skipped {$name}: original could not be preserved."); ++$skipped; continue;
+            }
+            $temporary = $path . '.promex-new';
+            if (file_put_contents($temporary, $adapted, LOCK_EX) === false || !rename($temporary, $path)) {
+                @unlink($temporary);
+                $this->warn("Skipped {$name}: adapter write failed."); ++$skipped; continue;
+            }
+            $this->info("Adapted: {$name} (original preserved beside entry)");
+            ++$changed;
         }
-
-        $this->info("Injection complete! Injected: {$injectedCount}, Skipped: {$skippedCount}");
-        return 0;
+        $this->info("Legacy adapter complete: {$changed} changed, {$skipped} skipped.");
+        return self::SUCCESS;
     }
 }

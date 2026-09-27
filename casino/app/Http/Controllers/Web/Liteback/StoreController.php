@@ -4,21 +4,18 @@ namespace VanguardLTE\Http\Controllers\Web\Liteback;
 
 use VanguardLTE\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use VanguardLTE\Services\LicenseService;
+use VanguardLTE\Services\PromexInstallationService;
 use VanguardLTE\Services\UpdaterService;
 
 class StoreController extends Controller
 {
-    /**
-     * Display Store, Add-ons & License Dashboard
-     */
+    /** Display the license and archive-access request page. */
     public function index()
     {
         $license = LicenseService::getStatus();
-        $catalog = LicenseService::getStoreCatalog();
-        $versionInfo = UpdaterService::checkUpdate();
-
-        return view('liteback.store.index', compact('license', 'catalog', 'versionInfo'));
+        return view('liteback.store.index', compact('license'));
     }
 
     /**
@@ -40,7 +37,19 @@ class StoreController extends Controller
         // Force cache refresh
         $newStatus = LicenseService::getStatus(true);
 
-        $msg = "License settings updated! Current status: " . strtoupper($newStatus['status']);
+        $msg = "License settings updated. Current status: " . strtoupper($newStatus['status']);
+        if (($newStatus['status'] ?? '') === 'active' && (bool) config('licensing.auto_activate_installation', true)) {
+            try {
+                PromexInstallationService::ensureActivated($key);
+                $msg .= '. Protected hosted services are active.';
+            } catch (\Throwable $e) {
+                return redirect()->route('liteback.store.index')->with(
+                    'warning',
+                    $msg . '. Local features remain active; protected hosted services are pending: ' . $e->getMessage()
+                );
+            }
+        }
+
         return redirect()->route('liteback.store.index')->with('success', $msg);
     }
 
@@ -55,6 +64,52 @@ class StoreController extends Controller
         $msg = "License verification complete: " . strtoupper($status['status']) . " - " . ($status['message'] ?? '');
 
         return redirect()->route('liteback.store.index')->with($type, $msg);
+    }
+
+    /** Request the one-email, 30-day PROMEX archives Drive grant for this license. */
+    public function requestArchivesDriveAccess(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email:rfc,dns|max:254',
+            'confirm_one_email_grant' => 'accepted',
+        ], [
+            'confirm_one_email_grant.accepted' => 'Please confirm that this license receives one 30-day grant for one email address.',
+        ]);
+
+        $license = LicenseService::getStatus();
+        $licenseKey = trim((string) ($license['license_key'] ?? ''));
+        if ($licenseKey === '') {
+            return redirect()->route('liteback.store.index')->withErrors('Save a license key before requesting archive access.')->withInput();
+        }
+
+        try {
+            $response = Http::acceptJson()->timeout(60)->post('https://promex.me/wp-json/promex/v1/games/access', [
+                'license_key' => $licenseKey,
+                'email' => $request->input('email'),
+            ]);
+            $data = $response->json();
+            if (!is_array($data)) {
+                $data = [];
+            }
+        } catch (\Throwable $exception) {
+            report($exception);
+            return redirect()->route('liteback.store.index')->withErrors('We could not reach PROMEX to request archive access. Please try again or open a support ticket.')->withInput();
+        }
+
+        if ($response->status() === 200 && ($data['success'] ?? false) === true) {
+            $message = 'Archive access was granted for ' . ($data['email'] ?? $request->input('email')) . '.';
+            if (!empty($data['expires_at'])) {
+                $message .= ' It expires ' . $data['expires_at'] . '.';
+            }
+
+            return redirect()->route('liteback.store.index')->with('drive_access', [
+                'message' => $message,
+                'folder_url' => $data['folder_url'] ?? null,
+            ]);
+        }
+
+        $message = is_array($data) && !empty($data['message']) ? $data['message'] : 'PROMEX could not grant archive access at this time.';
+        return redirect()->route('liteback.store.index')->withErrors($message)->withInput();
     }
 
     /**
@@ -76,12 +131,6 @@ class StoreController extends Controller
      */
     public function applyUpdate(Request $request)
     {
-        $result = UpdaterService::applyUpdate();
-
-        if ($result['success']) {
-            return redirect()->route('liteback.store.index')->with('success', $result['message']);
-        }
-
-        return redirect()->route('liteback.store.index')->withErrors($result['message']);
+        return redirect()->route('liteback.maintenance.index')->withErrors('The old full-package updater is retired. Select a signed patch under Backup & Update.');
     }
 }

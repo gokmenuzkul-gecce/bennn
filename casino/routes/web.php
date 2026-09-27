@@ -15,6 +15,11 @@ Route::namespace ('Frontend')->middleware(['siteisclosed', 'checker'])->group(fu
 
     Route::post('login', ['as' => 'frontend.auth.login.post', 'uses' => 'Auth\AuthController@postLogin']);
     Route::get('logout', ['as' => 'frontend.auth.logout', 'uses' => 'Auth\AuthController@getLogout']);
+    Route::post('auth/phone/otp', ['as' => 'frontend.auth.phone.otp', 'uses' => 'Auth\MultiAuthController@postPhoneOtp'])
+        ->middleware('throttle:5,1');
+    Route::post('auth/phone/verify', ['as' => 'frontend.auth.phone.verify', 'uses' => 'Auth\MultiAuthController@verifyPhoneOtp'])
+        ->middleware('throttle:10,1');
+    Route::post('auth/profile/update', ['as' => 'frontend.auth.profile.update', 'uses' => 'Auth\MultiAuthController@updateProfile']);
 
     Route::get('/specauth/{user}', ['as' => 'frontend.user.specauth', 'uses' => 'Auth\AuthController@specauth', ]);
 
@@ -122,6 +127,7 @@ Route::namespace ('Frontend')->middleware(['siteisclosed', 'checker'])->group(fu
      */
 
     Route::get('/', ['as' => 'frontend.game.list', 'uses' => 'GamesController@index']);
+    Route::get('/help/{locale?}', ['as' => 'frontend.help', 'uses' => 'HelpController@index'])->where('locale', 'en|fr|es|ru|tr|ar|he');
     Route::get('/faq', ['as' => 'frontend.faq', 'uses' => 'GamesController@faq', ]);
 
     Route::get('/bonuses', ['as' => 'frontend.bonuses', 'uses' => 'GamesController@bonuses', ]);
@@ -153,7 +159,6 @@ Route::namespace ('Frontend')->middleware(['siteisclosed', 'checker'])->group(fu
     ]);
 
     Route::get('game/{game}', ['as' => 'frontend.game.go', 'uses' => 'GamesController@go'])->middleware('game.homebutton');
-    Route::post('game/{game}/runtime-session', ['as' => 'frontend.game.runtime', 'uses' => 'GamesController@runtimeSession']);
     Route::post('game/{game}/server', ['as' => 'frontend.game.server', 'uses' => 'GamesController@server'])->middleware(\VanguardLTE\Http\Middleware\ProtectGameRequests::class);
 
     // Optional provider compatibility. Existing physical files bypass Laravel
@@ -212,12 +217,24 @@ Route::namespace ('Frontend')->middleware(['siteisclosed', 'checker'])->group(fu
 
     // Lotto & Jackpot Zone
     Route::get('/jackpot-zone', ['as' => 'frontend.lotto.index', 'uses' => 'SocialGamingController@lotto']);
-    Route::post('/jackpot-zone/buy-ticket', ['as' => 'frontend.lotto.buy', 'uses' => 'SocialGamingController@buyTicket']);
+    Route::post('/lotto/play', ['as' => 'frontend.lotto.play', 'uses' => 'SocialGamingController@lottoPlay']);
+    Route::post('/jackpot-zone/buy-ticket', ['as' => 'frontend.lotto.buy', 'uses' => 'SocialGamingController@lottoPlay']);
 
     // Future Vote / Prediction Markets
     Route::get('/future-vote', ['as' => 'frontend.predictions.index', 'uses' => 'PredictionsController@index']);
-    Route::post('/future-vote/bet', ['as' => 'frontend.predictions.bet', 'uses' => 'PredictionsController@placeBet']);
-    Route::post('/future-vote/shares', ['as' => 'frontend.predictions.shares', 'uses' => 'PredictionsController@calculateShares']);
+    Route::get('/predictions/search', ['as' => 'frontend.predictions.search', 'uses' => 'PredictionsController@search']);
+    Route::post('/predictions/vote', ['as' => 'frontend.predictions.vote', 'uses' => 'PredictionsController@vote']);
+    Route::post('/predictions/custom', ['as' => 'frontend.predictions.custom', 'uses' => 'PredictionsController@createCustomMarket']);
+    Route::get('/predictions/{marketId}/order-book', ['as' => 'frontend.predictions.order-book', 'uses' => 'PredictionsController@orderBook'])
+        ->where('marketId', '[A-Za-z0-9_-]+');
+
+    // Crypto Trading Simulator. Client price reads are from the local CDN-safe cache only.
+    Route::get('/crypto-trading', ['as' => 'frontend.crypto.index', 'uses' => 'CryptoTradingController@index']);
+    Route::post('/crypto-trading/positions', ['as' => 'frontend.crypto.place', 'uses' => 'CryptoTradingController@place']);
+    Route::get('/crypto-trading/cache.json', ['as' => 'frontend.crypto.cache', 'uses' => 'CryptoTradingController@cache']);
+    Route::get('/stocks-trading', ['as' => 'frontend.stocks.index', 'uses' => 'StockTradingController@index']);
+    Route::post('/stocks-trading/positions', ['as' => 'frontend.stocks.place', 'uses' => 'StockTradingController@place']);
+    Route::get('/stocks-trading/cache.json', ['as' => 'frontend.stocks.cache', 'uses' => 'StockTradingController@cache']);
 
     // 3-Tier Affiliates
     Route::get('/affiliates', ['as' => 'frontend.affiliates.index', 'uses' => 'AffiliateController@index']);
@@ -247,6 +264,7 @@ Route::prefix('liteback')
     ->middleware(['auth', 'checker'])
     ->namespace('Liteback')
     ->group(function () {
+        Route::get('/help/{locale?}', ['as' => 'liteback.help', 'uses' => 'HelpController@index'])->where('locale', 'en|fr|es|ru|tr|ar|he');
         Route::get('/', ['as' => 'liteback.users.index', 'uses' => 'UserController@index']);
         Route::post('/users/{user}/balance', ['as' => 'liteback.users.balance', 'uses' => 'UserController@adjustBalance']);
         Route::post('/users/{user}/toggle-status', ['as' => 'liteback.users.toggle_status', 'uses' => 'UserController@toggleStatus']);
@@ -255,6 +273,9 @@ Route::prefix('liteback')
         Route::delete('/users/{user}', ['as' => 'liteback.users.delete', 'uses' => 'UserController@destroy']);
         Route::get('/games', ['as' => 'liteback.games.index', 'uses' => 'GameController@index']);
         Route::get('/games/inactive', ['as' => 'liteback.games.inactive', 'uses' => 'GameController@inactive']);
+        Route::get('/cedar', ['as' => 'liteback.cedar.index', 'uses' => 'GameController@cedar']);
+        Route::get('/cedar/inactive', ['as' => 'liteback.cedar.inactive', 'uses' => 'GameController@cedarInactive']);
+        Route::post('/cedar/sync', ['as' => 'liteback.cedar.sync', 'uses' => 'GameController@syncCedarCatalog']);
         Route::delete('/games/{game}', ['as' => 'liteback.games.delete', 'uses' => 'GameController@destroy']);
         Route::post('/games/{game}/deactivate', ['as' => 'liteback.games.deactivate', 'uses' => 'GameController@deactivate']);
         Route::post('/games/{game}/activate', ['as' => 'liteback.games.activate', 'uses' => 'GameController@activate']);
@@ -262,15 +283,23 @@ Route::prefix('liteback')
         Route::post('/games/{game}/update-params', ['as' => 'liteback.games.update_params', 'uses' => 'GameController@updateParams']);
         Route::post('/games/bulk-provider-toggle', ['as' => 'liteback.games.bulk_provider_toggle', 'uses' => 'GameController@bulkProviderToggle']);
         Route::post('/games/bulk-action', ['as' => 'liteback.games.bulk_action', 'uses' => 'GameController@bulkAction']);
+        Route::post('/games/bulk-delivery', ['as' => 'liteback.games.bulk_delivery', 'uses' => 'GameController@bulkDelivery']);
         Route::post('/games/{game}/update-source', ['as' => 'liteback.games.update_source', 'uses' => 'GameController@updateSource']);
         Route::post('/games/manual', ['as' => 'liteback.games.store_manual', 'uses' => 'GameController@storeManualGame']);
+        Route::post('/games/cedar-import', ['as' => 'liteback.games.import_cedar', 'uses' => 'GameController@importCedarGames']);
+        Route::post('/games/legacy-plugin', ['as' => 'liteback.games.legacy_plugin', 'uses' => 'GameController@toggleLegacyPlugin']);
+        Route::post('/games/legacy-import', ['as' => 'liteback.games.import_legacy', 'uses' => 'GameController@importLegacyGames']);
+        Route::post('/games/{game}/delivery', ['as' => 'liteback.games.delivery', 'uses' => 'GameController@updateDelivery']);
         Route::get('/profile/password', ['as' => 'liteback.profile.password', 'uses' => 'ProfileController@editPassword']);
         Route::post('/profile/password', ['as' => 'liteback.profile.password.update', 'uses' => 'ProfileController@updatePassword']);
+        Route::post('/profile/phone/send', ['as' => 'liteback.profile.phone.send', 'uses' => 'ProfileController@sendPhoneCode'])->middleware('throttle:5,1');
+        Route::post('/profile/phone/verify', ['as' => 'liteback.profile.phone.verify', 'uses' => 'ProfileController@verifyPhoneCode'])->middleware('throttle:10,1');
 
         // Sportsbook admin routes
         Route::prefix('sports')->group(function () {
             Route::get('/', ['as' => 'liteback.sports.dashboard', 'uses' => 'SportsDashboardController@index']);
             Route::post('/commands', ['as' => 'liteback.sports.commands.run', 'uses' => 'SportsDashboardController@runCommand']);
+            Route::post('/odds/clear-active', ['as' => 'liteback.sports.odds.clear_active', 'uses' => 'SportsDashboardController@clearActiveOdds']);
 
             Route::get('/categories', ['as' => 'liteback.sports.categories', 'uses' => 'SportsControlController@categories']);
             Route::post('/categories', ['as' => 'liteback.sports.categories.store', 'uses' => 'SportsControlController@storeCategory']);
@@ -314,6 +343,7 @@ Route::prefix('liteback')
             Route::post('/', ['as' => 'liteback.lotto.store', 'uses' => 'LottoController@store']);
             Route::post('/{game}/toggle', ['as' => 'liteback.lotto.toggle', 'uses' => 'LottoController@toggle']);
             Route::post('/{game}/draw', ['as' => 'liteback.lotto.draw', 'uses' => 'LottoController@draw']);
+            Route::post('/{game}/result-columns', ['as' => 'liteback.lotto.result_columns', 'uses' => 'LottoController@updateResultColumns']);
         });
 
         // Prediction Markets Admin routes
@@ -321,6 +351,18 @@ Route::prefix('liteback')
             Route::get('/', ['as' => 'liteback.predictions.index', 'uses' => 'PredictionController@index']);
             Route::post('/', ['as' => 'liteback.predictions.store', 'uses' => 'PredictionController@store']);
             Route::post('/{id}/settle', ['as' => 'liteback.predictions.settle', 'uses' => 'PredictionController@settle']);
+        });
+
+        // Crypto Trading Simulator operator controls
+        Route::prefix('crypto')->group(function () {
+            Route::get('/', ['as' => 'liteback.crypto.index', 'uses' => 'CryptoTradingController@index']);
+            Route::post('/refresh', ['as' => 'liteback.crypto.refresh', 'uses' => 'CryptoTradingController@refresh']);
+            Route::post('/assets/{asset}/toggle', ['as' => 'liteback.crypto.assets.toggle', 'uses' => 'CryptoTradingController@toggle']);
+        });
+        Route::prefix('stocks')->group(function () {
+            Route::get('/', ['as' => 'liteback.stocks.index', 'uses' => 'StockTradingController@index']);
+            Route::post('/refresh', ['as' => 'liteback.stocks.refresh', 'uses' => 'StockTradingController@refresh']);
+            Route::post('/assets/{asset}/toggle', ['as' => 'liteback.stocks.assets.toggle', 'uses' => 'StockTradingController@toggle']);
         });
 
         // Multi-Tier Affiliate Admin routes
@@ -342,6 +384,7 @@ Route::prefix('liteback')
             Route::post('/', ['as' => 'liteback.settings.update', 'uses' => 'SystemSettingsController@update']);
             Route::post('/clear-cache', ['as' => 'liteback.settings.clear_cache', 'uses' => 'SystemSettingsController@clearCache']);
             Route::post('/test-odds-api', ['as' => 'liteback.settings.test_odds_api', 'uses' => 'SystemSettingsController@testOddsApi']);
+            Route::post('/test-crypto-prices-api', ['as' => 'liteback.settings.test_crypto_prices_api', 'uses' => 'SystemSettingsController@testCryptoPricesApi']);
             Route::post('/test-polymarket-api', ['as' => 'liteback.settings.test_polymarket_api', 'uses' => 'SystemSettingsController@testPolymarketApi']);
             Route::post('/sync-odds-now', ['as' => 'liteback.settings.sync_odds_now', 'uses' => 'SystemSettingsController@syncOddsNow']);
             Route::post('/settle-matches-now', ['as' => 'liteback.settings.settle_matches_now', 'uses' => 'SystemSettingsController@runSettlementNow']);
@@ -353,7 +396,17 @@ Route::prefix('liteback')
             Route::get('/', ['as' => 'liteback.store.index', 'uses' => 'StoreController@index']);
             Route::post('/license', ['as' => 'liteback.store.update_license', 'uses' => 'StoreController@updateLicense']);
             Route::post('/refresh', ['as' => 'liteback.store.refresh_license', 'uses' => 'StoreController@refreshLicense']);
+            Route::post('/archives-drive-access', ['as' => 'liteback.store.archives_drive_access', 'uses' => 'StoreController@requestArchivesDriveAccess']);
             Route::post('/install', ['as' => 'liteback.store.install_pack', 'uses' => 'StoreController@installPack']);
             Route::post('/apply-update', ['as' => 'liteback.store.apply_update', 'uses' => 'StoreController@applyUpdate']);
+        });
+        Route::prefix('maintenance')->group(function () {
+            Route::get('/', ['as' => 'liteback.maintenance.index', 'uses' => 'MaintenanceController@index']);
+            Route::post('/backup', ['as' => 'liteback.maintenance.backup', 'uses' => 'MaintenanceController@backup']);
+            Route::get('/backup/{name}', ['as' => 'liteback.maintenance.backup.download', 'uses' => 'MaintenanceController@downloadBackup']);
+            Route::post('/fetch', ['as' => 'liteback.maintenance.fetch', 'uses' => 'MaintenanceController@fetch']);
+            Route::post('/install', ['as' => 'liteback.maintenance.install', 'uses' => 'MaintenanceController@install']);
+            Route::get('/package', ['as' => 'liteback.maintenance.package', 'uses' => 'MaintenanceController@package']);
+            Route::post('/verify-legacy', ['as' => 'liteback.maintenance.verify-legacy', 'uses' => 'MaintenanceController@verifyLegacy']);
         });
     });

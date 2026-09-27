@@ -17,7 +17,6 @@ use Illuminate\Support\Facades\Http;
 use VanguardLTE\Services\LicenseService;
 use VanguardLTE\Services\SignedLicenseCertificate as Certificate;
 use VanguardLTE\Http\Middleware\ProtectGameRequests;
-use VanguardLTE\Services\GameRuntimeSession;
 
 $checks = 0;
 function check($condition, string $label): void {
@@ -82,6 +81,7 @@ try {
     hub(Http::response($envelope, 200));
     check(LicenseService::getStatus(true)['status'] === 'active', 'service accepts signed authority response');
     check(LicenseService::canPlayGame('AuditGame'), 'licensed game accepted');
+    check(LicenseService::canUseCdnGames(), 'older unrestricted game grant includes licensed CDN delivery');
     check(!LicenseService::canDownloadPacks(), 'unbought feature denied');
     hub(Http::response([], 500));
     check(LicenseService::getStatus(true)['offline'] === true, 'outage uses signed certificate');
@@ -103,7 +103,7 @@ try {
     check(LicenseService::getStatus(true)['status'] !== 'active', 'wrong-domain hub denies');
     hub(Http::response($envelope, 200));
     check(LicenseService::getStatus(true)['status'] === 'active', 'reactivation succeeds');
-    $cacheKey = LicenseService::CACHE_KEY . ':v2:' . hash('sha256', 'audit.invalid|test-only');
+    $cacheKey = LicenseService::CACHE_KEY . ':v3:' . hash('sha256', 'live|audit.invalid|test-only');
     $expired = signed(array_replace($claims, ['issued_at' => $now - 5000, 'refresh_after' => $now - 4000, 'grace_deadline' => $now - 1, 'expires_at' => $now - 1]));
     Cache::put($cacheKey, $expired, 3600);
     file_put_contents($temp . '/framework/license.cert', json_encode($expired));
@@ -113,10 +113,15 @@ try {
     LicenseService::getStatus(true);
     check(!LicenseService::canPlayGame('AuditGame'), 'signed game restriction enforced');
     check(LicenseService::canPlayGame('OnlyThisGame'), 'purchased game allowed');
+    check(!LicenseService::canUseCdnGames(), 'restricted title grant does not imply shared CDN access');
+    hub(Http::response(signed(array_replace($claims, ['features' => ['cedar_games'], 'games' => null])), 200));
+    LicenseService::getStatus(true);
+    check(LicenseService::canPlayGame('LegacySlot'), 'signed unrestricted suite grant permits legacy runtime');
+    check(LicenseService::canUseCdnGames(), 'signed unrestricted suite grant permits CDN delivery');
     hub(Http::response($envelope, 200)); LicenseService::getStatus(true);
 
     $session = new Store('test', new ArraySessionHandler(120)); $session->start();
-    $makeRequest = function ($id = null, $host = 'audit.invalid', $authenticated = true, $body = '{"bet":10}', $signedBody = null) use ($session) {
+    $makeRequest = function ($id = null, $host = 'audit.invalid', $authenticated = true, $body = '{"bet":10}') use ($session) {
         $r = Request::create('https://' . $host . '/game/AuditGame/server', 'POST', [], [], [], [], $body);
         $r->setLaravelSession($session);
         $r->setUserResolver(fn () => $authenticated ? new Illuminate\Auth\GenericUser(['id' => 42]) : null);
@@ -125,16 +130,6 @@ try {
         $r->headers->set('X-Promex-Request', $id ?? bin2hex(random_bytes(16)));
         $r->headers->set('X-Promex-Time', (string)time());
         $r->headers->set('X-CSRF-TOKEN', $session->token());
-        if ($authenticated && $host === 'audit.invalid') {
-            $runtime = GameRuntimeSession::issue($r, 'AuditGame');
-            $sequence = '1';
-            $canonical = "POST\n/game/AuditGame/server\n" . $r->headers->get('X-Promex-Request') . "\n"
-                . $r->headers->get('X-Promex-Time') . "\n{$sequence}\n" . ($signedBody ?? $r->getContent());
-            $r->headers->set('X-Promex-Protocol', '2');
-            $r->headers->set('X-Promex-Expires', (string)$runtime['expires']);
-            $r->headers->set('X-Promex-Sequence', $sequence);
-            $r->headers->set('X-Promex-Proof', hash_hmac('sha256', $canonical, base64_decode($runtime['key'], true)));
-        }
         return $r;
     };
     $guard = new ProtectGameRequests();
@@ -142,10 +137,10 @@ try {
     $r = $makeRequest();
     check($guard->handle($r, $next)->getStatusCode() === 200, 'authenticated entitled request reaches engine');
     check($guard->handle($r, $next)->getStatusCode() === 409, 'duplicate blocked before engine');
-    $r = $makeRequest(); $r->headers->remove('X-Promex-Proof');
-    check($guard->handle($r, $next)->getStatusCode() === 403, 'request without compiled runtime proof rejected');
-    $r = $makeRequest(null, 'audit.invalid', true, '{"bet":11}', '{"bet":10}');
-    check($guard->handle($r, $next)->getStatusCode() === 403, 'body tampering after runtime signing rejected');
+    $r = $makeRequest(); $r->headers->remove('X-Promex-Request');
+    check($guard->handle($r, $next)->getStatusCode() === 400, 'request without browser identity rejected');
+    $r = $makeRequest(null, 'audit.invalid', true, '{"bet":11}');
+    check($guard->handle($r, $next)->getStatusCode() === 200, 'ordinary request body reaches engine validation without a browser-held secret');
     $r = $makeRequest(); $r->headers->set('X-Promex-Time', (string)(time() - 121));
     check($guard->handle($r, $next)->getStatusCode() === 400, 'old request rejected');
     $r = $makeRequest(); $r->headers->set('Origin', 'https://evil.invalid');

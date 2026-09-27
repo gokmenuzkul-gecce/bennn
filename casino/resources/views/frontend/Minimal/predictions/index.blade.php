@@ -23,7 +23,10 @@
 </div>
 
 <!-- Category Filters -->
-@php $cat = $selectedCategory ?? 'all'; @endphp
+@php
+    $cat = $selectedCategory ?? 'all';
+    $view = $selectedView ?? 'markets';
+@endphp
 <div class="flex items-center gap-2 overflow-x-auto pb-1.5 custom-scrollbar max-w-full">
     <a href="?category=all" class="px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap uppercase tracking-wider no-underline {{ $cat === 'all' ? 'bg-secondary text-white shadow-md shadow-secondary/25' : 'bg-surface-card text-on-surface-muted hover:text-white border border-white/[0.06]' }}">
         🔥 All Topics
@@ -40,8 +43,14 @@
     <a href="?category=custom" class="px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap uppercase tracking-wider no-underline {{ $cat === 'custom' ? 'bg-secondary text-white shadow-md shadow-secondary/25' : 'bg-surface-card text-on-surface-muted hover:text-white border border-white/[0.06]' }}">
         🎨 Player Created
     </a>
+    @if(Auth::check())
+        <a href="?view=mine" class="px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap uppercase tracking-wider no-underline {{ $view === 'mine' ? 'bg-secondary text-white shadow-md shadow-secondary/25' : 'bg-surface-card text-on-surface-muted hover:text-white border border-white/[0.06]' }}">
+            <span class="material-symbols-outlined align-middle text-sm mr-1">pie_chart</span> My Predictions
+        </a>
+    @endif
 </div>
 
+<div class="{{ $view === 'mine' ? 'hidden' : '' }}">
 <!-- Search Bar Widget -->
 <div class="bg-[#121622] rounded-2xl p-3 sm:p-4 border border-white/[0.08] shadow-md relative">
     <div class="flex items-center gap-3">
@@ -185,21 +194,34 @@
         @endforelse
     </div>
 </div>
+ </div>
 
 <!-- Player Active Shares Portfolio -->
-@if(Auth::check() && !empty($userVotes))
-<div class="mt-8 space-y-4">
+@if(Auth::check())
+<div id="my-predictions" class="{{ $view === 'mine' ? '' : 'hidden' }} space-y-4 pt-2">
     <div class="flex justify-between items-center">
         <h3 class="text-base sm:text-lg font-bold text-white uppercase tracking-tight flex items-center gap-2">
             <span class="material-symbols-outlined text-primary">pie_chart</span>
-            <span>Your Active Probability Share Positions</span>
+            <span>My Predictions</span>
         </h3>
         <span class="text-xs font-mono-jet text-primary font-bold">{{ count($userVotes) }} POSITIONS</span>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-        @foreach($userVotes as $v)
-            <div class="p-4 rounded-2xl bg-[#121622] border border-white/[0.08] shadow-md flex justify-between items-center">
+        @forelse($userVotes as $v)
+            @if($v->market)
+            <button type="button" class="btn-reopen-position w-full p-4 rounded-2xl bg-[#121622] border border-white/[0.08] hover:border-secondary/50 hover:bg-white/[0.03] shadow-md flex justify-between items-center text-left transition-all"
+                    data-market-id="{{ $v->market->market_id }}"
+                    data-choice="{{ $v->choice }}"
+                    data-title="{{ $v->market->title }}"
+                    data-initial-price="{{ $v->market->yes_price }}"
+                    data-yes-price="{{ $v->market->yes_price }}"
+                    data-no-price="{{ $v->market->no_price }}"
+                    data-yes-percent="{{ $v->market->yes_percent }}"
+                    data-no-percent="{{ $v->market->no_percent }}"
+                    data-category="{{ $v->market->category }}"
+                    data-end-date="{{ $v->market->end_date ? $v->market->end_date->toIso8601String() : '' }}"
+                    aria-label="Manage {{ $v->market->title }} position">
                 <div class="space-y-1 max-w-[70%]">
                     <div class="flex items-center gap-2">
                         <span class="px-2 py-0.5 rounded text-[10px] font-mono-jet font-bold uppercase {{ $v->choice === 'yes' ? 'bg-primary/20 text-primary border border-primary/30' : 'bg-accent-rose/20 text-accent-rose border border-accent-rose/30' }}">
@@ -211,6 +233,7 @@
                     <div class="text-[11px] font-mono-jet text-on-surface-muted">
                         Shares: <strong class="text-white">{{ number_format($v->shares_count ?: ($v->stake / max(0.01, $v->share_price ?: 0.5)), 0) }}</strong> | Stake: {{ number_format($v->stake, 0) }} C
                     </div>
+                    <div class="text-[10px] font-mono-jet text-secondary pt-0.5">Click to buy more or switch sides</div>
                 </div>
 
                 <div class="text-right space-y-1">
@@ -221,8 +244,23 @@
                         {{ $v->status }}
                     </span>
                 </div>
+            </button>
+            @else
+            <div class="p-4 rounded-2xl bg-[#121622] border border-white/[0.08] shadow-md flex justify-between items-center">
+                <div class="space-y-1 max-w-[70%]">
+                    <span class="text-[10px] font-mono-jet text-on-surface-muted uppercase">Archived market</span>
+                    <div class="text-xs font-bold text-white truncate">{{ $v->market_id }}</div>
+                </div>
+                <span class="text-[10px] font-mono-jet text-on-surface-muted">Unavailable</span>
             </div>
-        @endforeach
+            @endif
+        @empty
+            <div class="col-span-2 text-center py-12 bg-[#121622] rounded-3xl border border-white/[0.06]">
+                <span class="material-symbols-outlined text-4xl text-on-surface-subtle mb-2">pie_chart</span>
+                <p class="text-on-surface-muted text-sm font-medium">No prediction positions yet.</p>
+                <p class="text-xs text-on-surface-subtle mt-1">Choose a market to acquire your first YES or NO shares.</p>
+            </div>
+        @endforelse
     </div>
 </div>
 @endif
@@ -502,6 +540,14 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    // Position cards reopen the same market at its current prices. The modal starts
+    // on the held outcome, but its YES/NO tabs let the player reverse their view.
+    document.querySelectorAll('.btn-reopen-position').forEach(btn => {
+        btn.addEventListener('click', function() {
+            openBuyModal(this);
+        });
+    });
+
     if (stakeInput) {
         stakeInput.addEventListener('input', updateCalc);
     }
@@ -530,7 +576,7 @@ document.addEventListener('DOMContentLoaded', function() {
             confirmBtn.disabled = true;
             confirmBtn.innerText = 'ACQUIRING SHARES...';
 
-            fetch('/predictions/vote', {
+            fetch('{{ route('frontend.predictions.vote') }}', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -570,7 +616,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.btn-open-orderbook').forEach(btn => {
         btn.addEventListener('click', function() {
             const marketId = this.dataset.marketId;
-            fetch(`/predictions/${marketId}/order-book`)
+            fetch(`{{ url('/predictions') }}/${encodeURIComponent(marketId)}/order-book`)
                 .then(res => res.json())
                 .then(data => {
                     if (data.success) {
@@ -629,7 +675,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 initial_stake: parseFloat(document.getElementById('custom-initial-stake').value) || 1000
             };
 
-            fetch('/predictions/custom', {
+            fetch('{{ route('frontend.predictions.custom') }}', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -678,7 +724,7 @@ document.addEventListener('DOMContentLoaded', function() {
             searchSpinner.classList.remove('hidden');
 
             searchTimer = setTimeout(() => {
-                fetch(`/predictions/search?q=${encodeURIComponent(query)}`)
+                fetch(`{{ route('frontend.predictions.search') }}?q=${encodeURIComponent(query)}`)
                     .then(res => res.json())
                     .then(data => {
                         searchSpinner.classList.add('hidden');

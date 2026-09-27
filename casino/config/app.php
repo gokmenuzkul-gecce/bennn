@@ -11,8 +11,7 @@ return [
     | framework needs to place the application's name in a notification or
     | any other location as required by the application or its packages.
     |
-    | NOTE: This version is overwritten inside app/Providers/AppServiceProvider.php
-    | and it will se application name defined from Vanguard settings page.
+    | NOTE: AppServiceProvider uses the operator's application name from settings.
     |
     */
 
@@ -20,10 +19,11 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Vanguard Version
+    | PROMEX Gaming Suite Version (core release snapshot)
     |--------------------------------------------------------------------------
     */
-    'version' => '8.5',
+    'version' => is_file(dirname(__DIR__, 2) . '/VERSION')
+        ? trim(file_get_contents(dirname(__DIR__, 2) . '/VERSION')) : '2.0.0',
 
     /*
     |--------------------------------------------------------------------------

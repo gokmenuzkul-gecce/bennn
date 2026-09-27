@@ -22,8 +22,11 @@ class UsersTableSeeder extends Seeder
         if (config('roles.models.defaultUser')::where('email', '=', 'admin@admin.com')->first() === null) {
             $newUser = config('roles.models.defaultUser')::create([
                 'name'     => 'Admin',
+                'username' => 'admin',
                 'email'    => 'admin@admin.com',
-                'password' => bcrypt('password'),
+                'password' => '123456',
+                'must_change_password' => true,
+                'preferred_login_method' => 'password',
             ]);
 
             $newUser->attachRole($adminRole);
@@ -35,8 +38,10 @@ class UsersTableSeeder extends Seeder
         if (config('roles.models.defaultUser')::where('email', '=', 'user@user.com')->first() === null) {
             $newUser = config('roles.models.defaultUser')::create([
                 'name'     => 'User',
+                'username' => 'user',
                 'email'    => 'user@user.com',
-                'password' => bcrypt('password'),
+                'password' => 'password',
+                'preferred_login_method' => 'password',
             ]);
 
             $newUser;

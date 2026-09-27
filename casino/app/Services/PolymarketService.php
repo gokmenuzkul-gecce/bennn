@@ -14,12 +14,16 @@ class PolymarketService
     public function getEndpoint(): string
     {
         if (function_exists('settings')) {
+            if (settings('polymarket_api_provider', 'promex') !== 'custom') {
+                return 'https://gamma-api.polymarket.com/events/keyset';
+            }
+
             $url = settings('polymarket_api_url');
             if (!empty($url)) {
                 return $url;
             }
         }
-        return 'https://gamma-api.polymarket.com/events';
+        return 'https://gamma-api.polymarket.com/events/keyset';
     }
 
     /**
@@ -28,7 +32,10 @@ class PolymarketService
     public function searchEvents(string $keyword = ''): array
     {
         try {
-            $rawEvents = $this->fetchTopEvents(100);
+            $rawEvents = $this->isOfficialGammaEndpoint()
+                ? $this->fetchKeywordEvents($keyword)
+                : $this->fetchTopEvents(15);
+
             if (!empty($rawEvents)) {
                 $formatted = $this->formatEventsPayload($rawEvents, $keyword);
                 if (!empty($formatted)) {
@@ -43,13 +50,52 @@ class PolymarketService
     }
 
     /**
-     * Fetch top volume events from Polymarket Gamma API with 60-second caching
+     * Search the official Gamma API without downloading a large, expanded event feed.
+     */
+    protected function fetchKeywordEvents(string $keyword): array
+    {
+        $keyword = trim($keyword);
+        if ($keyword === '') {
+            return $this->fetchTopEvents(15);
+        }
+
+        return Cache::remember('polymarket_gamma_search_v1_' . sha1($keyword), 60, function () use ($keyword) {
+            try {
+                $response = Http::timeout(8)
+                    ->withHeaders([
+                        'User-Agent' => 'CasinoDuLiban/SocialGaming/2.0',
+                        'Accept' => 'application/json',
+                    ])
+                    ->get('https://gamma-api.polymarket.com/public-search', ['q' => $keyword]);
+
+                if ($response->successful()) {
+                    $json = $response->json();
+                    if (is_array($json) && isset($json['events']) && is_array($json['events'])) {
+                        return $json['events'];
+                    }
+                }
+            } catch (\Throwable $e) {
+                Log::warning("[Polymarket Gamma Keyword Search Exception] " . $e->getMessage());
+            }
+
+            return [];
+        });
+    }
+
+    protected function isOfficialGammaEndpoint(): bool
+    {
+        return str_starts_with($this->getEndpoint(), 'https://gamma-api.polymarket.com/');
+    }
+
+    /**
+     * Fetch top volume events from the current Polymarket Gamma keyset API with 60-second caching.
      */
     public function fetchTopEvents(int $limit = 100): array
     {
-        return Cache::remember('polymarket_gamma_top_events_v2', 60, function () use ($limit) {
+        $endpoint = $this->getEndpoint();
+
+        return Cache::remember('polymarket_gamma_top_events_v4_' . $limit . '_' . sha1($endpoint), 60, function () use ($limit, $endpoint) {
             try {
-                $endpoint = $this->getEndpoint();
                 $response = Http::timeout(8)
                     ->withHeaders([
                         'User-Agent' => 'CasinoDuLiban/SocialGaming/2.0',
@@ -66,7 +112,15 @@ class PolymarketService
                 if ($response->successful()) {
                     $json = $response->json();
                     if (is_array($json)) {
-                        return $json;
+                        // The current /events/keyset API wraps the event list, while
+                        // compatible private providers may still return a plain array.
+                        if (isset($json['events']) && is_array($json['events'])) {
+                            return $json['events'];
+                        }
+
+                        if (array_is_list($json)) {
+                            return $json;
+                        }
                     }
                 } else {
                     Log::warning("[Polymarket Gamma HTTP Error] Status: " . $response->status());

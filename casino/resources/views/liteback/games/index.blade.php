@@ -1,10 +1,14 @@
 @extends('liteback.layout')
 
-@section('title', 'Liteback - Game & Provider Controls')
-@section('page_title', 'Game & Provider Management')
+@section('title', $isCedarLibrary ? 'Liteback - CEDAR Games' : 'Liteback - Game & Provider Controls')
+@section('page_title', $isCedarLibrary ? 'CEDAR Game Management' : 'Game & Provider Management')
 
 @section('content')
 <div class="container-fluid">
+    @php
+        $listRoute = $isCedarLibrary ? 'liteback.cedar.index' : 'liteback.games.index';
+        $inactiveRoute = $isCedarLibrary ? 'liteback.cedar.inactive' : 'liteback.games.inactive';
+    @endphp
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">
             <i class="fas fa-check-circle mr-2"></i> {{ session('success') }}
@@ -23,6 +27,97 @@
         </div>
     @endif
 
+    @if(session('cedar_import_results'))
+        <div class="alert alert-light border">
+            <strong>CEDAR import details:</strong>
+            @foreach(session('cedar_import_results') as $row)
+                <span class="badge {{ $row['status'] === 'skipped' ? 'badge-warning' : 'badge-success' }} ml-1">{{ $row['name'] }}: {{ $row['status'] }}</span>
+            @endforeach
+        </div>
+    @endif
+
+    @if(session('legacy_import_results'))
+        <div class="alert alert-light border">
+            <strong>Legacy import details:</strong>
+            @foreach(session('legacy_import_results') as $row)
+                <span class="badge {{ $row['status'] === 'skipped' ? 'badge-warning' : 'badge-success' }} ml-1" title="{{ $row['message'] }}">{{ $row['name'] }}: {{ $row['status'] }}</span>
+            @endforeach
+        </div>
+    @endif
+
+    @if($isCedarLibrary)
+        <div class="card card-outline card-success mb-4">
+            <div class="card-body d-flex flex-column flex-md-row justify-content-between align-items-md-center">
+                <div>
+                    <h3 class="h5 font-weight-bold mb-1"><i class="fas fa-cloud-download-alt mr-2"></i>Licensed CEDAR Catalog</h3>
+                    <p class="text-muted mb-0">Pull entitled hosted games, add titles missing from this installation, and refresh existing metadata. Protected math and source remain on PROMEX servers.</p>
+                </div>
+                <form method="post" action="{{ route('liteback.cedar.sync') }}" class="mt-3 mt-md-0 ml-md-3">
+                    @csrf
+                    <button class="btn btn-success font-weight-bold" type="submit"><i class="fas fa-sync-alt mr-1"></i> Pull & Install Games</button>
+                </form>
+            </div>
+        </div>
+    @else
+    <div class="card card-outline {{ $legacyEnabled ? 'card-warning' : 'card-secondary' }} mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+                <h3 class="card-title font-weight-bold"><i class="fas fa-puzzle-piece mr-2"></i>Legacy Compatibility Plugin</h3>
+                <div class="small text-muted mt-1">Operator-supplied local files only. Promex does not provide, upload, or claim rights to provider content.</div>
+            </div>
+            <form method="post" action="{{ route('liteback.games.legacy_plugin') }}">
+                @csrf
+                <input type="hidden" name="enabled" value="{{ $legacyEnabled ? 0 : 1 }}">
+                <button class="btn btn-sm {{ $legacyEnabled ? 'btn-outline-danger' : 'btn-warning' }}" type="submit">
+                    {{ $legacyEnabled ? 'Disable Plugin & Games' : 'Enable Plugin' }}
+                </button>
+            </form>
+        </div>
+        <div class="card-body">
+            @php
+                $legacyBackendReady = count(array_filter($legacyDiscovered, fn($row) => $row['backend']));
+                $legacyBridgeHints = count(array_filter($legacyDiscovered, fn($row) => $row['bridge_hint']));
+            @endphp
+            <div class="mb-3">
+                <span class="badge badge-secondary">{{ count($legacyDiscovered) }} local frontends discovered</span>
+                <span class="badge badge-info">{{ $legacyBackendReady }} matching servers</span>
+                <span class="badge badge-dark">{{ $legacyBridgeHints }} bridge hints</span>
+                <span class="badge {{ $legacyEnabled ? 'badge-success' : 'badge-secondary' }}">{{ $legacyEnabled ? 'PLUGIN ON' : 'PLUGIN OFF' }}</span>
+            </div>
+            @if(count($legacyDiscovered))
+                <details class="small mb-3">
+                    <summary class="text-info" style="cursor:pointer">Show discovered folder names</summary>
+                    <div class="mt-2">
+                        @foreach(array_slice($legacyDiscovered, 0, 100) as $candidate)
+                            <span class="badge {{ $candidate['backend'] ? 'badge-light border' : 'badge-secondary' }} mr-1 mb-1" title="{{ $candidate['backend'] ? 'Matching server found' : 'Server.php missing' }}">{{ $candidate['name'] }}</span>
+                        @endforeach
+                        @if(count($legacyDiscovered) > 100)<span class="text-muted">and {{ count($legacyDiscovered) - 100 }} more…</span>@endif
+                    </div>
+                </details>
+            @endif
+            <form method="post" action="{{ route('liteback.games.import_legacy') }}" enctype="multipart/form-data">
+                @csrf
+                <div class="form-row">
+                    <div class="col-lg-7 mb-2">
+                        <textarea class="form-control" name="names" rows="2" placeholder="Explicit folder names, separated by commas or new lines" {{ $legacyEnabled ? '' : 'disabled' }}></textarea>
+                    </div>
+                    <div class="col-lg-3 mb-2">
+                        <input class="form-control-file" type="file" name="csv" accept=".csv,.txt" {{ $legacyEnabled ? '' : 'disabled' }}>
+                    </div>
+                    <div class="col-lg-2 mb-2">
+                        <button class="btn btn-warning btn-block" type="submit" {{ $legacyEnabled ? '' : 'disabled' }}>Register Disabled</button>
+                    </div>
+                </div>
+                <div class="custom-control custom-checkbox">
+                    <input class="custom-control-input" id="legacy-rights-attested" type="checkbox" name="rights_attested" value="1" required {{ $legacyEnabled ? '' : 'disabled' }}>
+                    <label class="custom-control-label" for="legacy-rights-attested">I confirm I am authorized to use these selected frontend and backend files.</label>
+                </div>
+                <p class="small text-muted mt-2 mb-0">Discovery never activates a game. Imported games remain off until their normal Activate control passes plugin, file, attestation, and license checks.</p>
+            </form>
+        </div>
+    </div>
+    @endif
+
     <!-- Metric Stat Widgets -->
     <div class="row">
         <div class="col-lg-3 col-6">
@@ -34,7 +129,7 @@
                 <div class="icon">
                     <i class="fas fa-gamepad"></i>
                 </div>
-                <a href="{{ route('liteback.games.index') }}" class="small-box-footer">Reset Filter <i class="fas fa-arrow-circle-right"></i></a>
+                <a href="{{ route($listRoute) }}" class="small-box-footer">Reset Filter <i class="fas fa-arrow-circle-right"></i></a>
             </div>
         </div>
         <div class="col-lg-3 col-6">
@@ -46,7 +141,7 @@
                 <div class="icon">
                     <i class="fas fa-check-circle"></i>
                 </div>
-                <a href="{{ route('liteback.games.index', ['status' => 'active']) }}" class="small-box-footer">View Active Only <i class="fas fa-arrow-circle-right"></i></a>
+                <a href="{{ route($listRoute, ['status' => 'active']) }}" class="small-box-footer">View Active Only <i class="fas fa-arrow-circle-right"></i></a>
             </div>
         </div>
         <div class="col-lg-3 col-6">
@@ -58,7 +153,7 @@
                 <div class="icon">
                     <i class="fas fa-ban"></i>
                 </div>
-                <a href="{{ route('liteback.games.index', ['status' => 'disabled']) }}" class="small-box-footer">View Disabled Only <i class="fas fa-arrow-circle-right"></i></a>
+                <a href="{{ route($inactiveRoute) }}" class="small-box-footer">View Disabled Only <i class="fas fa-arrow-circle-right"></i></a>
             </div>
         </div>
         <div class="col-lg-3 col-6">
@@ -110,7 +205,7 @@
                                 </div>
                             </div>
                             <div class="d-flex justify-content-between align-items-center pt-2 border-top">
-                                <a href="{{ route('liteback.games.index', ['category_id' => $p->id]) }}" class="btn btn-xs btn-outline-info" title="Filter list to {{ $p->title }}">
+                                <a href="{{ route($listRoute, ['category_id' => $p->id]) }}" class="btn btn-xs btn-outline-info" title="Filter list to {{ $p->title }}">
                                     <i class="fas fa-filter"></i> Filter
                                 </a>
                                 <div class="btn-group btn-group-sm">
@@ -142,7 +237,7 @@
     <!-- Games Table & Filter Card -->
     <div class="card card-outline card-secondary">
         <div class="card-header">
-            <form class="form-row align-items-center" method="get" action="{{ route('liteback.games.index') }}">
+            <form class="form-row align-items-center" method="get" action="{{ route($listRoute) }}">
                 <div class="col-md-3 col-sm-6 mb-2">
                     <div class="input-group input-group-sm">
                         <div class="input-group-prepend">
@@ -177,13 +272,18 @@
                 </div>
                 <div class="col-md-2 col-sm-4 mb-2 d-flex">
                     <button type="submit" class="btn btn-sm btn-primary flex-fill mr-1"><i class="fas fa-filter"></i> Apply</button>
-                    <a href="{{ route('liteback.games.index') }}" class="btn btn-sm btn-outline-secondary mr-1" title="Clear Filters"><i class="fas fa-undo"></i></a>
-                    <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#addManualGameModal" title="Add Custom / External Game"><i class="fas fa-plus"></i></button>
+                    <a href="{{ route($listRoute) }}" class="btn btn-sm btn-outline-secondary mr-1" title="Clear Filters"><i class="fas fa-undo"></i></a>
+                    @unless($isCedarLibrary)
+                        <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#addManualGameModal" title="Add Custom / External Game"><i class="fas fa-plus"></i></button>
+                    @endunless
                 </div>
             </form>
         </div>
 
         <!-- Bulk Action Form & Controls -->
+        @if($remoteCatalogError)
+            <div class="alert alert-warning m-3 mb-0 py-2"><i class="fas fa-cloud-slash mr-1"></i>{{ $remoteCatalogError }} Remote games remain unavailable until the Hub responds.</div>
+        @endif
         <form id="bulk-action-form" method="post" action="{{ route('liteback.games.bulk_action') }}">
             @csrf
             <div class="bg-light px-3 py-2 border-bottom d-flex justify-content-between align-items-center flex-wrap">
@@ -200,6 +300,12 @@
                     </button>
                     <button type="submit" name="action" value="disable" class="btn btn-outline-danger font-weight-bold bulk-btn" disabled onclick="return confirm('Disable all selected games?');">
                         <i class="fas fa-ban"></i> Disable Selected
+                    </button>
+                    <button type="submit" formaction="{{ route('liteback.games.bulk_delivery') }}" name="delivery_mode" value="LOCAL" class="btn btn-outline-secondary font-weight-bold bulk-btn" disabled>
+                        <i class="fas fa-server"></i> Use Local
+                    </button>
+                    <button type="submit" formaction="{{ route('liteback.games.bulk_delivery') }}" name="delivery_mode" value="PROMEX_REMOTE" class="btn btn-outline-primary font-weight-bold bulk-btn" disabled>
+                        <i class="fas fa-cloud"></i> Use Promex Remote
                     </button>
                 </div>
             </div>
@@ -245,12 +351,26 @@
                                     <code class="small text-secondary">{{ $game->name }}</code>
                                 </td>
                                 <td>
-                                    @if(isset($game->source_type) && $game->source_type === 'custom_folder')
+                                    @if(isset($game->source_type) && $game->source_type === 'legacy_compat')
+                                        <span class="badge badge-warning" title="Operator-supplied local content; rights attested {{ $game->legacy_rights_attested_at }} by admin #{{ $game->legacy_rights_attested_by }}"><i class="fas fa-puzzle-piece mr-1"></i> Legacy Plugin</span>
+                                    @elseif(isset($game->source_type) && $game->source_type === 'cedar_game')
+                                        <span class="badge badge-dark" title="{{ $game->custom_path }}"><i class="fas fa-tree mr-1"></i> CEDAR</span>
+                                    @elseif(isset($game->source_type) && $game->source_type === 'custom_folder')
                                         <span class="badge badge-warning" title="{{ $game->custom_path }}"><i class="fas fa-folder mr-1"></i> Custom</span>
                                     @elseif(isset($game->source_type) && $game->source_type === 'external_url')
                                         <span class="badge badge-info" title="{{ $game->custom_path }}"><i class="fas fa-globe mr-1"></i> Ext URL</span>
                                     @else
                                         <span class="badge badge-secondary"><i class="fas fa-cube mr-1"></i> Default</span>
+                                    @endif
+                                    @if(($game->delivery_mode ?? 'LOCAL') === 'PROMEX_REMOTE')
+                                        @php($remoteReady = ($game->source_type ?? '') === 'legacy_compat'
+                                            ? $legacyCdnAvailable
+                                            : isset($remoteCatalog[$game->name]))
+                                        <span class="badge {{ $remoteReady ? 'badge-primary' : 'badge-danger' }} d-block mt-1">
+                                            <i class="fas fa-cloud mr-1"></i>{{ $remoteReady ? 'PROMEX CDN' : 'REMOTE UNENTITLED' }}
+                                        </span>
+                                    @else
+                                        <span class="badge badge-light border d-block mt-1"><i class="fas fa-server mr-1"></i>LOCAL</span>
                                     @endif
                                 </td>
                                 <td>
@@ -265,8 +385,14 @@
                                     <div class="text-muted small">Denom: <strong class="text-dark">{{ $game->denomination ?: '1.00' }}</strong></div>
                                 </td>
                                 <td class="text-center">
-                                    @if((int)$game->view === 1)
+                                    @php($effective = (int)$game->view === 1
+                                        && (($game->source_type ?? '') !== 'legacy_compat' || $legacyEnabled)
+                                        && (($game->delivery_mode ?? 'LOCAL') !== 'PROMEX_REMOTE'
+                                            || (($game->source_type ?? '') === 'legacy_compat' ? $legacyCdnAvailable : isset($remoteCatalog[$game->name]))))
+                                    @if($effective)
                                         <span class="badge badge-success px-2 py-1"><i class="fas fa-check-circle mr-1"></i> ACTIVE</span>
+                                    @elseif((int)$game->view === 1)
+                                        <span class="badge badge-warning px-2 py-1"><i class="fas fa-ban mr-1"></i> {{ ($game->source_type ?? '') === 'legacy_compat' ? 'PLUGIN BLOCKED' : 'HUB BLOCKED' }}</span>
                                     @else
                                         <span class="badge badge-danger px-2 py-1"><i class="fas fa-ban mr-1"></i> DISABLED</span>
                                     @endif
@@ -300,9 +426,18 @@
                                                 data-title="{{ $game->title }}"
                                                 data-source="{{ $game->source_type ?? 'default' }}"
                                                 data-path="{{ $game->custom_path ?? '' }}"
-                                                title="Configure Game Source / Host Location">
+                                                title="{{ ($game->source_type ?? '') === 'legacy_compat' ? 'Managed by Legacy Compatibility' : 'Configure Game Source / Host Location' }}"
+                                                {{ ($game->source_type ?? '') === 'legacy_compat' ? 'disabled' : '' }}>
                                             <i class="fas fa-network-wired"></i>
                                         </button>
+                                        @if(in_array(($game->source_type ?? ''), ['cedar_game', 'legacy_compat'], true))
+                                            <button type="button" class="btn btn-sm btn-outline-primary btn-delivery-toggle"
+                                                    data-id="{{ $game->id }}"
+                                                    data-mode="{{ ($game->delivery_mode ?? 'LOCAL') === 'PROMEX_REMOTE' ? 'LOCAL' : 'PROMEX_REMOTE' }}"
+                                                    title="Switch between local and licensed Promex CDN delivery">
+                                                <i class="fas {{ ($game->delivery_mode ?? 'LOCAL') === 'PROMEX_REMOTE' ? 'fa-server' : 'fa-cloud' }}"></i>
+                                            </button>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>
@@ -397,6 +532,7 @@
                             <option value="default">Standard Core (Local Blade / Legacy Files)</option>
                             <option value="custom_folder">Custom Directory (Subfolder in /public or /storage)</option>
                             <option value="external_url">External Hosted URL / Reverse Proxy / Iframe</option>
+                            <option value="cedar_game">CEDAR Remake (validated /CedarGames manifest)</option>
                         </select>
                         <small class="form-text text-muted">Select how this game launcher is hosted and delivered to players.</small>
                     </div>
@@ -417,6 +553,36 @@
             </form>
         </div>
     </div>
+</div>
+
+<!-- Import isolated CEDAR remakes -->
+<div class="modal fade" id="importCedarGamesModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document"><div class="modal-content">
+        <form method="post" action="{{ route('liteback.games.import_cedar') }}" enctype="multipart/form-data">
+            @csrf
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title"><i class="fas fa-tree mr-2"></i>Import CEDAR Remakes</h5>
+                <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted small">Each name must match a folder under <code>/CedarGames</code> containing a valid <code>game.json</code>. Existing legacy games are never overwritten.</p>
+                <div class="form-group">
+                    <label class="font-weight-bold">Folder names</label>
+                    <textarea name="names" rows="4" class="form-control" placeholder="CedarHercules, CedarAnotherGame"></textarea>
+                    <small class="form-text text-muted">Separate names with commas, spaces, or new lines.</small>
+                </div>
+                <div class="form-group">
+                    <label class="font-weight-bold">Or upload CSV</label>
+                    <input type="file" name="csv" class="form-control-file" accept=".csv,.txt">
+                    <small class="form-text text-muted">Use <code>name</code> as the optional first-column header.</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-dark">Validate & Import</button>
+            </div>
+        </form>
+    </div></div>
 </div>
 
 <!-- Add Manual Game Modal -->
@@ -584,6 +750,17 @@ document.addEventListener('DOMContentLoaded', function() {
             editSourceForm.action = `/liteback/games/${gameId}/update-source`;
 
             editSourceModal.modal('show');
+        });
+    });
+
+    document.querySelectorAll('.btn-delivery-toggle').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/liteback/games/${this.dataset.id}/delivery`;
+            form.innerHTML = `@csrf<input type="hidden" name="delivery_mode" value="${this.dataset.mode}">`;
+            document.body.appendChild(form);
+            form.submit();
         });
     });
 });

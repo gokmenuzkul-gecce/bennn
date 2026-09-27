@@ -26,8 +26,6 @@ class Server
                  if( $userId == null )
                 {
                     $response = '{"responseEvent":"error","responseType":"","serverResponse":"invalid login"}';
-                    var_dump($request->callbackUrl);
-                    var_dump($request->userId);
                     exit( $response );
                 }
                 $user = User::lockForUpdate()->find($userId);
@@ -84,7 +82,6 @@ class Server
                 }
                 ///////////////////////////////////////////
                 if ($action == 'doBonus'){
-                    var_dump('before doBonus');
                     $gameSettings = new GameSettings($init);
                     $response = DoBonus::doBonus($user, $game, $bet, $lines, $log->getLog(), $index, $counter, $bank, $shop, $jpgs, $gameSettings->all);
                     exit( $response );

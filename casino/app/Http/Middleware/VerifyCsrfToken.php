@@ -1,7 +1,7 @@
 <?php 
 namespace VanguardLTE\Http\Middleware
 {
-    class VerifyCsrfToken extends \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken
+    class VerifyCsrfToken extends \Illuminate\Foundation\Http\Middleware\PreventRequestForgery
     {
         protected function inExceptArray($request)
         {

@@ -1,0 +1,85 @@
+PROMEX OWN-USE SOURCE LICENSE
+Version 1.0, September 27, 2026
+Copyright (c) 2026 PROMEX DOT ME INC, for Covered Software.
+
+1. SCOPE
+
+"Licensor" means PROMEX DOT ME INC.
+"Covered Software" means only code and documentation that Licensor owns
+or is authorized to license under these terms. "You" means the individual or legal
+entity using the Covered Software. These terms do not transfer ownership.
+
+Third-party libraries, pre-existing code, provider game assets and components
+under separate notices are not relicensed by this document. Their own terms apply.
+No rights previously granted under another license are revoked by this document.
+
+2. PERMITTED OWN USE
+
+Subject to these terms, Licensor grants You a non-exclusive, non-transferable
+permission to copy, install, inspect and modify Covered Software solely for Your
+own personal use or Your own business's operation of its own platform. You may
+use Your own name, visual branding and customizations on that platform.
+
+You may provide end users with the player-facing functionality of Your own
+platform, including as part of Your own commercial operation where lawful.
+This permission is not a ban on revenue from operating Your own platform.
+It is not permission to supply the platform as a product to other operators.
+
+Employees and contractors may access Covered Software only to work on Your own
+permitted installation on Your behalf, with no independent reuse, distribution
+or resale rights. You remain responsible for that access.
+
+3. RESTRICTIONS
+
+Without separate written permission from Licensor, You may not:
+
+- Sell, resell, rent, sublicense, assign or redistribute Covered Software or a
+  derivative platform to another person or operator, whether standalone or bundled.
+- Sell or supply client installations, white-label/operator platforms, reseller
+  packages, turnkey deployments, platform-as-a-service or hosted operator accounts
+  based on Covered Software for other businesses to operate.
+- Repackage, rebrand or incorporate Covered Software into a software product,
+  game-platform product or competing operator service offered to third parties.
+- Share protected CEDAR assets/engines or grant access to hosted services outside
+  the separate authorization applicable to those assets/services.
+- Remove copyright/license notices from source or falsely claim authorship of
+  Covered Software. Changing the branding of Your own player-facing platform
+  remains permitted under section 2.
+
+These restrictions apply to Covered Software and modifications incorporating it,
+not to independently developed work or material governed by other licenses.
+Repository-hosting permissions that You receive directly from the hosting
+platform's terms remain subject to those terms; they do not grant resale rights
+in Covered Software under this license.
+
+4. HOSTED SERVICES ARE SEPARATE
+
+Installing the self-hosted application does not require purchasing a PROMEX
+hosted-service subscription. Protected CEDAR content, managed patch delivery and
+other entitled services require their applicable service authorization and terms.
+Purchasing a service subscription does not grant software resale or redistribution
+rights. Subscription duration, prices, renewals and entitlements are governed by
+the purchase terms, not by this source-use license.
+
+5. COMPLIANCE AND RIGHTS RESERVED
+
+You are responsible for content permissions, provider agreements and laws applicable
+to Your operation. This license grants no gambling, financial-services, trademark
+or third-party content authorization. Rights not expressly granted are reserved.
+
+6. TERMINATION
+
+Permissions under these terms terminate upon material violation, subject to any
+non-waivable rights under applicable law. After termination, cease unauthorized
+use and distribution of Covered Software. Copies required by law may be retained
+solely for that purpose. Termination does not alter independent third-party rights.
+
+7. NO WARRANTY; LIMITATION OF LIABILITY
+
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, COVERED SOFTWARE IS PROVIDED
+"AS IS", WITHOUT WARRANTIES, INCLUDING MERCHANTABILITY, FITNESS FOR A PARTICULAR
+PURPOSE OR NON-INFRINGEMENT. LICENSOR IS NOT LIABLE FOR INDIRECT, SPECIAL,
+INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING FROM ITS USE. NOTHING HERE EXCLUDES
+LIABILITY OR RIGHTS THAT APPLICABLE LAW DOES NOT PERMIT TO BE EXCLUDED.
+
+For permissions outside own use, contact PROMEX through https://promex.me/.

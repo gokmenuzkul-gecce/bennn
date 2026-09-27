@@ -50,11 +50,11 @@
                 <h3 class="card-title">Manual Command Runner</h3>
             </div>
             <div class="card-body">
-                <p class="text-muted">Manually trigger Odds API synchronization or cleanup commands.</p>
+                <p class="text-muted">Run the licensed aggregate feed or maintenance commands. PROMEX verifies this installation before returning any data.</p>
                 <form action="{{ route('liteback.sports.commands.run') }}" method="POST" class="mb-3">
                     @csrf
-                    <div class="input-group">
-                        <select name="command" class="form-control" required>
+                    <div class="form-group">
+                        <select name="command" id="sportsCommand" class="form-control" required>
                             <option value="sports:sync:all">sports:sync:all (RUN FULL SEQUENCE - leagues, games, odds, open, cleanup)</option>
                             <option value="sports:sync:upcoming">sports:sync:upcoming (fetch upcoming global pre-match odds - TEST / ONCE)</option>
                             <option value="sports:sync:leagues">sports:sync:leagues (fetch categories/leagues)</option>
@@ -64,10 +64,38 @@
                             <option value="sports:games:open">sports:games:open (set games open for betting)</option>
                             <option value="sports:events:cleanup">sports:events:cleanup (run cleanup logic)</option>
                         </select>
-                        <span class="input-group-append">
-                            <button type="submit" class="btn btn-primary">Run Command</button>
-                        </span>
                     </div>
+                    <div id="sportsSelection" class="border rounded p-2 mb-3">
+                        <div class="font-weight-bold mb-1">Sports included in this run</div>
+                        <small class="text-muted d-block mb-2">All currently available feed sports are selected by default. Uncheck any sport to skip it for this run.</small>
+                        @if($sportsFeedError)
+                            <div class="alert alert-warning py-2 mb-2">{{ $sportsFeedError }}</div>
+                        @elseif(empty($availableSports))
+                            <div class="text-muted small">No PRE-MATCH sports are currently available.</div>
+                        @else
+                            <div class="row">
+                                @foreach($availableSports as $sport)
+                                    <div class="col-md-6">
+                                        <div class="custom-control custom-checkbox mb-1">
+                                            <input type="checkbox" class="custom-control-input" id="sport_{{ $loop->index }}" name="sports[]" value="{{ $sport['key'] }}" checked>
+                                            <label class="custom-control-label" for="sport_{{ $loop->index }}">{{ $sport['title'] }}</label>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Run Command</button>
+                </form>
+                <hr>
+                <form action="{{ route('liteback.sports.odds.clear_active') }}" method="POST" onsubmit="return confirm('Hide every active site odd? Bets and historical records will be preserved.');">
+                    @csrf
+                    <button type="submit" class="btn btn-outline-danger btn-block font-weight-bold">
+                        <i class="fas fa-eraser mr-1"></i> Clear Active Site Odds
+                    </button>
+                    <small class="text-muted d-block mt-1">
+                        Hides active Battle Odds and sportsbook markets without deleting bets or history. The next full feed sync restores available odds.
+                    </small>
                 </form>
             </div>
         </div>
@@ -113,4 +141,16 @@
         </div>
     </div>
 </div>
+@endsection
+
+@section('scripts')
+<script>
+$(function() {
+    const toggleSports = function() {
+        $('#sportsSelection').toggle($('#sportsCommand').val() === 'sports:sync:all');
+    };
+    $('#sportsCommand').on('change', toggleSports);
+    toggleSports();
+});
+</script>
 @endsection

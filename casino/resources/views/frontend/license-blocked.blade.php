@@ -10,12 +10,13 @@
     <main id="game-license-blocked"
           data-game="{{ $gameTitle }}"
           data-admin="{{ $isAdmin ? '1' : '0' }}"
+          data-admin-message="{{ $adminMessage ?? '' }}"
           data-lobby-url="{{ url('/') }}"
           data-manage-url="{{ $manageUrl ?? '' }}"
           data-official-url="{{ $officialUrl }}"></main>
     <noscript>
         <p>This game is temporarily unavailable. <a href="{{ url('/') }}">Return to the lobby</a>.</p>
     </noscript>
-    <script src="/js/game-license-blocked.js?v=1"></script>
+    <script src="/js/game-license-blocked.js?v=2"></script>
 </body>
 </html>

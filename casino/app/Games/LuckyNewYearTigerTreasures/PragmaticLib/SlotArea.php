@@ -6,25 +6,21 @@ class SlotArea
 {
     public static function getSlotArea($gameSettings, $reelset, $log){
         // parse from the reelset settings, specify 1 or 0 depending on the RTP and increase the chances for a large bet.
-        var_dump('0_3');
         $reelset = explode('~', $gameSettings['reel_set'.$reelset]);
         foreach ($reelset as &$reel) { // convert the string to an array to make it more convenient to work
             $reel = explode(',', $reel);
         }
         $sh = $gameSettings['sh'];
-        var_dump('0_4');
 
         $positions = [];
         // get random coil positions
         foreach ($reelset as $key => $value) {
             $positions[$key] = rand(0, count($reelset[$key]) - 5);
         }
-        var_dump('0_5');
         // fill the playing field with symbols
         $reels = [];
         $symbolsAfter = [];
         $symbolsBelow = [];
-        var_dump('0_6');
         foreach ($positions as $key => $value) {
             // sh - number of visible symbols in one reel
             $reelsetCycled = array_merge($reelset[$key], array_slice($reelset[$key], 0, 10)); // loop coils
@@ -33,7 +29,6 @@ class SlotArea
             $symbolsBelow[$key] = $reels[$key][array_key_last($reels[$key])];
         }
         
-        var_dump('0_7');
 
         // add all symbols into an array to calculate the number of wins & get the number of scatters & wilds
         $scatterTmp = explode('~',$gameSettings['scatters']);
@@ -60,7 +55,6 @@ class SlotArea
             $i += 1;
             // var_dump($scatterCount, $scatterPositions, $slotArea);
         }
-        var_dump('0_10');
 
         $return = ['SlotArea' => $slotArea,
             'SymbolsAfter' => $symbolsAfter,
@@ -122,7 +116,6 @@ class SlotArea
         // format variables to handle mo
         $slotArea = $SlotArea['SlotArea'];
         $mo_v = explode(',', $gameSettings['mo_v']);
-        var_dump('getMO_mo_v='.implode(',', $mo_v));
         
         $mo = [];
         $mo_t = [];
@@ -165,7 +158,6 @@ class SlotArea
                     $index ++;  //800
                 if($random > 999)
                     $index ++;  //800
-                var_dump('getMO_index='.$index);
                 $mo[] = $mo_v[$index];
                 $mo_wpos[] = $i;
                 if($index == 14)
@@ -185,7 +177,6 @@ class SlotArea
             $SlotArea['mo'] = $mo;
             $SlotArea['mo_t'] = $mo_t;
         }
-        var_dump('mo='.implode(',', $mo).' mo_t='.implode(',', $mo_t));
         if(count($mo_wpos) > 0)
             $SlotArea['mo_wpos'] = $mo_wpos;
     }

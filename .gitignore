@@ -2,13 +2,17 @@
 *.env*
 casino/.env
 casino/.env.*
+!casino/.env.example
 
 # Application Assets & Games CDN
-games/
+/games/
+/CedarGames/
 casino/public/games/
+/public/games/
 
 # Database dumps & archives
 *.sql
+!/install.sql
 *.sql.gz
 *.zip
 *.bak
@@ -33,6 +37,22 @@ localscripts/wasm-build/node_modules/
 *_Context.md
 .skills-backup/
 _access/
+
+# Local planning, working scripts, and generated operator artifacts
+/Collaborated_Tasks.md
+/Shared.md
+/context/
+/localscripts/
+/clients377live/
+/output/
+/.playwright-cli/
+/_packager/
+/dist/
+/.agents/
+/AGENTS.md
+/RELEASE-WORKFLOW.md
+/PRODUCT-PAGE.md
+/tools/cedar/
 
 # Reproducible development tools (dependencies stay local)
 tools/wasm/node_modules/

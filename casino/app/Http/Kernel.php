@@ -20,7 +20,8 @@ namespace VanguardLTE\Http
                 'Illuminate\Routing\Middleware\SubstituteBindings', 
                 'VanguardLTE\Http\Middleware\SelectLanguage',
                 'VanguardLTE\Http\Middleware\ForceShopOne',
-                'VanguardLTE\Http\Middleware\ReferralTracking'
+                'VanguardLTE\Http\Middleware\ReferralTracking',
+                'VanguardLTE\Http\Middleware\RequirePasswordChange'
             ], 
             'api' => [
                 'VanguardLTE\Http\Middleware\UseApiGuard', 

@@ -17,6 +17,14 @@ class StatusController extends \VanguardLTE\Http\Controllers\Api\ApiController
         }
         public function checkUserLogin(\VanguardLTE\Http\Requests\Auth\LoginRequest $request)
         {
+            if ((string) settings('enable_password_login', '1') !== '1') {
+                return response()->json([
+                    'success' => false,
+                    'errormsg' => 'Username, email, and password sign-in is disabled for this store.',
+                    'data' => '',
+                ], 403);
+            }
+
             $username = $request->input('username');
             $password = $request->input('password');
             $user = VanguardLTEUser::where('username', '=', $username)->first();

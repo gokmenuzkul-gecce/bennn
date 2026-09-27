@@ -1,10 +1,8 @@
 @php
     $licenseStatus = \VanguardLTE\Services\LicenseService::getStatus();
     $licenseState = $licenseStatus['status'] ?? 'unregistered';
-    $licenseKey = $licenseStatus['license_key'] ?? '';
-    $operatorPortalUrl = !empty($licenseKey) 
-        ? 'https://clients.377.live/operator?key=' . urlencode($licenseKey)
-        : 'https://clients.377.live/operator';
+    // Never place the license key in a URL (browser history, logs and referrers can retain it).
+    $operatorPortalUrl = 'https://clients.377.live/operator';
     $boundDomain = $licenseStatus['domain'] ?? request()->getHost();
     $daysLeft = $licenseStatus['days_left'] ?? 0;
 @endphp
@@ -216,8 +214,8 @@
             </li>
 
             <li class="nav-item">
-                <a href="{{ route('liteback.profile.password') }}" class="nav-link font-weight-bold text-secondary" title="Change Admin Password">
-                    <i class="fas fa-user-shield mr-1"></i> Password
+                <a href="{{ route('liteback.profile.password') }}" class="nav-link font-weight-bold text-secondary" title="Account and login security">
+                    <i class="fas fa-user-shield mr-1"></i> Account
                 </a>
             </li>
         </ul>
@@ -230,6 +228,12 @@
         <div class="sidebar">
             <nav class="mt-2">
                 <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu">
+                    <li class="nav-item">
+                        <a href="{{ route('liteback.help') }}" class="nav-link {{ Route::is('liteback.help') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-question-circle text-info"></i>
+                            <p>Help Guide</p>
+                        </a>
+                    </li>
                     <li class="nav-item">
                         <a href="{{ route('liteback.users.index') }}" class="nav-link">
                             <i class="nav-icon fas fa-users"></i>
@@ -250,6 +254,26 @@
                             </li>
                             <li class="nav-item">
                                 <a href="{{ route('liteback.games.inactive') }}" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Inactive</p>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('liteback.cedar.index') }}" class="nav-link">
+                            <i class="nav-icon fas fa-tree"></i>
+                            <p>CEDAR</p>
+                        </a>
+                        <ul class="nav nav-treeview ml-3">
+                            <li class="nav-item">
+                                <a href="{{ route('liteback.cedar.index', ['status' => 'active']) }}" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Active</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('liteback.cedar.inactive') }}" class="nav-link">
                                     <i class="far fa-circle nav-icon"></i>
                                     <p>Inactive</p>
                                 </a>
@@ -339,6 +363,18 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a href="{{ route('liteback.crypto.index') }}" class="nav-link">
+                            <i class="nav-icon fas fa-chart-line text-info"></i>
+                            <p>Crypto Trading</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('liteback.stocks.index') }}" class="nav-link">
+                            <i class="nav-icon fas fa-chart-line text-info"></i>
+                            <p>Stock Trading</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a href="{{ route('liteback.affiliates.index') }}" class="nav-link">
                             <i class="nav-icon fas fa-users text-success"></i>
                             <p>Affiliate & Referrals</p>
@@ -371,6 +407,9 @@
                             </p>
                         </a>
                     </li>
+                    @if((int) auth()->user()->role_id === 6)
+                    <li class="nav-item"><a href="{{ route('liteback.maintenance.index') }}" class="nav-link {{ Route::is('liteback.maintenance.*') ? 'active' : '' }}"><i class="nav-icon fas fa-tools text-info"></i><p>Backup &amp; Update</p></a></li>
+                    @endif
                 </ul>
             </nav>
         </div>
@@ -403,7 +442,7 @@
                                     <i class="fas fa-exclamation-triangle mr-1 text-warning"></i> Running on Unregistered Community Mode
                                 </h6>
                                 <p class="mb-0 text-white-50 small" style="line-height: 1.5;">
-                                    Local slots and core features are open. Cloud perks (Hosted Games CDN, Liteback Store Pack Downloads, Central Sportsbook Odds Feed, and GitHub Cloud Live Upgrades) require an active Promex SaaS license key.
+                                    Core features and free GitHub updates are available. Protected Cedar games, PROMEX feeds and managed patch delivery require an active license. Legacy game assets are hosted in your own games folder.
                                 </p>
                             </div>
                             <div class="d-flex align-items-center gap-2 flex-shrink-0 ml-md-3">
@@ -483,5 +522,6 @@
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+@yield('scripts')
 </body>
 </html>

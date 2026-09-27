@@ -63,13 +63,20 @@
                         </div>
                     </div>
 
-                    <input type="hidden" name="sportsbook_provider" value="the_odds_api">
-
-                    <h5 class="border-bottom pb-2 mt-4" style="border-bottom: 1px solid #dee2e6; padding-bottom: 8px; margin-top: 20px;"><strong>The Odds API Credentials</strong></h5>
+                    <h5 class="border-bottom pb-2 mt-4" style="border-bottom: 1px solid #dee2e6; padding-bottom: 8px; margin-top: 20px;"><strong>PRE-MATCH Odds Provider</strong></h5>
+                    <p class="text-muted small">This is the same provider used by Battle Odds and the full synchronization command. PROMEX verifies the active installation and does not require a provider key in this app.</p>
                     <div class="form-group">
-                        <label for="ods_api_key">API Secret Key</label>
-                        <input type="text" name="ods_api_key" class="form-control" id="ods_api_key" value="{{ env('ODS_API_KEY', settings('ods_api_key')) }}" placeholder="Enter your Odds API Key">
+                        <label for="sportsbook_api_provider">Provider</label>
+                        <select name="sportsbook_api_provider" id="sportsbook_api_provider" class="form-control">
+                            <option value="promex" {{ settings('sportsbook_api_provider', 'promex') === 'promex' ? 'selected' : '' }}>PROMEX Licensed API — included with active license</option>
+                            <option value="custom" {{ settings('sportsbook_api_provider', 'promex') === 'custom' ? 'selected' : '' }}>My own The Odds API key</option>
+                        </select>
                     </div>
+                    <div id="customSportsProviderFields">
+                        <div class="form-group">
+                            <label for="odds_api_key">Custom API Secret Key</label>
+                            <input type="password" name="odds_api_key" class="form-control" id="odds_api_key" value="{{ settings('odds_api_key', '') }}" placeholder="Enter your Odds API key">
+                        </div>
                     <div class="row">
                         <div class="col-md-6 form-group">
                             <label for="ods_api_regions">Regions (comma-separated)</label>
@@ -79,6 +86,7 @@
                             <label for="ods_api_markets">Markets (comma-separated)</label>
                             <input type="text" name="ods_api_markets" class="form-control" id="ods_api_markets" value="{{ settings('ods_api_markets', 'h2h') }}" placeholder="e.g. h2h,spreads,totals">
                         </div>
+                    </div>
                     </div>
 
                     <h5 class="border-bottom pb-2 mt-4" style="border-bottom: 1px solid #dee2e6; padding-bottom: 8px; margin-top: 20px;"><strong>Bet Slip Limit Controls</strong></h5>
@@ -110,4 +118,16 @@
         </div>
     </div>
 </div>
+@endsection
+
+@section('scripts')
+<script>
+$(function() {
+    const toggleCustomProvider = function() {
+        $('#customSportsProviderFields').toggle($('#sportsbook_api_provider').val() === 'custom');
+    };
+    $('#sportsbook_api_provider').on('change', toggleCustomProvider);
+    toggleCustomProvider();
+});
+</script>
 @endsection

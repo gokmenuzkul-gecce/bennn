@@ -1,171 +1,22 @@
 @extends('liteback.layout')
-
-@section('title', 'Liteback - Lotto Jackpot Management')
-
+@section('title', 'Liteback - Lotto Round Control')
 @section('content')
-<div class="content-header">
-    <div class="container-fluid">
-        <h1 class="m-0 text-dark">🎯 Lotto Jackpot Zone Control</h1>
-    </div>
-</div>
-
-<section class="content">
-    <div class="container-fluid">
-        @if(session('success'))
-            <div class="alert alert-success alert-dismissible fade show">
-                {{ session('success') }}
-                <button type="button" class="close" data-dismiss="alert">&times;</button>
-            </div>
-        @endif
-
-        <div class="row">
-            <!-- Create Lotto Game Card -->
-            <div class="col-md-4">
-                <div class="card card-primary">
-                    <div class="card-header">
-                        <h3 class="card-title"><i class="fas fa-plus-circle mr-1"></i> Create Lotto Draw Rule</h3>
-                    </div>
-                    <form action="{{ route('liteback.lotto.store') }}" method="POST">
-                        @csrf
-                        <div class="card-body">
-                            <div class="form-group">
-                                <label>Game Title</label>
-                                <input type="text" name="title" class="form-control" placeholder="e.g. Cedar Mega Lucky 6" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Max Number Pool</label>
-                                <input type="number" name="max_number" class="form-control" value="49" min="10" max="99" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Pick Count per Ticket</label>
-                                <input type="number" name="pick_count" class="form-control" value="6" min="3" max="10" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Entry Fee (Cedar Coins)</label>
-                                <input type="number" name="entry_fee" class="form-control" value="500" min="50" step="50" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Jackpot Pool (Cedar Coins)</label>
-                                <input type="number" name="jackpot_pool" class="form-control" value="2500000" min="10000" step="50000" required>
-                            </div>
-                        </div>
-                        <div class="card-footer">
-                            <button type="submit" class="btn btn-primary btn-block">Add Lotto Game</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <!-- Active Lotto Games List -->
-            <div class="col-md-8">
-                <div class="card card-dark">
-                    <div class="card-header">
-                        <h3 class="card-title"><i class="fas fa-dice mr-1"></i> Active Jackpot Games</h3>
-                    </div>
-                    <div class="card-body p-0">
-                        <table class="table table-striped table-hover">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Game Title</th>
-                                    <th>Rules</th>
-                                    <th>Entry Fee</th>
-                                    <th>Jackpot Pool</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($games as $g)
-                                    <tr>
-                                        <td>#{{ $g->id }}</td>
-                                        <td><strong>{{ $g->title }}</strong></td>
-                                        <td><span class="badge badge-info">Pick {{ $g->pick_count }} of {{ $g->max_number }}</span></td>
-                                        <td><span class="badge badge-secondary">{{ number_format($g->entry_fee, 0) }} C</span></td>
-                                        <td><strong class="text-success">{{ number_format($g->jackpot_pool, 0) }} CEDARS</strong></td>
-                                        <td>
-                                            @if($g->is_active)
-                                                <span class="badge badge-success">ACTIVE</span>
-                                            @else
-                                                <span class="badge badge-danger">INACTIVE</span>
-                                            @endif
-                                        </td>
-                                        <td class="d-flex gap-1">
-                                            <!-- Manual Draw Trigger -->
-                                            <form action="{{ route('liteback.lotto.draw', $g->id) }}" method="POST" class="mr-1" onsubmit="return confirm('Trigger winning numbers draw and settle tickets for {{ $g->title }}?');">
-                                                @csrf
-                                                <button type="submit" class="btn btn-xs btn-warning font-weight-bold">
-                                                    ⚡ Trigger Draw
-                                                </button>
-                                            </form>
-                                            
-                                            <!-- Toggle Active Status -->
-                                            <form action="{{ route('liteback.lotto.toggle', $g->id) }}" method="POST">
-                                                @csrf
-                                                <button type="submit" class="btn btn-xs {{ $g->is_active ? 'btn-outline-danger' : 'btn-outline-success' }}">
-                                                    {{ $g->is_active ? 'Disable' : 'Enable' }}
-                                                </button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="7" class="text-center text-muted py-4">No Lotto Games defined.</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Recent Player Tickets Table -->
-                <div class="card card-info">
-                    <div class="card-header">
-                        <h3 class="card-title"><i class="fas fa-ticket-alt mr-1"></i> Recent Player Lotto Tickets</h3>
-                    </div>
-                    <div class="card-body p-0">
-                        <table class="table table-sm table-striped">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Player</th>
-                                    <th>Game</th>
-                                    <th>Selected Numbers</th>
-                                    <th>Status</th>
-                                    <th>Prize Won</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($tickets as $t)
-                                    <tr>
-                                        <td>#{{ $t->id }}</td>
-                                        <td><strong>{{ $t->user->username ?? 'Guest' }}</strong></td>
-                                        <td>{{ $t->game->title ?? 'Lotto' }}</td>
-                                        <td><code>{{ is_array($t->numbers_json) ? implode(', ', $t->numbers_json) : $t->numbers_json }}</code></td>
-                                        <td>
-                                            @if($t->status === 'jackpot_win')
-                                                <span class="badge badge-warning">🏆 JACKPOT WIN</span>
-                                            @elseif($t->status === 'win')
-                                                <span class="badge badge-success">WINNER</span>
-                                            @elseif($t->status === 'lost')
-                                                <span class="badge badge-secondary">LOST</span>
-                                            @else
-                                                <span class="badge badge-info">PENDING DRAW</span>
-                                            @endif
-                                        </td>
-                                        <td><strong>{{ number_format($t->prize_won, 0) }} C</strong></td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="6" class="text-center text-muted py-4">No recent lotto tickets.</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
+<div class="content-header"><div class="container-fluid"><h1 class="m-0 text-dark">🎯 Lotto Round Control</h1></div></div>
+<section class="content"><div class="container-fluid">
+@if(session('success'))<div class="alert alert-success">{{ session('success') }}</div>@endif
+@if($errors->any())<div class="alert alert-danger"><ul class="mb-0">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>@endif
+<div class="row"><div class="col-lg-4"><div class="card card-primary"><div class="card-header"><h3 class="card-title">Create Lotto Rule</h3></div>
+<form action="{{ route('liteback.lotto.store') }}" method="POST">@csrf <div class="card-body">
+<div class="form-group"><label>Game title</label><input name="title" class="form-control" required></div>
+<div class="form-row"><div class="form-group col-6"><label>Number pool</label><input type="number" name="max_number" class="form-control" value="49" min="10" max="99" required></div><div class="form-group col-6"><label>Picks</label><input type="number" name="pick_count" class="form-control" value="6" min="3" max="10" required></div></div>
+<div class="form-row"><div class="form-group col-6"><label>Ticket cost</label><input type="number" name="entry_fee" class="form-control" value="500" min="0" required></div><div class="form-group col-6"><label>Jackpot</label><input type="number" name="jackpot_pool" class="form-control" value="250000" min="0" required></div></div>
+<div class="form-row"><div class="form-group col-6"><label>Draw frequency</label><select name="draw_interval" class="form-control"><option value="daily">Daily</option><option value="hourly">Hourly</option></select></div><div class="form-group col-6"><label>UTC time</label><input name="draw_time" class="form-control" value="00:00" required><small class="text-muted">Daily HH:MM; hourly minute.</small></div></div>
+<div class="form-group"><label>Result source</label><select name="draw_source" class="form-control"><option value="local">LOCAL — generate here</option><option value="promex_api">PROMEX API — licensed feed</option></select></div>
+<label class="d-block">Public result columns</label>@foreach(['round_id'=>'Round ID','scheduled_for'=>'Day / time','numbers'=>'Winning numbers','my_tickets'=>'My ticket count','winners'=>'Winner count'] as $key=>$label)<div class="custom-control custom-checkbox"><input class="custom-control-input" type="checkbox" id="new_{{ $key }}" name="result_columns[]" value="{{ $key }}" checked><label class="custom-control-label" for="new_{{ $key }}">{{ $label }}</label></div>@endforeach
+</div><div class="card-footer"><button class="btn btn-primary btn-block">Add Lotto Game</button></div></form></div></div>
+<div class="col-lg-8"><div class="card card-dark"><div class="card-header"><h3 class="card-title">Games, schedule & public results</h3></div><div class="card-body p-0 table-responsive"><table class="table table-sm table-striped mb-0"><thead><tr><th>Game</th><th>Rules</th><th>UTC schedule</th><th>Source</th><th>Round settlement</th><th>State</th></tr></thead><tbody>
+@forelse($games as $g)<tr><td><strong>{{ $g->title }}</strong><br><small>{{ number_format($g->entry_fee,0) }} C ticket · {{ number_format($g->jackpot_pool,0) }} C pool</small></td><td>Pick {{ $g->pick_count }} / {{ $g->max_number }}</td><td>{{ ucfirst($g->draw_interval) }} · {{ $g->draw_time }} UTC</td><td><span class="badge badge-{{ $g->draw_source==='local'?'info':'warning' }}">{{ strtoupper($g->draw_source) }}</span></td><td><form action="{{ route('liteback.lotto.draw',$g) }}" method="POST" class="form-inline">@csrf<input name="round_id" class="form-control form-control-sm mr-1" placeholder="Draw ID / Round ID" required><button class="btn btn-sm btn-warning">Trigger</button></form><small class="text-muted">A drawn ID returns stored results.</small></td><td><form action="{{ route('liteback.lotto.toggle',$g) }}" method="POST">@csrf<button class="btn btn-xs {{ $g->is_active?'btn-outline-danger':'btn-outline-success' }}">{{ $g->is_active?'Disable':'Enable' }}</button></form></td></tr><tr class="bg-light"><td colspan="6"><form action="{{ route('liteback.lotto.result_columns',$g) }}" method="POST" class="form-inline">@csrf <strong class="mr-2">Show in player results:</strong>@foreach(['round_id'=>'Round ID','scheduled_for'=>'Day / time','numbers'=>'Numbers','my_tickets'=>'My tickets','winners'=>'Winners'] as $key=>$label)<label class="mr-2 font-weight-normal"><input type="checkbox" name="result_columns[]" value="{{ $key }}" {{ in_array($key,$g->result_columns_json ?: \VanguardLTE\Services\LottoDrawService::DEFAULT_RESULT_COLUMNS)?'checked':'' }}> {{ $label }}</label>@endforeach<button class="btn btn-xs btn-primary">Save columns</button></form></td></tr>
+@empty<tr><td colspan="6" class="text-center text-muted py-4">No Lotto Games defined.</td></tr>@endforelse</tbody></table></div></div>
+<div class="card card-info"><div class="card-header"><h3 class="card-title">Recent rounds</h3></div><div class="card-body p-0 table-responsive"><table class="table table-sm mb-0"><thead><tr><th>Round ID</th><th>Game</th><th>Scheduled UTC</th><th>Tickets</th><th>Winners</th><th>Result</th></tr></thead><tbody>@forelse($draws as $draw)<tr><td>{{ $draw->round_code ?: '#'.$draw->id }}</td><td>{{ $draw->game->title ?? 'Lotto' }}</td><td>{{ optional($draw->scheduled_for)->format('Y-m-d H:i') ?: $draw->draw_date }}</td><td>{{ $draw->total_tickets }}</td><td>{{ $draw->total_winners }}</td><td><span class="badge badge-{{ $draw->status==='drawn'?'success':'secondary' }}">{{ strtoupper($draw->status) }}</span> {{ $draw->status==='drawn'?implode(', ',$draw->winning_numbers_json ?: []):'' }}</td></tr>@empty<tr><td colspan="6" class="text-center text-muted">No rounds yet.</td></tr>@endforelse</tbody></table></div></div></div></div>
+</div></section>
 @endsection

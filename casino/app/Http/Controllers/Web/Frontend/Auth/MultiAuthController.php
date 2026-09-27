@@ -5,10 +5,11 @@ namespace VanguardLTE\Http\Controllers\Web\Frontend\Auth;
 use VanguardLTE\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
 use VanguardLTE\User;
+use VanguardLTE\Services\AccountSecurityService;
 use VanguardLTE\Services\WhatsAppService;
 use VanguardLTE\Services\AffiliateService;
 
@@ -21,6 +22,7 @@ class MultiAuthController extends Controller
     {
         $this->whatsAppService = $whatsAppService;
         $this->affiliateService = $affiliateService;
+        $this->middleware('auth')->only('updateProfile');
     }
 
     /**
@@ -29,6 +31,13 @@ class MultiAuthController extends Controller
     public function postPhoneOtp(Request $request)
     {
         try {
+            if ((string) settings('enable_whatsapp_otp', '1') !== '1') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'WhatsApp code sign-in is disabled for this store. Use username, email, or phone with your password.',
+                ], 403);
+            }
+
             $phoneInput = $request->input('phone');
             if (empty($phoneInput)) {
                 return response()->json(['success' => false, 'message' => 'Please enter a valid phone number!']);
@@ -52,12 +61,29 @@ class MultiAuthController extends Controller
             }
 
             $sent = $this->whatsAppService->sendOtp($formattedPhone, $otp);
-            $isDevMode = env('WHATSAPP_MODE', 'devmode') === 'devmode';
+            $isDevMode = $this->whatsAppService->isDevelopmentMode();
+
+            if (!$sent) {
+                if ($user) {
+                    $user->otp_code = null;
+                    $user->otp_expires_at = null;
+                    $user->save();
+                } else {
+                    session()->forget(['pending_phone', 'pending_otp', 'pending_otp_expires']);
+                }
+
+                return response()->json([
+                    'success' => false,
+                    'message' => \VanguardLTE\Services\DeliveryGatewaySettings::provider('whatsapp') === 'devmode'
+                        ? 'Development simulation is blocked in this environment. Select PROMEX or Custom delivery in System & API Keys. Use standard login meanwhile.'
+                        : 'The WhatsApp delivery provider is unavailable. Try standard login or ask the operator to check Delivery settings.',
+                ], 503);
+            }
 
             return response()->json([
                 'success' => true,
                 'message' => $isDevMode 
-                    ? "DEV MODE: Verification Code generated for {$formattedPhone}!" 
+                    ? 'DEVELOPMENT SIMULATION: No WhatsApp was sent. Use the displayed test code only on this private test site.'
                     : "6-Digit Verification Code sent to {$formattedPhone} via WhatsApp!",
                 'phone' => $formattedPhone,
                 'devmode' => $isDevMode,
@@ -75,6 +101,13 @@ class MultiAuthController extends Controller
     public function verifyPhoneOtp(Request $request)
     {
         try {
+            if ((string) settings('enable_whatsapp_otp', '1') !== '1') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'WhatsApp code sign-in is disabled for this store. Use username, email, or phone with your password.',
+                ], 403);
+            }
+
             $phoneInput = $request->input('phone');
             $otpInput = trim($request->input('otp_code'));
             $refCode = trim($request->input('ref') ?: ($request->cookie('cedar_ref') ?: (session('cedar_ref') ?: '')));
@@ -120,9 +153,9 @@ class MultiAuthController extends Controller
                     }
                 }
 
-                $username = 'player_' . mt_rand(10000, 99999);
+                $username = 'player_' . random_int(10000, 99999);
                 while (User::where('username', $username)->exists()) {
-                    $username = 'player_' . mt_rand(10000, 99999);
+                    $username = 'player_' . random_int(10000, 99999);
                 }
 
                 $user = User::create([
@@ -130,7 +163,7 @@ class MultiAuthController extends Controller
                     'phone' => $formattedPhone,
                     'phone_verified_at' => now(),
                     'parent_id' => $parentId,
-                    'password' => Hash::make(Str::random(16)),
+                    'password' => Str::random(32),
                     'role_id' => 1,
                     'status' => 'Active',
                     'balance' => (float) (function_exists('settings') ? settings('default_starting_coins', 50000) : 50000),
@@ -183,7 +216,7 @@ class MultiAuthController extends Controller
     /**
      * Update User Profile & Reward Verification Fields
      */
-    public function updateProfile(Request $request)
+    public function updateProfile(Request $request, AccountSecurityService $security)
     {
         try {
             $user = Auth::user();
@@ -191,43 +224,54 @@ class MultiAuthController extends Controller
                 return response()->json(['success' => false, 'message' => 'Please log in to update profile!']);
             }
 
-            $username = trim($request->input('username', ''));
-            $email = trim($request->input('email', ''));
-            $firstName = trim($request->input('first_name', ''));
-            $lastName = trim($request->input('last_name', ''));
+            $phone = trim((string) $request->input('phone', ''));
+            $request->merge(['phone' => $phone === '' ? null : WhatsAppService::formatE164($phone)]);
+            $request->validate([
+                'username' => ['required', 'string', 'max:191', Rule::unique('users', 'username')->ignore($user->id)],
+                'email' => ['nullable', 'email', 'max:191', Rule::unique('users', 'email')->ignore($user->id)],
+                'phone' => ['nullable', 'string', 'max:32', Rule::unique('users', 'phone')->ignore($user->id)],
+                'preferred_login_method' => ['required', Rule::in(['phone', 'password'])],
+                'current_password' => ['nullable', 'string'],
+                'new_password' => ['nullable', 'string', 'min:8', 'confirmed'],
+                'first_name' => ['nullable', 'string', 'max:191'],
+                'last_name' => ['nullable', 'string', 'max:191'],
+            ]);
 
-            if (!empty($username) && $username !== $user->username) {
-                if (User::where('username', $username)->where('id', '!=', $user->id)->exists()) {
-                    return response()->json(['success' => false, 'message' => 'Username is already taken!']);
-                }
-                $user->username = $username;
-            }
+            $result = $security->update($user, [
+                'username' => $request->input('username'),
+                'email' => $request->input('email', ''),
+                'phone' => $request->input('phone'),
+                'preferred_login_method' => $request->input('preferred_login_method'),
+                'current_password' => $request->input('current_password', ''),
+                'password' => $request->input('new_password', ''),
+                'first_name' => $request->input('first_name', ''),
+                'last_name' => $request->input('last_name', ''),
+            ]);
 
-            if (!empty($email) && $email !== $user->email) {
-                if (User::where('email', $email)->where('id', '!=', $user->id)->exists()) {
-                    return response()->json(['success' => false, 'message' => 'Email address is already registered!']);
-                }
-                $user->email = $email;
-            }
-
-            $user->first_name = $firstName;
-            $user->last_name = $lastName;
-            $user->save();
+            $user->refresh();
 
             // Check $99+ Real Reward Claim Eligibility
             $isEligible99 = !empty($user->first_name) && !empty($user->last_name) && !empty($user->email);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Profile & Reward Verification status updated!',
+                'message' => $result['phone_verification_required']
+                    ? 'Profile saved. Verify the new phone with WhatsApp OTP before using phone login.'
+                    : 'Profile and login settings updated.',
                 'eligible_99' => $isEligible99,
                 'user' => [
                     'username' => $user->username,
                     'email' => $user->email,
+                    'phone' => $user->phone,
+                    'preferred_login_method' => $user->preferred_login_method,
                     'first_name' => $user->first_name,
                     'last_name' => $user->last_name,
                 ]
             ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $errors = $e->errors();
+            $message = collect($errors)->flatten()->first() ?: 'Check the highlighted account fields.';
+            return response()->json(['success' => false, 'message' => $message, 'errors' => $errors], 422);
         } catch (\Exception $e) {
             Log::error("[Profile Update Error] " . $e->getMessage());
             return response()->json(['success' => false, 'message' => $e->getMessage()]);

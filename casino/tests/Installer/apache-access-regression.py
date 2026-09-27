@@ -27,7 +27,7 @@ with tempfile.TemporaryDirectory(prefix='promex-apache-test-') as directory:
                  'casino/app/Example.php', 'casino/config/app.php', 'casino/bootstrap/cache/config.php',
                  'casino/resources/views/test.blade.php', 'casino/vendor/autoload.php',
                  'casino/server.php', 'casino/composer.json', 'localscripts/private.txt', '_access/private.txt']
-    allowed = ['js/game-session.js', 'js/ws-bridge.wasm', 'public/logo.png', 'frontend/theme.css', 'install.php']
+    allowed = ['js/game-session.js', 'js/promex-legacy-bridge.js', 'public/logo.png', 'frontend/theme.css', 'install.php']
     for relative in forbidden + allowed:
         file = web / relative
         file.parent.mkdir(parents=True, exist_ok=True)

@@ -5,8 +5,8 @@ namespace VanguardLTE\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use VanguardLTE\Services\LicenseService;
-use VanguardLTE\Services\GameRuntimeSession;
 
 /** Session/CSRF authentication is handled by Laravel's web middleware. */
 class ProtectGameRequests
@@ -36,17 +36,31 @@ class ProtectGameRequests
             || abs(time() - (int)$sentAt) > 120) {
             return response()->json(['error' => 'invalid_request_identity'], 400);
         }
-        if (!GameRuntimeSession::verify($request, $game)) {
-            return response()->json(['error' => 'runtime_required'], 403);
-        }
         $scope = $request->user()->getAuthIdentifier() . '|' . $request->session()->getId() . '|' . $game . '|' . $id;
+        $replayKey = 'game-request:v1:' . hash('sha256', $scope);
         try {
-            // add() is atomic in the supported file/Redis stores. Consume before invoking the engine.
-            if (!Cache::add('game-request:v1:' . hash('sha256', $scope), true, 300)) {
+            // add() is atomic in the supported database/file/Redis stores. Consume before invoking the engine.
+            if (!Cache::add($replayKey, true, 300)) {
                 return response()->json(['error' => 'duplicate_request'], 409);
             }
         } catch (\Throwable $e) {
-            return response()->json(['error' => 'request_store_unavailable'], 503);
+            // A single-host install may keep its general cache in a database
+            // table that is briefly unavailable to the web worker. Preserve
+            // replay protection with Laravel's locked file store; fail closed
+            // if that store is unavailable too.
+            Log::warning('[GameRuntime] Primary replay store unavailable; using atomic file fallback.', [
+                'exception' => get_class($e), 'message' => $e->getMessage(),
+            ]);
+            try {
+                if (!Cache::store('file')->add($replayKey, true, 300)) {
+                    return response()->json(['error' => 'duplicate_request'], 409);
+                }
+            } catch (\Throwable $fallback) {
+                Log::error('[GameRuntime] All replay stores unavailable.', [
+                    'exception' => get_class($fallback), 'message' => $fallback->getMessage(),
+                ]);
+                return response()->json(['error' => 'request_store_unavailable'], 503);
+            }
         }
         return $next($request);
     }

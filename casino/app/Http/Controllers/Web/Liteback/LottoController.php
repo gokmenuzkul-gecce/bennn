@@ -8,6 +8,7 @@ use VanguardLTE\LottoGame;
 use VanguardLTE\LottoTicket;
 use VanguardLTE\LottoDraw;
 use VanguardLTE\User;
+use VanguardLTE\Services\LottoDrawService;
 
 class LottoController extends Controller
 {
@@ -17,8 +18,8 @@ class LottoController extends Controller
     public function index()
     {
         $games = LottoGame::orderBy('id', 'desc')->get();
-        $tickets = LottoTicket::with('user', 'game')->orderBy('id', 'desc')->take(30)->get();
-        $draws = LottoDraw::with('game')->orderBy('id', 'desc')->take(10)->get();
+        $tickets = LottoTicket::with('user', 'game', 'draw')->orderByDesc('id')->take(30)->get();
+        $draws = LottoDraw::with('game')->orderByDesc('scheduled_for')->take(20)->get();
 
         return view('liteback.lotto.index', compact('games', 'tickets', 'draws'));
     }
@@ -33,19 +34,33 @@ class LottoController extends Controller
             'max_number' => 'required|integer|min:10|max:99',
             'pick_count' => 'required|integer|min:3|max:10',
             'entry_fee' => 'required|numeric|min:0',
+            'jackpot_pool' => 'required|numeric|min:0',
+            'draw_interval' => 'required|in:hourly,daily',
+            'draw_time' => 'required|string|max:5',
+            'draw_source' => 'required|in:local,promex_api',
+            'result_columns' => 'nullable|array',
         ]);
 
         $slug = \Str::slug($request->input('title'));
 
+        $drawTime = trim((string) $request->input('draw_time'));
+        if ($request->input('draw_interval') === 'hourly' && (!ctype_digit($drawTime) || (int) $drawTime > 59)) {
+            return back()->withInput()->withErrors(['draw_time' => 'Hourly draws use a minute from 00 to 59.']);
+        }
+        if ($request->input('draw_interval') === 'daily' && !preg_match('/^([01]\\d|2[0-3]):[0-5]\\d$/', $drawTime)) {
+            return back()->withInput()->withErrors(['draw_time' => 'Daily draws use UTC 24-hour time, e.g. 21:00.']);
+        }
         LottoGame::create([
             'title' => $request->input('title'),
             'slug' => $slug,
-            'description' => $request->input('description', 'Official Social Lotto Draw'),
             'max_number' => $request->input('max_number'),
             'pick_count' => $request->input('pick_count'),
             'entry_fee' => $request->input('entry_fee'),
             'jackpot_pool' => $request->input('jackpot_pool', 1000000),
-            'draw_schedule' => $request->input('draw_schedule', 'Daily 21:00 UTC'),
+            'draw_interval' => $request->input('draw_interval'),
+            'draw_time' => $drawTime,
+            'draw_source' => $request->input('draw_source'),
+            'result_columns_json' => array_values($request->input('result_columns', LottoDrawService::DEFAULT_RESULT_COLUMNS)),
             'is_active' => true,
         ]);
 
@@ -84,77 +99,26 @@ class LottoController extends Controller
             return redirect()->route('liteback.lotto.index')->with('error', 'Lotto Game not found!');
         }
 
-        // Generate random winning numbers for game pick_count
-        $winningNumbers = [];
-        while (count($winningNumbers) < $game->pick_count) {
-            $num = rand(1, $game->max_number);
-            if (!in_array($num, $winningNumbers)) {
-                $winningNumbers[] = $num;
-            }
+        $drawIdentifier = trim((string) $request->input('round_id'));
+        if ($drawIdentifier === '') return back()->withErrors(['round_id' => 'Enter the numeric draw ID or public Round ID to settle.']);
+        $draw = LottoDraw::where('lotto_game_id', $game->id)->where(fn ($q) => $q->where('id', $drawIdentifier)->orWhere('round_code', $drawIdentifier))->first();
+        if (!$draw) return back()->withErrors(['round_id' => 'That round does not belong to this lotto game.']);
+        try {
+            $settled = app(LottoDrawService::class)->draw($draw);
+            $numbers = implode(', ', $settled->winning_numbers_json ?: []);
+            $note = $settled->wasChanged() ? 'settled' : 'was already drawn';
+            return redirect()->route('liteback.lotto.index')->with('success', "Round {$settled->round_code} {$note}. Winning numbers: [{$numbers}].");
+        } catch (\Throwable $e) {
+            return back()->withErrors(['round_id' => $e->getMessage()]);
         }
-        sort($winningNumbers);
+    }
 
-        // Settle Pending Tickets
-        $pendingTickets = LottoTicket::where('lotto_game_id', $game->id)
-            ->where('status', 'pending')
-            ->get();
-
-        // Record Draw
-        $draw = LottoDraw::create([
-            'lotto_game_id' => $game->id,
-            'winning_numbers_json' => $winningNumbers,
-            'draw_date' => now()->format('Y-m-d H:i:s'),
-            'drawn_at' => now(),
-            'total_tickets' => count($pendingTickets),
-            'total_winners' => 0,
-            'total_paid' => 0,
-            'jackpot_paid' => 0,
-        ]);
-
-        $totalPaidOut = 0;
-        $totalWinners = 0;
-        foreach ($pendingTickets as $ticket) {
-            $pick = is_array($ticket->numbers_json) ? $ticket->numbers_json : (json_decode($ticket->numbers_json, true) ?? []);
-            $matches = count(array_intersect($pick, $winningNumbers));
-
-            $ticket->matches_count = $matches;
-
-            if ($matches === $game->pick_count) {
-                // Jackpot Winner!
-                $prize = $game->jackpot_pool;
-                $ticket->status = 'jackpot_win';
-                $ticket->payout_amount = $prize;
-                $ticket->prize_won = $prize;
-                $ticket->save();
-
-                User::where('id', $ticket->user_id)->increment('balance', $prize);
-                $totalPaidOut += $prize;
-                $totalWinners++;
-            } elseif ($matches >= floor($game->pick_count / 2)) {
-                // Partial Match Winner!
-                $prize = $game->entry_fee * 5;
-                $ticket->status = 'win';
-                $ticket->payout_amount = $prize;
-                $ticket->prize_won = $prize;
-                $ticket->save();
-
-                User::where('id', $ticket->user_id)->increment('balance', $prize);
-                $totalPaidOut += $prize;
-                $totalWinners++;
-            } else {
-                $ticket->status = 'lost';
-                $ticket->payout_amount = 0;
-                $ticket->prize_won = 0;
-                $ticket->save();
-            }
-        }
-
-        $draw->total_winners = $totalWinners;
-        $draw->total_paid = $totalPaidOut;
-        $draw->jackpot_paid = $totalPaidOut;
-        $draw->save();
-
-        $winningStr = implode(', ', $winningNumbers);
-        return redirect()->route('liteback.lotto.index')->with('success', "Draw executed for '{$game->title}'! Winning Numbers: [{$winningStr}]. Total Payout: " . number_format($totalPaidOut, 0) . " Cedar Coins.");
+    public function updateResultColumns(Request $request, LottoGame $game)
+    {
+        $columns = $request->validate(['result_columns' => 'nullable|array'])['result_columns'] ?? [];
+        $allowed = LottoDrawService::DEFAULT_RESULT_COLUMNS;
+        $game->result_columns_json = array_values(array_intersect($allowed, $columns));
+        $game->save();
+        return back()->with('success', "Public result columns updated for {$game->title}.");
     }
 }

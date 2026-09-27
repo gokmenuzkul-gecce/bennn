@@ -1,383 +1,99 @@
 @extends('liteback.layout')
 
-@section('title', 'Extensions, Add-ons & License')
+@section('title', 'License')
 
 @section('content')
 <style>
-    .store-container {
-        padding-bottom: 40px;
-    }
-    .store-panel {
-        background: #111827 !important;
-        border: 1px solid #1f2937 !important;
-        border-radius: 18px !important;
-        padding: 24px 28px !important;
-        margin-bottom: 24px !important;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35) !important;
-        position: relative;
-        overflow: hidden;
-    }
-    .store-heading {
-        font-size: 1.5rem !important;
-        font-weight: 800 !important;
-        color: #ffffff !important;
-        letter-spacing: -0.02em;
-    }
-    .store-sub {
-        color: #94a3b8 !important;
-        font-size: 0.82rem !important;
-        font-family: 'JetBrains Mono', monospace !important;
-    }
-    .store-label-title {
-        color: #64748b !important;
-        font-size: 0.72rem !important;
-        text-transform: uppercase;
-        font-weight: 700;
-        letter-spacing: 0.05em;
-        font-family: 'JetBrains Mono', monospace !important;
-        display: block;
-        margin-bottom: 3px;
-    }
-    .store-val {
-        color: #ffffff !important;
-        font-weight: 700 !important;
-        font-size: 0.95rem !important;
-        font-family: 'JetBrains Mono', monospace !important;
-    }
-    .store-stat-pill {
-        background: #141e30 !important;
-        border: 1px solid #23334d !important;
-        border-radius: 12px !important;
-        padding: 12px 16px !important;
-    }
-    .store-grid-3 {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
-        gap: 18px;
-    }
-    .store-grid-2 {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
-        gap: 18px;
-    }
-    .module-item {
-        background: #141e30 !important;
-        border: 1px solid #23334d !important;
-        border-radius: 14px !important;
-        padding: 20px !important;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        transition: all 0.2s ease-in-out;
-    }
-    .module-item:hover {
-        border-color: #3b82f6 !important;
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
-        transform: translateY(-2px);
-    }
-    .module-icon-wrap {
-        width: 44px;
-        height: 44px;
-        border-radius: 12px;
-        background: rgba(59, 130, 246, 0.15);
-        border: 1px solid rgba(59, 130, 246, 0.3);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #38bdf8;
-    }
-    .gamepack-item {
-        background: #141e30 !important;
-        border: 1px solid #23334d !important;
-        border-radius: 14px !important;
-        padding: 22px !important;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        transition: all 0.2s ease-in-out;
-    }
-    .gamepack-item:hover {
-        border-color: #10b981 !important;
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
-    }
-    .key-input-box {
-        background: #090d16 !important;
-        border: 1px solid #283955 !important;
-        border-radius: 10px !important;
-        color: #ffffff !important;
-        font-family: 'JetBrains Mono', monospace !important;
-        font-size: 0.85rem !important;
-        padding: 10px 14px !important;
-    }
-    .key-input-box:focus {
-        border-color: #3b82f6 !important;
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
-    }
-    .badge-status-active {
-        background: rgba(16, 185, 129, 0.2) !important;
-        border: 1px solid #10b981 !important;
-        color: #34d399 !important;
-        font-weight: 800;
-        font-size: 0.72rem;
-        padding: 4px 10px;
-        border-radius: 20px;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-    }
-    .badge-status-warn {
-        background: rgba(245, 158, 11, 0.2) !important;
-        border: 1px solid #f59e0b !important;
-        color: #fbbf24 !important;
-        font-weight: 800;
-        font-size: 0.72rem;
-        padding: 4px 10px;
-        border-radius: 20px;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-    }
-    .badge-status-danger {
-        background: rgba(239, 68, 68, 0.2) !important;
-        border: 1px solid #ef4444 !important;
-        color: #f87171 !important;
-        font-weight: 800;
-        font-size: 0.72rem;
-        padding: 4px 10px;
-        border-radius: 20px;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-    }
+    .store-container { max-width: 1280px; padding-bottom: 40px; }
+    .store-panel { background: #111827; border: 1px solid #1f2937; border-radius: 18px; padding: 24px 28px; margin-bottom: 24px; box-shadow: 0 8px 32px rgba(0, 0, 0, .35); }
+    .store-heading { color: #fff; font-size: 1.5rem; font-weight: 800; letter-spacing: -.02em; }
+    .store-sub, .drive-note { color: #94a3b8; font-family: 'JetBrains Mono', monospace; font-size: .82rem; }
+    .store-label-title { color: #64748b; display: block; font-family: 'JetBrains Mono', monospace; font-size: .72rem; font-weight: 700; letter-spacing: .05em; margin-bottom: 3px; text-transform: uppercase; }
+    .store-val { color: #fff; font-family: 'JetBrains Mono', monospace; font-size: .95rem; font-weight: 700; overflow-wrap: anywhere; }
+    .store-stat-pill { background: #141e30; border: 1px solid #23334d; border-radius: 12px; height: 100%; padding: 12px 16px; }
+    .key-input-box { background: #090d16; border: 1px solid #283955; border-radius: 10px; color: #fff; font-family: 'JetBrains Mono', monospace; font-size: .85rem; padding: 10px 14px; }
+    .key-input-box:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, .25); outline: 0; }
+    .badge-status { border-radius: 20px; display: inline-flex; font-size: .72rem; font-weight: 800; gap: 6px; padding: 4px 10px; }
+    .badge-status-active { background: rgba(16, 185, 129, .2); border: 1px solid #10b981; color: #34d399; }
+    .badge-status-warn { background: rgba(245, 158, 11, .2); border: 1px solid #f59e0b; color: #fbbf24; }
+    .badge-status-danger { background: rgba(239, 68, 68, .2); border: 1px solid #ef4444; color: #f87171; }
 </style>
 
 <div class="store-container">
-
-    <!-- Header Section -->
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 pb-2">
-        <div class="mb-3 mb-md-0">
-            <h1 class="store-heading d-flex align-items-center gap-2 mb-1">
-                <i class="fas fa-store text-primary mr-2"></i>
-                Extensions, Add-ons & License
-            </h1>
-            <p class="store-sub">
-                Manage your domain subscription, live service feeds, and install modular game packages.
-            </p>
-        </div>
-        <div class="d-flex align-items-center gap-2">
-            <form action="{{ route('liteback.store.refresh_license') }}" method="POST" class="mr-2">
-                @csrf
-                <button type="submit" class="btn btn-sm btn-outline-light font-weight-bold d-flex align-items-center shadow-sm" style="border-radius: 10px; padding: 7px 16px;">
-                    <i class="fas fa-sync-alt mr-1.5 text-info"></i>
-                    Check License Now
-                </button>
-            </form>
-            <a href="https://promex.me/platforms/promex-gaming-suite/" target="_blank" class="btn btn-sm btn-success font-weight-bold d-flex align-items-center shadow-sm" style="border-radius: 10px; padding: 7px 16px;">
-                <i class="fas fa-external-link-alt mr-1.5"></i>
-                Promex Store
-            </a>
-        </div>
+    <div class="mb-4 pb-2">
+        <h1 class="store-heading mb-1"><i class="fas fa-key text-primary mr-2"></i>License</h1>
+        <p class="store-sub mb-0">Manage the license assigned to this installation.</p>
     </div>
 
-    <!-- Alerts -->
-    @if(session('success'))
-        <div class="alert alert-success d-flex align-items-center mb-4" style="background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #34d399; border-radius: 12px;">
-            <i class="fas fa-check-circle mr-2 fs-5"></i>
-            <div>{{ session('success') }}</div>
-        </div>
-    @endif
-    @if(session('warning'))
-        <div class="alert alert-warning d-flex align-items-center mb-4" style="background: rgba(245, 158, 11, 0.15); border: 1px solid #f59e0b; color: #fbbf24; border-radius: 12px;">
-            <i class="fas fa-exclamation-triangle mr-2 fs-5"></i>
-            <div>{{ session('warning') }}</div>
-        </div>
-    @endif
-    @if(session('danger'))
-        <div class="alert alert-danger d-flex align-items-center mb-4" style="background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #f87171; border-radius: 12px;">
-            <i class="fas fa-times-circle mr-2 fs-5"></i>
-            <div>{{ session('danger') }}</div>
+    @if(session('success')) <div class="alert alert-success mb-4">{{ session('success') }}</div> @endif
+    @if(session('warning')) <div class="alert alert-warning mb-4">{{ session('warning') }}</div> @endif
+    @if(session('danger')) <div class="alert alert-danger mb-4">{{ session('danger') }}</div> @endif
+    @if($errors->any())
+        <div class="alert alert-danger mb-4">
+            @foreach($errors->all() as $error)<div>{{ $error }}</div>@endforeach
+            <div class="mt-2">Need help? <a class="alert-link" href="https://promex.me/opensource-support/" target="_blank" rel="noopener noreferrer">Open a support ticket</a>.</div>
         </div>
     @endif
 
-    <!-- 1. License Card -->
     <div class="store-panel">
         <div class="row align-items-center">
             <div class="col-lg-7 mb-4 mb-lg-0">
-                <div class="d-flex align-items-center gap-2 mb-2">
-                    <span class="store-label-title mb-0 mr-2">License Status:</span>
+                <div class="d-flex align-items-center mb-2">
+                    <span class="store-label-title mb-0 mr-2">License status:</span>
                     @if($license['status'] === 'active')
-                        <span class="badge-status-active">
-                            <i class="fas fa-circle text-success" style="font-size: 8px;"></i> ACTIVE (ENTERPRISE)
-                        </span>
+                        <span class="badge-status badge-status-active"><i class="fas fa-circle" style="font-size:8px;"></i> ACTIVE</span>
                     @elseif($license['status'] === 'grace_period')
-                        <span class="badge-status-warn">
-                            <i class="fas fa-clock text-warning" style="font-size: 8px;"></i> GRACE PERIOD ({{ $license['days_left'] ?? 3 }} DAYS REMAINING)
-                        </span>
+                        <span class="badge-status badge-status-warn"><i class="fas fa-clock"></i> GRACE PERIOD</span>
                     @elseif($license['status'] === 'suspended')
-                        <span class="badge-status-danger">
-                            <i class="fas fa-ban text-danger" style="font-size: 8px;"></i> SUSPENDED
-                        </span>
+                        <span class="badge-status badge-status-danger"><i class="fas fa-ban"></i> SUSPENDED</span>
                     @else
-                        <span class="badge-status-warn">
-                            <i class="fas fa-shield-alt text-warning" style="font-size: 8px;"></i> COMMUNITY / TRIAL
-                        </span>
+                        <span class="badge-status badge-status-warn"><i class="fas fa-shield-alt"></i> COMMUNITY / TRIAL</span>
                     @endif
                 </div>
-
-                <div class="h2 font-weight-bold text-white mb-3" style="letter-spacing: -0.02em;">
-                    {{ $license['plan'] ?? 'Community Edition' }}
-                </div>
-
-                <div class="row mt-2">
-                    <div class="col-md-4 mb-2 mb-md-0">
-                        <div class="store-stat-pill">
-                            <span class="store-label-title">Bound Domain</span>
-                            <span class="store-val">{{ $license['domain'] ?? request()->getHost() }}</span>
-                        </div>
-                    </div>
-                    <div class="col-md-4 mb-2 mb-md-0">
-                        <div class="store-stat-pill">
-                            <span class="store-label-title">Valid Until</span>
-                            <span class="store-val text-info">{{ $license['valid_until'] ? date('M d, Y', strtotime($license['valid_until'])) : 'Lifetime / Unlimited' }}</span>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="store-stat-pill">
-                            <span class="store-label-title">License Key</span>
-                            <span class="store-val text-warning">{{ !empty($license['license_key']) ? substr($license['license_key'], 0, 8) . '••••••••' . substr($license['license_key'], -4) : 'Unassigned' }}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Verified Cloud Perks & Portal Link -->
-                <div class="mt-3 pt-2 d-flex align-items-center flex-wrap" style="gap: 8px;">
-                    <a href="https://clients.377.live/operator?key={{ urlencode($license['license_key'] ?? '') }}" target="_blank" class="btn btn-sm btn-outline-info font-weight-bold d-inline-flex align-items-center shadow-sm" style="border-radius: 8px; font-size: 11px; padding: 4px 10px;">
-                        <i class="fas fa-shield-check mr-1.5"></i>
-                        Tamper-Proof Cloud Portal &nearr;
-                    </a>
-                    <span class="badge badge-dark px-2.5 py-1.5 font-mono-jet" style="background: #162238; border: 1px solid #283955; color: #cbd5e1; font-size: 11px;">
-                        <i class="fas fa-check-circle text-success mr-1"></i> Games CDN
-                    </span>
-                    <span class="badge badge-dark px-2.5 py-1.5 font-mono-jet" style="background: #162238; border: 1px solid #283955; color: #cbd5e1; font-size: 11px;">
-                        <i class="fas fa-check-circle text-success mr-1"></i> Central Odds Feed
-                    </span>
-                    <span class="badge badge-dark px-2.5 py-1.5 font-mono-jet" style="background: #162238; border: 1px solid #283955; color: #cbd5e1; font-size: 11px;">
-                        <i class="fas fa-check-circle text-success mr-1"></i> Store Packs
-                    </span>
+                <div class="h2 font-weight-bold text-white mb-3">{{ $license['plan'] ?? 'Community Edition' }}</div>
+                <div class="row">
+                    <div class="col-md-4 mb-2 mb-md-0"><div class="store-stat-pill"><span class="store-label-title">Bound domain</span><span class="store-val">{{ $license['domain'] ?? request()->getHost() }}</span></div></div>
+                    <div class="col-md-4 mb-2 mb-md-0"><div class="store-stat-pill"><span class="store-label-title">Valid until</span><span class="store-val text-info">{{ !empty($license['valid_until']) ? date('M d, Y', strtotime($license['valid_until'])) : 'Lifetime / Unlimited' }}</span></div></div>
+                    <div class="col-md-4"><div class="store-stat-pill"><span class="store-label-title">License key</span><span class="store-val text-warning">{{ !empty($license['license_key']) ? substr($license['license_key'], 0, 8) . '••••••••' . substr($license['license_key'], -4) : 'Unassigned' }}</span></div></div>
                 </div>
             </div>
-
-            <!-- License Key Action Form Box -->
             <div class="col-lg-5">
-                <div class="p-3" style="background: #0d1422; border: 1px solid #1e2b40; border-radius: 14px;">
-                    <span class="store-label-title mb-2 text-white d-flex align-items-center">
-                        <i class="fas fa-key text-warning mr-1.5"></i> Update License Key
-                    </span>
+                <div class="p-3" style="background:#0d1422; border:1px solid #1e2b40; border-radius:14px;">
+                    <span class="store-label-title text-white"><i class="fas fa-key text-warning mr-1"></i>Update license key</span>
                     <form action="{{ route('liteback.store.update_license') }}" method="POST">
                         @csrf
-                        <div class="form-group mb-2">
-                            <input type="text" name="license_key" value="{{ $license['license_key'] }}" placeholder="PROMEX-XXXX-XXXX-XXXX" class="form-control key-input-box w-100">
-                        </div>
-                        <div class="d-flex align-items-center gap-2">
-                            <button type="submit" class="btn btn-primary font-weight-bold flex-fill" style="border-radius: 8px; font-size: 12px; padding: 8px 14px;">
-                                <i class="fas fa-save mr-1"></i> Save & Activate
-                            </button>
-                            <a href="https://promex.me/platforms/promex-gaming-suite/" target="_blank" class="btn btn-outline-light font-weight-bold ml-2" style="border-radius: 8px; font-size: 12px; padding: 8px 14px;">
-                                Get Key &nearr;
-                            </a>
-                        </div>
+                        <div class="form-group mb-2"><input type="text" name="license_key" value="{{ $license['license_key'] ?? '' }}" placeholder="PROMEX-XXXX-XXXX-XXXX" class="form-control key-input-box w-100"></div>
+                        <button type="submit" class="btn btn-primary btn-block font-weight-bold"><i class="fas fa-save mr-1"></i> Save &amp; Activate</button>
                     </form>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Live GitHub & Cloud Updater Card -->
     <div class="store-panel">
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3">
-            <div class="mb-2 mb-md-0">
-                <h2 class="h5 font-weight-bold text-white mb-1 d-flex align-items-center">
-                    <i class="fas fa-cloud-download-alt text-purple mr-2"></i>
-                    GitHub Cloud Live Updater
-                </h2>
-                <p class="store-sub mb-0">
-                    Synchronize core code and database migrations directly from central verified releases.
-                </p>
+        <h2 class="h5 font-weight-bold text-white mb-1"><i class="fab fa-google-drive text-success mr-2"></i>Request all archives Drive share</h2>
+        <p class="store-sub mb-3">Get a free 30-day (one-month) archive grant for one Google or preferred email address.</p>
+        @if(session('drive_access'))
+            <div class="alert alert-success mb-3">
+                {{ session('drive_access.message') }}
+                @if(!empty(session('drive_access.folder_url')))<a class="alert-link ml-1" href="{{ session('drive_access.folder_url') }}" target="_blank" rel="noopener noreferrer">Open shared Drive folder</a>@endif
             </div>
-            <div class="d-flex align-items-center font-mono-jet" style="gap: 8px;">
-                <span class="badge badge-dark px-3 py-2" style="background: #162238; border: 1px solid #283955; color: #ffffff; font-size: 12px;">
-                    Installed: <strong class="text-success">{{ $versionInfo['current_version'] ?? 'v2.5.0' }}</strong>
-                </span>
-                <span class="badge badge-dark px-3 py-2 ml-1" style="background: #162238; border: 1px solid #283955; color: #ffffff; font-size: 12px;">
-                    Latest: <strong class="text-info">{{ $versionInfo['latest_version'] ?? 'v2.5.0' }}</strong>
-                </span>
-            </div>
-        </div>
-
-        <!-- Operator Risk Notice -->
-        <div class="alert alert-warning d-flex align-items-start mb-3" style="background: #241905; border: 1px solid #785a10; color: #fef08a; border-radius: 12px; padding: 12px 16px;">
-            <i class="fas fa-exclamation-triangle mr-2 text-warning fs-5 mt-1"></i>
-            <div style="font-size: 13px; line-height: 1.5;">
-                <strong class="text-white">Operator Risk Notice:</strong> Live updating applies core schema changes and updates files in-place. Always make a full database and code backup before proceeding. Custom modifications should be decoupled via custom modules.
-            </div>
-        </div>
-
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center pt-1">
-            <div class="store-sub mb-2 mb-md-0">
-                Release Notes: <span class="text-white font-weight-bold">{{ $versionInfo['release_notes'] ?? 'System is on the latest stable build.' }}</span>
-            </div>
-            <div>
-                <form action="{{ route('liteback.store.apply_update') }}" method="POST" onsubmit="return confirm('APPLY UPDATE WARNING:\n\nThis will download and apply verified update files and execute database migrations.\n\nProceed at your own risk?');">
-                    @csrf
-                    <button type="submit" class="btn btn-purple font-weight-bold shadow-sm" style="background: #7c3aed; color: #ffffff; border-radius: 10px; padding: 8px 18px; font-size: 12px;">
-                        <i class="fas fa-download mr-1.5"></i>
-                        Apply Live Update
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- 2. Modular Extension Suite -->
-    <div class="mb-4">
-        <div class="mb-3">
-            <h2 class="h5 font-weight-bold text-white mb-1 d-flex align-items-center">
-                <i class="fas fa-puzzle-piece text-info mr-2"></i>
-                Modular Add-ons & Service Hub
-            </h2>
-            <p class="store-sub">
-                Pre-configured core modules powered by your central service feeds.
-            </p>
-        </div>
-
-        <div class="store-grid-3">
-            @foreach($catalog['modules'] as $mod)
-                <div class="module-item">
-                    <div>
-                        <div class="d-flex justify-content-between align-items-start mb-3">
-                            <div class="module-icon-wrap">
-                                <span class="material-symbols-outlined">{{ $mod['icon'] }}</span>
-                            </div>
-                            <span class="badge badge-success px-2 py-1 font-mono-jet" style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #34d399; font-size: 10px;">
-                                {{ $mod['status'] }}
-                            </span>
-                        </div>
-                        <h3 class="h6 font-weight-bold text-white mb-1">{{ $mod['name'] }}</h3>
-                        <p class="store-sub" style="font-size: 12px; line-height: 1.5; color: #94a3b8 !important;">
-                            {{ $mod['description'] }}
-                        </p>
-                    </div>
-
-                    <div class="pt-3 mt-3 border-top border-secondary d-flex justify-content-between align-items-center" style="border-color: #23334d !important;">
-                        <span class="font-mono-jet" style="font-size: 11px; color: #64748b;">v{{ $mod['version'] }} • {{ $mod['category'] }}</span>
-                        <span class="text-success font-weight-bold font-mono-jet d-flex align-items-center" style="font-size: 11px;">
-                            <i class="fas fa-check mr-1"></i> Installed
-                        </span>
-                    </div>
+        @endif
+        <form action="{{ route('liteback.store.archives_drive_access') }}" method="POST">
+            @csrf
+            <div class="row align-items-end">
+                <div class="col-lg-7 mb-3 mb-lg-0">
+                    <label class="store-label-title" for="archives-email">Google or preferred email address</label>
+                    <input id="archives-email" type="email" name="email" value="{{ old('email') }}" required maxlength="254" autocomplete="email" class="form-control key-input-box w-100" placeholder="customer@gmail.com">
                 </div>
-            @endforeach
-        </div>
+                <div class="col-lg-5"><button type="submit" class="btn btn-success btn-block font-weight-bold"><i class="fas fa-paper-plane mr-1"></i> Confirm &amp; send request</button></div>
+            </div>
+            <div class="custom-control custom-checkbox mt-3">
+                <input id="one-email-grant" type="checkbox" name="confirm_one_email_grant" value="1" required class="custom-control-input" {{ old('confirm_one_email_grant') ? 'checked' : '' }}>
+                <label class="custom-control-label text-light" for="one-email-grant">I confirm this license receives one 30-day grant for one email address.</label>
+            </div>
+        </form>
+        <p class="drive-note mt-3 mb-0">We send this request only when you submit this form. If it cannot be completed, <a href="https://promex.me/opensource-support/" target="_blank" rel="noopener noreferrer">open a support ticket</a>.</p>
     </div>
 </div>
 @endsection

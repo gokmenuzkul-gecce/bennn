@@ -3,6 +3,7 @@ namespace VanguardLTE\Http\Controllers\Web\Frontend\Auth;
 use Illuminate\Support\Facades\Notification;
 use VanguardLTE\Notifications\UserRegistered;
 use Illuminate\Support\Facades\Mail;
+use VanguardLTE\Services\LoginCredentialResolver;
 {
     include_once(base_path() . '/app/ShopCore.php');
     include_once(base_path() . '/app/ShopGame.php');
@@ -56,6 +57,15 @@ use Illuminate\Support\Facades\Mail;
         }
         public function postLogin(\VanguardLTE\Http\Requests\Auth\LoginRequest $request, \VanguardLTE\Repositories\Session\SessionRepository $sessionRepository)
         {
+            if ((string) settings('enable_password_login', '1') !== '1') {
+                $message = 'Username, email, and password sign-in is disabled for this store. Use WhatsApp code sign-in.';
+                if ($request->has('is_ajax')) {
+                    return response()->json(['success' => false, 'message' => $message], 403);
+                }
+
+                return redirect()->route('frontend.auth.login')->withErrors($message);
+            }
+
             $throttles = settings('throttle_enabled');
             $to = ($request->has('to') ? '?to=' . $request->get('to') : '');
             if( $throttles && $this->hasTooManyLoginAttempts($request) ) 
@@ -63,20 +73,7 @@ use Illuminate\Support\Facades\Mail;
                 return $this->sendLockoutResponse($request);
             }
             $credentials = $request->getCredentials();
-            if( filter_var($credentials['username'], FILTER_VALIDATE_EMAIL) ) 
-            {
-                $credentials = [
-                    'email' => $credentials['username'], 
-                    'password' => $credentials['password']
-                ];
-            }
-            else
-            {
-                $credentials = [
-                    'username' => $credentials['username'], 
-                    'password' => $credentials['password']
-                ];
-            }
+            $credentials = LoginCredentialResolver::resolve($credentials['username'], $credentials['password']);
             if( !\Auth::validate($credentials) ) 
             {
                 if( $throttles ) 
@@ -294,6 +291,7 @@ use Illuminate\Support\Facades\Mail;
                 'parent_id' => $parentId,
                 'shop_id' => 1,
                 'role_id' => 1, 
+                'preferred_login_method' => 'password',
                 'status' => (settings('use_email') ? \VanguardLTE\Support\Enum\UserStatus::UNCONFIRMED : \VanguardLTE\Support\Enum\UserStatus::ACTIVE)
             ]));
             \VanguardLTE\ShopUser::create([

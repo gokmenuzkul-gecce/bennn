@@ -33,26 +33,22 @@ class OddsApiService
         ];
 
         $totalSynced = 0;
-        $provider = env('SPORTSBOOK_PROVIDER', 'clients_377');
-        $hubUrl = LicenseService::DEFAULT_SERVER;
+        $provider = function_exists('settings')
+            ? settings('sportsbook_api_provider', 'promex')
+            : 'promex';
+        $hubUrl = rtrim((string) config('licensing.hub_url', LicenseService::DEFAULT_SERVER), '/');
 
         // 1. Try Central Service Hub (Pre-cached odds via Redis)
-        if ($provider === 'clients_377' || empty($this->apiKey)) {
+        if ($provider === 'promex') {
             if (!LicenseService::canUseCentralOdds()) {
                 Log::info("[OddsApiService] Sportsbook hub feed skipped: license inactive or sportsbook module not included.");
-                return ['success' => false, 'message' => 'Sportsbook hub access not licensed', 'synced' => 0];
+                return $this->failedResult('PROMEX Sports API access requires an active sportsbook license.');
             }
             try {
-                $license = LicenseService::getStatus();
-                $domain = $license['domain'] ?? request()->getHost();
-                $key = $license['license_key'] ?? '';
-
+                $path = '/api/service/sports/odds';
                 $hubResponse = Http::timeout(6)
-                    ->withHeaders([
-                        'X-License-Key' => $key,
-                        'X-Domain' => $domain,
-                        'Accept' => 'application/json'
-                    ])
+                    ->withOptions((array) config('licensing.hub_http_options', ['allow_redirects' => false]))
+                    ->withHeaders(PromexInstallationService::signedHeaders('GET', $path))
                     ->get("{$hubUrl}/sports/odds");
 
                 if ($hubResponse->successful()) {
@@ -66,13 +62,28 @@ class OddsApiService
                             if (function_exists('settings')) {
                                 settings(['sports_last_sync' => now()->toDateTimeString()]);
                             }
-                            return ['success' => true, 'synced' => $totalSynced, 'provider' => 'clients_377'];
+                            return [
+                                'success' => true,
+                                'synced_count' => $totalSynced,
+                                'synced_at' => now()->toDateTimeString(),
+                                'provider' => 'promex',
+                            ];
                         }
                     }
                 }
+
+                $message = is_array($hubData ?? null) && is_string($hubData['message'] ?? null)
+                    ? $hubData['message']
+                    : 'The PROMEX Sports API returned no fixtures.';
+                return $this->failedResult($message);
             } catch (\Throwable $e) {
                 Log::warning("[Sportsbook Hub] Central cache unavailable: " . $e->getMessage());
+                return $this->failedResult('The PROMEX Sports API is temporarily unavailable.');
             }
+        }
+
+        if (empty($this->apiKey)) {
+            return $this->failedResult('Add a The Odds API key or select PROMEX Licensed API.');
         }
 
         // 2. Direct Upstream API (The Odds API) or Local Generator
@@ -116,6 +127,16 @@ class OddsApiService
             'success' => true,
             'synced_count' => $totalSynced,
             'synced_at' => now()->toDateTimeString()
+        ];
+    }
+
+    protected function failedResult(string $message): array
+    {
+        return [
+            'success' => false,
+            'message' => $message,
+            'synced_count' => 0,
+            'synced_at' => now()->toDateTimeString(),
         ];
     }
 

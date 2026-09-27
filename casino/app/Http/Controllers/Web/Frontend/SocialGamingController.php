@@ -9,6 +9,8 @@ use VanguardLTE\User;
 use VanguardLTE\LottoGame;
 use VanguardLTE\LottoTicket;
 use VanguardLTE\LottoDraw;
+use VanguardLTE\Services\LottoDrawService;
+use Illuminate\Support\Facades\DB;
 
 class SocialGamingController extends Controller
 {
@@ -20,21 +22,23 @@ class SocialGamingController extends Controller
         $user = Auth::user();
         
         $activeGames = LottoGame::where('is_active', true)->get();
-        $selectedGameSlug = $request->input('game', 'daily-lucky-4');
+        $selectedGameSlug = $request->input('game');
         
-        $currentGame = LottoGame::where('slug', $selectedGameSlug)->first() ?? $activeGames->first();
+        $currentGame = $selectedGameSlug ? $activeGames->firstWhere('slug', $selectedGameSlug) : null;
+        $currentGame = $currentGame ?: $activeGames->first();
         
-        $recentDraws = [];
-        $userTickets = [];
+        $recentDraws = collect();
+        $userTickets = collect();
 
         if ($currentGame) {
             $recentDraws = LottoDraw::where('lotto_game_id', $currentGame->id)
-                ->orderBy('id', 'desc')
+                ->where('status', 'drawn')
+                ->orderByDesc('scheduled_for')
                 ->take(5)
                 ->get();
 
             if ($user) {
-                $userTickets = LottoTicket::where('lotto_game_id', $currentGame->id)
+                $userTickets = LottoTicket::with('draw')->where('lotto_game_id', $currentGame->id)
                     ->where('user_id', $user->id)
                     ->orderBy('id', 'desc')
                     ->take(10)
@@ -42,11 +46,9 @@ class SocialGamingController extends Controller
             }
         }
 
-        $recentWinners = [
-            ['user' => 'LuckySpin99', 'coins' => '250,000', 'time' => '10 mins ago'],
-            ['user' => 'CryptoKing', 'coins' => '1,000,000', 'time' => '1 hour ago'],
-            ['user' => 'VegasPro777', 'coins' => '50,000', 'time' => '3 hours ago']
-        ];
+        $nextRound = $currentGame ? app(LottoDrawService::class)->nextRound($currentGame) : null;
+        $resultColumns = $currentGame ? ($currentGame->result_columns_json ?: LottoDrawService::DEFAULT_RESULT_COLUMNS) : [];
+        $ticketsByDraw = $userTickets->groupBy('lotto_draw_id');
 
         return view('frontend.Minimal.lotto.index', compact(
             'user', 
@@ -54,7 +56,9 @@ class SocialGamingController extends Controller
             'currentGame', 
             'recentDraws', 
             'userTickets', 
-            'recentWinners'
+            'nextRound',
+            'resultColumns',
+            'ticketsByDraw'
         ));
     }
 
@@ -83,6 +87,11 @@ class SocialGamingController extends Controller
             ]);
         }
 
+        $numbers = array_map('intval', $numbers);
+        if (count(array_unique($numbers)) !== count($numbers)) {
+            return response()->json(['success' => false, 'message' => 'Each ticket number must be unique.']);
+        }
+
         // Validate range
         foreach ($numbers as $num) {
             $val = (int)$num;
@@ -102,26 +111,34 @@ class SocialGamingController extends Controller
             ]);
         }
 
-        // Deduct entry fee
-        $user->decrement('balance', $game->entry_fee);
-        \VanguardLTE\Services\AffiliateService::recordWagerCommission($user, $game->entry_fee, 'lotto');
-        \VanguardLTE\Services\VipService::recordWagerXpAndRakeback($user, $game->entry_fee, 5.0);
-
         sort($numbers);
-
-        // Create Ticket
-        $ticket = LottoTicket::create([
-            'lotto_game_id' => $game->id,
-            'user_id' => $user->id,
-            'numbers_json' => $numbers,
-            'draw_date' => now()->format('Y-m-d'),
-            'status' => 'pending',
-        ]);
+        try {
+            $ticket = DB::transaction(function () use ($user, $game, $numbers) {
+                $freshUser = User::whereKey($user->id)->lockForUpdate()->firstOrFail();
+                if ($freshUser->balance < $game->entry_fee) throw new \RuntimeException('Insufficient Cedar Coins.');
+                $round = app(LottoDrawService::class)->nextRound($game);
+                $freshUser->decrement('balance', $game->entry_fee);
+                $ticket = LottoTicket::create([
+                    'lotto_game_id' => $game->id,
+                    'lotto_draw_id' => $round->id,
+                    'user_id' => $freshUser->id,
+                    'numbers_json' => $numbers,
+                    'draw_date' => $round->scheduled_for->toDateString(),
+                    'status' => 'pending',
+                ]);
+                \VanguardLTE\Services\AffiliateService::recordWagerCommission($freshUser, $game->entry_fee, 'lotto');
+                \VanguardLTE\Services\VipService::recordWagerXpAndRakeback($freshUser, $game->entry_fee, 5.0);
+                return $ticket->load('draw');
+            });
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+        }
 
         return response()->json([
             'success' => true,
-            'message' => "Ticket Registered for '{$game->title}'! Good luck!",
+            'message' => "Ticket registered for Round {$ticket->draw->round_code}. Good luck!",
             'ticket_id' => $ticket->id,
+            'round_id' => $ticket->draw->round_code,
             'numbers' => $numbers,
             'new_balance' => number_format($user->balance, 0)
         ]);

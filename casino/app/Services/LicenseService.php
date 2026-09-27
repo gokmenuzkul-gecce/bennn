@@ -31,7 +31,7 @@ class LicenseService
         $key = (string)(function_exists('settings') ? settings('license_key', '') : '');
         $key = trim($key !== '' ? $key : (string)env('LICENSE_KEY', ''));
         $domain = self::licensedDomain();
-        $cacheKey = self::CACHE_KEY . ':v2:' . hash('sha256', $domain . '|' . $key);
+        $cacheKey = self::CACHE_KEY . ':v3:' . hash('sha256', self::runtimeProfile() . '|' . $domain . '|' . $key);
         if ($key === '' || $domain === '') {
             return self::denied($key, $domain, 'License key and a valid APP_URL are required.');
         }
@@ -47,9 +47,9 @@ class LicenseService
             Cache::forget($cacheKey);
         }
         try {
-            $response = Http::timeout(6)->withOptions(['allow_redirects' => false])->withHeaders([
+            $response = Http::timeout(6)->withOptions((array) config('licensing.hub_http_options', ['allow_redirects' => false]))->withHeaders([
                 'X-License-Key' => $key, 'X-Domain' => $domain, 'Accept' => 'application/json',
-            ])->post(self::DEFAULT_SERVER . '/license/check', [
+            ])->post(rtrim((string) config('licensing.hub_url', self::DEFAULT_SERVER), '/') . '/license/check', [
                 'license_key' => $key, 'domain' => $domain, 'app_version' => '2.5.0', 'certificate_version' => 1,
             ]);
             if ($response->successful()) {
@@ -94,7 +94,13 @@ class LicenseService
 
     protected static function getCertPath(): string
     {
-        return storage_path('framework/license.cert');
+        $suffix = self::runtimeProfile() === 'local' ? '.local' : '';
+        return storage_path('framework/license' . $suffix . '.cert');
+    }
+
+    private static function runtimeProfile(): string
+    {
+        return config('licensing.runtime_profile', 'live') === 'local' ? 'local' : 'live';
     }
 
     protected static function saveLocalCert(array $envelope): void
@@ -153,9 +159,21 @@ class LicenseService
         if (!preg_match('/^[A-Za-z0-9_]+$/D', $game)) { return false; }
         $status = self::getStatus();
         $features = $status['features'] ?? [];
+        // The authority normalizes its signed "*" game grant to null. That is
+        // an explicit suite-wide game entitlement, not a missing entitlement.
+        $unrestrictedGames = !array_key_exists('games', $status) || $status['games'] === null;
+        $licensedGames = is_array($status['games'] ?? null) ? $status['games'] : [];
+        // First-party remakes are licensed as local runtime content for the
+        // signed domain; they do not require a new per-title certificate.
+        $isCedarRemake = class_exists(CedarGameRegistry::class) && CedarGameRegistry::isRegisteredSlot($game);
+        $gameAllowed = $unrestrictedGames || in_array($game, $licensedGames, true) || $isCedarRemake;
+        $runtimeAllowed = $unrestrictedGames
+            || in_array('all', $features, true)
+            || in_array('local_slots', $features, true)
+            || in_array('full_pack', $features, true);
         return ($status['status'] ?? '') === 'active'
-            && (!isset($status['games']) || in_array($game, $status['games'], true))
-            && (in_array('all', $features, true) || in_array('local_slots', $features, true) || in_array('full_pack', $features, true));
+            && $gameAllowed
+            && $runtimeAllowed;
     }
 
     /**
@@ -281,7 +299,14 @@ class LicenseService
      */
     public static function canUseCdnGames(): bool
     {
-        return self::isLicensed() && self::hasFeature('cdn_games');
+        $status = self::getStatus();
+        $features = $status['features'] ?? [];
+        $unrestrictedGames = !array_key_exists('games', $status) || $status['games'] === null;
+
+        return ($status['status'] ?? '') === 'active'
+            && ($unrestrictedGames
+                || in_array('all', $features, true)
+                || in_array('cdn_games', $features, true));
     }
 
     /**
@@ -298,6 +323,14 @@ class LicenseService
     public static function canUseCentralOdds(): bool
     {
         return self::isLicensed() && self::hasFeature('sportsbook_hub');
+    }
+
+    public static function canUseCentralCryptoPrices(): bool
+    {
+        // Crypto prices are part of the base PROMEX suite.  An active signed
+        // installation is the entitlement; feature flags must not strand an
+        // older otherwise-valid certificate when a new suite module is added.
+        return self::isLicensed();
     }
 
 }

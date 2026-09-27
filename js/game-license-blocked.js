@@ -6,6 +6,7 @@
 
     const isAdmin = root.dataset.admin === '1';
     const game = root.dataset.game || 'This game';
+    const adminMessage = root.dataset.adminMessage || '';
 
     const style = document.createElement('style');
     style.textContent = [
@@ -38,7 +39,7 @@
 
     const message = document.createElement('p');
     message.textContent = isAdmin
-        ? game + ' could not start because this installation does not currently have an active game entitlement.'
+        ? (adminMessage || game + ' could not start because this installation does not currently have an active game entitlement.')
         : game + ' is temporarily unavailable. Please return to the lobby or contact the platform operator.';
 
     const actions = document.createElement('div');
@@ -66,7 +67,9 @@
     const note = document.createElement('p');
     note.className = 'license-note';
     note.textContent = isAdmin
-        ? 'No provider game code was loaded. Reactivate the license, then reopen the game.'
+        ? (adminMessage
+            ? 'No provider game code was loaded. Complete the required Game Control step, then reopen the game.'
+            : 'No provider game code was loaded. Reactivate the license, then reopen the game.')
         : 'Your balance and game history were not affected.';
 
     card.append(mark, heading, message, actions, note);

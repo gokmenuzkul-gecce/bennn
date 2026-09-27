@@ -6,6 +6,8 @@ namespace VanguardLTE\Console
     {
         protected $commands = [
             Commands\SettleCedarCrash::class,
+            Commands\ProcessCryptoRounds::class,
+            Commands\ProcessStockRounds::class,
             Commands\Sports\SyncLeagues::class,
             Commands\Sports\SyncGames::class,
             Commands\Sports\SyncOdds::class,
@@ -39,7 +41,6 @@ namespace VanguardLTE\Console
             $schedule->call(new Schedules\Synchronization($_obf_0D2F242F2D052B0938193F2D0D2F192F27160616153332))->everyMinute();
             $schedule->call(new Schedules\QuickShops($_obf_0D2F242F2D052B0938193F2D0D2F192F27160616153332))->everyMinute();
             $schedule->call(new Schedules\HierarchyUsersCache($_obf_0D2F242F2D052B0938193F2D0D2F192F27160616153332))->everyFiveMinutes();
-            $schedule->call(new Schedules\TreeCache($_obf_0D2F242F2D052B0938193F2D0D2F192F27160616153332))->everyFiveMinutes();
             $schedule->call(new Schedules\HotGamesCache($_obf_0D2F242F2D052B0938193F2D0D2F192F27160616153332))->everyThreeHours();
             $schedule->call(new Schedules\BankDecrease($_obf_0D2F242F2D052B0938193F2D0D2F192F27160616153332))->everyThreeHours();
             $schedule->call(new Schedules\Notifications($_obf_0D2F242F2D052B0938193F2D0D2F192F27160616153332))->everyMinute();
@@ -61,8 +62,12 @@ namespace VanguardLTE\Console
             $schedule->command('sports:sync-odds')->everyThirtyMinutes();
             $schedule->command('sports:settle-matches')->everyFiveMinutes();
 
-            // Automated Cedar Lotto Draw Runner (Daily at Midnight 00:00)
-            $schedule->command('casino:draw-lotto')->dailyAt('00:00');
+            // Each round carries its own hourly/daily UTC time; settle only due event IDs.
+            $schedule->command('casino:draw-lotto')->everyMinute()->withoutOverlapping();
+            // One licensed Hub-cache read per minute; all client reads stay local/CDN-cached.
+            $schedule->command('crypto:process-rounds')->everyMinute()->withoutOverlapping();
+            // One signed hourly-epoch Hub cache read; customer browsers use only /stocks-trading/cache.json.
+            $schedule->command('stocks:process-rounds')->everyMinute()->withoutOverlapping();
         }
 
         protected function commands()

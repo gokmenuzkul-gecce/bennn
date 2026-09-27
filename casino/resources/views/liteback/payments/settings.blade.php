@@ -155,9 +155,10 @@
             <!-- XTOPAY CONFIGURATION -->
             <div class="card card-success card-outline mb-4">
                 <div class="card-header">
-                    <h3 class="card-title"><i class="fas fa-coins text-success mr-2"></i> XtoPay Crypto Integration</h3>
+                    <h3 class="card-title"><i class="fas fa-coins text-success mr-2"></i> XtoPay — Instant No-KYC USDT Gateway</h3>
                 </div>
                 <div class="card-body">
+                    <p class="text-muted">Register at <a href="https://xto.377.live/" target="_blank" rel="noopener noreferrer">xto.377.live</a> to get your site-name identifier instantly.</p>
                     <div class="form-group row">
                         <label class="col-sm-3 col-form-label">Enable XtoPay</label>
                         <div class="col-sm-9">
@@ -168,9 +169,10 @@
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label class="col-sm-3 col-form-label">Website Name</label>
+                        <label class="col-sm-3 col-form-label">Site-Name Identifier</label>
                         <div class="col-sm-9">
                             <input type="text" name="payment_xto_website_name" class="form-control" value="{{ settings('payment_xto_website_name', config('payments.drivers.xtopay.website_name')) }}" placeholder="e.g. one">
+                            <small class="text-muted">Use the site-name identifier issued when you register with XtoPay.</small>
                         </div>
                     </div>
                     <div class="form-group row">

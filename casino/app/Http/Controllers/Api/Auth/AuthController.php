@@ -12,24 +12,12 @@ namespace VanguardLTE\Http\Controllers\Api\Auth
         }
         public function login(\VanguardLTE\Http\Requests\Auth\LoginRequest $request)
         {
-            $credentials = $request->getCredentials();
-            if( settings('use_email') ) 
-            {
-                if( filter_var($credentials['username'], FILTER_VALIDATE_EMAIL) ) 
-                {
-                    $credentials = [
-                        'email' => $credentials['username'], 
-                        'password' => $credentials['password']
-                    ];
-                }
-                else
-                {
-                    $credentials = [
-                        'username' => $credentials['username'], 
-                        'password' => $credentials['password']
-                    ];
-                }
+            if ((string) settings('enable_password_login', '1') !== '1') {
+                return response()->json(['message' => 'Username, email, and password sign-in is disabled for this store.'], 403);
             }
+
+            $credentials = $request->getCredentials();
+            $credentials = \VanguardLTE\Services\LoginCredentialResolver::resolve($credentials['username'], $credentials['password']);
             try
             {
                 if( !($token = JWTAuth::attempt($credentials)) ) 

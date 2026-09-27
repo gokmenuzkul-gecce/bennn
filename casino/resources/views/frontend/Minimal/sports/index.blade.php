@@ -49,7 +49,7 @@
                     <span class="text-secondary font-bold uppercase tracking-wider text-[11px]">{{ $m->sport_title ?? 'Sports Match' }}</span>
                     <span class="text-on-surface-muted flex items-center gap-1.5 bg-white/[0.04] px-2.5 py-1 rounded-lg border border-white/[0.06]">
                         <span class="material-symbols-outlined text-xs text-primary">schedule</span>
-                        <time class="local-time" datetime="{{ $m->start_time->toIso8601String() }}">{{ $m->start_time->format('H:i') }}</time>
+                        <time class="local-time" data-format="full" datetime="{{ $m->start_time->toIso8601String() }}">{{ $m->start_time->format('M d, Y · h:i A') }}</time>
                     </span>
                 </div>
 

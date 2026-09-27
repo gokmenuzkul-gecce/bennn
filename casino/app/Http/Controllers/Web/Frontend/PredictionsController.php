@@ -27,6 +27,10 @@ class PredictionsController extends Controller
     {
         $user = Auth::user();
         $selectedCategory = $request->input('category', 'all');
+        $selectedView = $request->input('view', 'markets');
+        if (!in_array($selectedView, ['markets', 'mine'], true)) {
+            $selectedView = 'markets';
+        }
 
         $query = PredictionMarket::where('status', 'active')
             ->where('end_date', '>', now());
@@ -40,12 +44,13 @@ class PredictionsController extends Controller
         $userVotes = [];
         if ($user) {
             $userVotes = PredictionVote::where('user_id', $user->id)
+                ->with('market')
                 ->orderBy('id', 'desc')
                 ->take(10)
                 ->get();
         }
 
-        return view('frontend.Minimal.predictions.index', compact('user', 'activeMarkets', 'selectedCategory', 'userVotes'));
+        return view('frontend.Minimal.predictions.index', compact('user', 'activeMarkets', 'selectedCategory', 'selectedView', 'userVotes'));
     }
 
     /**

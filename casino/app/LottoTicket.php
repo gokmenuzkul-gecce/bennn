@@ -10,6 +10,7 @@ class LottoTicket extends Model
 
     protected $fillable = [
         'lotto_game_id',
+        'lotto_draw_id',
         'user_id',
         'numbers_json',
         'draw_date',
@@ -33,5 +34,10 @@ class LottoTicket extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function draw()
+    {
+        return $this->belongsTo(LottoDraw::class, 'lotto_draw_id');
     }
 }

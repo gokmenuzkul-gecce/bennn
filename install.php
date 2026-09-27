@@ -1,6 +1,6 @@
 <?php
 /**
- * Promex Gaming Suite v2.0 - Turnkey Web Installer
+ * Promex Gaming Suite v2.0.0 - Turnkey Web Installer
  * Easy 1-click database initialization, admin setup, and environment config.
  */
 
@@ -22,6 +22,36 @@ $message = '';
 $messageType = '';
 $isInstalled = file_exists($lockFile);
 $cleanupResult = null;
+
+/** Boot the packaged application only after its environment and database exist. */
+function promexInstallerLaravel(string $root): array
+{
+    static $booted = null;
+    if (is_array($booted)) {
+        return $booted;
+    }
+
+    $autoload = $root . '/casino/vendor/autoload.php';
+    $bootstrap = $root . '/casino/bootstrap/app.php';
+    if (!is_file($autoload) || !is_file($bootstrap)) {
+        throw new RuntimeException('The packaged Laravel runtime is incomplete. Re-upload the clean distribution.');
+    }
+
+    require_once $autoload;
+    $previousDirectory = getcwd();
+    try {
+        chdir($root . '/casino');
+        $app = require $bootstrap;
+        $kernel = $app->make(\Illuminate\Contracts\Console\Kernel::class);
+        $kernel->bootstrap();
+        return $booted = [$app, $kernel];
+    } finally {
+        if (is_string($previousDirectory)) {
+            chdir($previousDirectory);
+        }
+    }
+}
+
 $isPost = ($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST';
 if ($isPost && (!is_string($_POST['installer_csrf'] ?? null)
     || !hash_equals($_SESSION['installer_csrf'], $_POST['installer_csrf']))) {
@@ -50,8 +80,15 @@ foreach ($requiredDirs as $dir) {
 }
 
 // Requirements Check
+require_once __DIR__ . '/casino/vendor/autoload.php';
+$cliOverride = getenv('PROMEX_PHP_BINARY') ?: null;
+if (!$cliOverride && is_file($envFile)) {
+    try { $cliOverride = \Dotenv\Dotenv::parse(file_get_contents($envFile))['PROMEX_PHP_BINARY'] ?? null; }
+    catch (\Throwable $e) { /* Environment is rewritten after successful installation. */ }
+}
+$cliCheck = \VanguardLTE\Support\InstallerPhpCli::check(__DIR__, $cliOverride);
 $requirements = [
-    'PHP >= 8.2' => version_compare(PHP_VERSION, '8.2.0', '>='),
+    'PHP >= 8.3' => version_compare(PHP_VERSION, '8.3.0', '>='),
     'PDO MySQL' => extension_loaded('pdo_mysql'),
     'cURL Extension' => extension_loaded('curl'),
     'OpenSSL Extension' => extension_loaded('openssl'),
@@ -74,17 +111,14 @@ if ($isPost && !$isInstalled && $allRequirementsMet) {
     
     $appUrl = rtrim($_POST['app_url'] ?? (($_SERVER['HTTPS'] ?? 'off') === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'], '/');
     $appName = trim($_POST['app_name'] ?? 'Promex Gaming Suite');
+    $licenseKey = trim($_POST['license_key'] ?? '');
 
-    $adminUser = trim($_POST['admin_user'] ?? 'admin');
-    $adminEmail = trim($_POST['admin_email'] ?? 'admin@admin.com');
-    $adminPass = $_POST['admin_pass'] ?? '';
-    $adminPassConfirm = $_POST['admin_pass_confirm'] ?? '';
+    $adminUser = 'admin';
+    $adminEmail = 'admin@admin.com';
+    $adminPass = '123456';
 
-    if (empty($adminPass) || strlen($adminPass) < 6) {
-        $message = "Admin password must be at least 6 characters long.";
-        $messageType = "error";
-    } elseif ($adminPass !== $adminPassConfirm) {
-        $message = "Admin passwords do not match.";
+    if (strlen($licenseKey) > 255) {
+        $message = "Enter the Promex license issued for this installation.";
         $messageType = "error";
     } else {
         try {
@@ -144,6 +178,21 @@ if ($isPost && !$isInstalled && $allRequirementsMet) {
 
             // Update App Name in Settings
             $pdo->prepare("UPDATE `w_settings` SET `value` = ? WHERE `key` = 'app_name'")->execute([$appName]);
+            $licenseExists = $pdo->query("SELECT COUNT(*) FROM `w_settings` WHERE `key` = 'license_key'")->fetchColumn();
+            if ((int) $licenseExists > 0) {
+                $pdo->prepare("UPDATE `w_settings` SET `value` = ? WHERE `key` = 'license_key'")->execute([$licenseKey]);
+            } else {
+                $pdo->prepare("INSERT INTO `w_settings` (`key`, `value`) VALUES ('license_key', ?)")->execute([$licenseKey]);
+            }
+            foreach (['whatsapp_delivery_provider' => 'promex', 'email_delivery_provider' => 'promex'] as $key => $value) {
+                $exists = $pdo->prepare("SELECT COUNT(*) FROM `w_settings` WHERE `key` = ?");
+                $exists->execute([$key]);
+                if ((int) $exists->fetchColumn() > 0) {
+                    $pdo->prepare("UPDATE `w_settings` SET `value` = ? WHERE `key` = ?")->execute([$value, $key]);
+                } else {
+                    $pdo->prepare("INSERT INTO `w_settings` (`key`, `value`) VALUES (?, ?)")->execute([$key, $value]);
+                }
+            }
 
             // 6. Generate APP_KEY
             $generatedAppKey = 'base64:' . base64_encode(random_bytes(32));
@@ -155,6 +204,7 @@ if ($isPost && !$isInstalled && $allRequirementsMet) {
             $replacements = [
                 'APP_NAME' => $appName,
                 'APP_ENV' => 'production',
+                'PROMEX_PHP_BINARY' => $cliCheck['ok'] ? $cliCheck['binary'] : ($cliOverride ?: 'php'),
                 'APP_KEY' => $generatedAppKey,
                 'APP_DEBUG' => 'false',
                 'APP_URL' => $appUrl,
@@ -168,6 +218,13 @@ if ($isPost && !$isInstalled && $allRequirementsMet) {
                 'CACHE_DRIVER' => 'database',
                 'SESSION_DRIVER' => 'database',
                 'QUEUE_DRIVER' => 'database',
+                'WHATSAPP_MODE' => 'promex',
+                'PROMEX_HUB_URL' => 'https://clients.377.live/api/service',
+                'PROMEX_CEDAR_PUBLIC_ORIGIN' => 'https://clients.377.live',
+                'PROMEX_HUB_VERSION_URL' => 'https://clients.377.live/api/service/version',
+                'PROMEX_RUNTIME_PROFILE' => 'live',
+                'PROMEX_LOCAL_PUBLIC_KEY_FILE' => '',
+                'PROMEX_LOCAL_CA_FILE' => '',
             ];
 
             foreach ($replacements as $k => $v) {
@@ -187,15 +244,33 @@ if ($isPost && !$isInstalled && $allRequirementsMet) {
                 }
             }
 
-            // 8. Create Lock File
+            // 8. Apply every versioned schema change before activation.
+            [, $console] = promexInstallerLaravel(__DIR__);
+            $migrationStatus = $console->call('migrate', ['--force' => true]);
+            if ($migrationStatus !== 0) {
+                throw new RuntimeException("Database migrations failed:\n" . trim($console->output()));
+            }
+            $pdo->prepare("UPDATE `w_users` SET `must_change_password` = 1, `preferred_login_method` = 'password' WHERE `id` = ?")
+                ->execute([$adminId]);
+
+            // 9. Verify the signed license and bind the protected-service credential.
+            if ($licenseKey !== '') {
+            $licenseStatus = \VanguardLTE\Services\LicenseService::getStatus(true);
+            if (($licenseStatus['status'] ?? '') !== 'active') {
+                throw new RuntimeException('License activation was denied: ' . ($licenseStatus['message'] ?? 'verification failed'));
+            }
+            \VanguardLTE\Services\PromexInstallationService::ensureActivated($licenseKey, $appName);
+            }
+
+            // 10. Create Lock File only after schema and license activation succeed.
             if (file_put_contents($lockFile, "Installed on " . date('Y-m-d H:i:s') . " for " . $appUrl . "\n", LOCK_EX) === false) {
                 throw new Exception('Unable to lock the installation. Check folder permissions.');
             }
             $isInstalled = true;
-            $message = "Installation completed successfully! Your platform is ready.";
+            $message = "Installation completed. Sign in with admin / 123456, then choose a permanent password before continuing.";
             $messageType = "success";
 
-            // 9. Remove installation-only files after configuration and lock are safely written.
+            // 11. Remove installation-only files after configuration and lock are safely written.
             $cleanupResult = \VanguardLTE\Support\InstallerCleanup::run(__DIR__);
 
         } catch (Exception $e) {
@@ -210,7 +285,7 @@ if ($isPost && !$isInstalled && $allRequirementsMet) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Promex Gaming Suite v2.0 - 1-Click Installer</title>
+    <title>Promex Gaming Suite v2.0.0 - 1-Click Installer</title>
     <style>
         :root { --bg: #0f172a; --card: #1e293b; --border: #334155; --text: #f8fafc; --muted: #94a3b8; --accent: #10b981; --primary: #0ea5e9; }
         * { box-sizing: border-box; }
@@ -244,8 +319,8 @@ if ($isPost && !$isInstalled && $allRequirementsMet) {
 
 <div class="card">
     <div class="logo-wrap">
-        <span class="badge">Laravel 12 • Turnkey Edition</span>
-        <h1>Promex Gaming Suite v2.0</h1>
+        <span class="badge">Laravel 13 • Turnkey Edition</span>
+        <h1>Promex Gaming Suite v2.0.0</h1>
         <p>1-Click Turnkey Installation & Setup Wizard</p>
     </div>
 
@@ -303,6 +378,13 @@ if ($isPost && !$isInstalled && $allRequirementsMet) {
         </div>
 
         <form method="POST" action="">
+            <div class="check-item" style="display:block; margin-bottom:16px;">
+                <strong>PHP CLI — optional for managed updates</strong>
+                <p><?= $cliCheck['ok'] ? '✓ Ready for managed updates.' : '⚠ Managed updates are not ready. You can still install and use the application.' ?></p>
+                <p>The managed updater uses PHP command-line processes for patch migrations, cache cleanup and application checks. This is separate from your website PHP. This check tests its version, packaged dependencies and extensions; it does not block installation.</p>
+                <p>If CLI is unavailable, download releases and apply updates manually following their file and database instructions, or ask your host to configure PHP CLI to enable managed updates. Manual updates do not use a ZIP upload in this panel.</p>
+                <p><?= htmlspecialchars($cliCheck['message'], ENT_QUOTES, 'UTF-8') ?> When verified, the executable is saved for the updater; check it again if your host changes PHP.</p>
+            </div>
             <input type="hidden" name="installer_csrf" value="<?= htmlspecialchars($_SESSION['installer_csrf'], ENT_QUOTES, 'UTF-8') ?>">
             <!-- Application Config -->
             <div class="section-title"><span>🌐</span> Site Settings</div>
@@ -316,6 +398,15 @@ if ($isPost && !$isInstalled && $allRequirementsMet) {
                     <input type="text" name="app_url" value="<?= htmlspecialchars($_POST['app_url'] ?? ((($_SERVER['HTTPS'] ?? 'off') === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'])) ?>" required>
                 </div>
             </div>
+
+            <div class="section-title"><span>🔐</span> Promex License</div>
+            <div class="form-group">
+                <label>License Key</label>
+                    <input type="password" name="license_key" value="<?= htmlspecialchars($_POST['license_key'] ?? '', ENT_QUOTES, 'UTF-8') ?>" autocomplete="off" maxlength="255" placeholder="Optional — activate protected services now or later">
+            </div>
+            <p style="color: var(--muted); font-size: 12px; margin-top: -6px;">
+                The installer verifies the signed license and activates protected Cedar/API services for this domain. Legacy Compatibility remains off until you explicitly enable and attest local content in Liteback.
+            </p>
 
             <!-- Database Config -->
             <div class="section-title"><span>🗄️</span> MySQL Database Credentials</div>
@@ -345,26 +436,11 @@ if ($isPost && !$isInstalled && $allRequirementsMet) {
             </div>
 
             <!-- Admin Account -->
-            <div class="section-title"><span>👤</span> Create Administrator Account</div>
-            <div class="grid-2">
-                <div class="form-group">
-                    <label>Admin Username</label>
-                    <input type="text" name="admin_user" value="<?= htmlspecialchars($_POST['admin_user'] ?? 'admin') ?>" required>
-                </div>
-                <div class="form-group">
-                    <label>Admin Email</label>
-                    <input type="email" name="admin_email" value="<?= htmlspecialchars($_POST['admin_email'] ?? 'admin@admin.com') ?>" required>
-                </div>
-            </div>
-            <div class="grid-2">
-                <div class="form-group">
-                    <label>Password (min 6 chars)</label>
-                    <input type="password" name="admin_pass" required minlength="6" placeholder="Choose a strong password">
-                </div>
-                <div class="form-group">
-                    <label>Confirm Password</label>
-                    <input type="password" name="admin_pass_confirm" required minlength="6" placeholder="Re-enter password">
-                </div>
+            <div class="section-title"><span>👤</span> First Administrator Login</div>
+            <div class="alert" style="background:#172554; border:1px solid #1d4ed8; color:#dbeafe;">
+                Username: <strong>admin</strong><br>
+                Temporary password: <strong>123456</strong><br>
+                You must replace this password immediately after the first login.
             </div>
 
             <button type="submit" class="btn-submit" <?= !$allRequirementsMet ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : '' ?>>

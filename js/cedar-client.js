@@ -21,10 +21,33 @@
     };
     async function verify(p) {
         if (!crypto.subtle) throw new Error('Open this site over HTTPS to verify rounds in your browser.');
-        if (p.math_version !== 'cedar-v2') throw new Error('Unsupported math version.');
+        if (!['cedar-v2', 'cedar-slot-v1'].includes(p.math_version)) throw new Error('Unsupported math version.');
         if (await sha(p.server_seed) !== p.server_seed_hash) throw new Error('Seed hash mismatch.');
         const o = p.outcome;
         let valid = false;
+        if (p.math_version === 'cedar-slot-v1') {
+            let cursor = 0;
+            const columns = [];
+            for (const weights of p.parameters.reel_weights) {
+                const entries = Object.entries(weights).filter(([, weight]) => Number(weight) > 0);
+                const total = entries.reduce((sum, [, weight]) => sum + Number(weight), 0);
+                const column = [];
+                for (let row = 0; row < p.parameters.rows; row++) {
+                    const pick = await sample(p, total, cursor++) + 1;
+                    let mark = 0;
+                    for (const [symbol, weight] of entries) {
+                        mark += Number(weight);
+                        if (pick <= mark) { column.push(String(symbol)); break; }
+                    }
+                }
+                columns.push(column);
+            }
+            const generated = [];
+            for (let row = 0; row < p.parameters.rows; row++) for (const column of columns) generated.push(column[row]);
+            valid = JSON.stringify(generated) === JSON.stringify(o.grid);
+            if (!valid) throw new Error('Outcome does not match the seed.');
+            return 'Seed and slot grid verified locally. The public paytable and paylines are included in this record.';
+        }
         if (p.game === 'CedarDice') valid = await sample(p, 10000) === Math.round(Number(o.roll) * 100);
         if (p.game === 'CedarWheel') valid = await sample(p, p.parameters.segments) === o.winning_index;
         if (p.game === 'CedarPlinko') {
@@ -79,7 +102,7 @@
 
     window.fetch = async function (input, options = {}) {
         const url = typeof input === 'string' ? new URL(input, location.href) : null;
-        const match = url && url.origin === location.origin && url.pathname.match(/^\/game\/(CedarDice|CedarWheel|CedarPlinko|CedarMines|CedarCrash|RoyalSteps|CedarLimbo|CedarTower|CedarKeno|CedarCoinFlip|CedarGoal|CedarTreasure|CedarHiLo|CedarBlackjack)\/server$/);
+        const match = url && url.origin === location.origin && url.pathname.match(/^\/game\/(Cedar[A-Za-z0-9_]+|RoyalSteps)\/server$/);
         if (!match || typeof options.body !== 'string') return nativeFetch(input, options);
         const game = match[1];
         let body;
@@ -131,7 +154,8 @@
     };
 
     document.addEventListener('DOMContentLoaded', () => {
-        const game = location.pathname.match(/(?:Cedar(?:Dice|Wheel|Plinko|Mines|Crash|Limbo|Tower|Keno|CoinFlip|Goal|Treasure|HiLo|Blackjack)|RoyalSteps)/)?.[0];
+        if (document.getElementById('arcade-config')) return; // Arcade owns its receipt UI.
+        const game = location.pathname.match(/(?:Cedar[A-Za-z0-9_]+|RoyalSteps)/)?.[0];
         if (!game) return;
         try { lastProof = JSON.parse(sessionStorage.getItem(`cedar-proof-${game}`)) || lastProof; } catch (_) {}
         const panel = document.createElement('details');

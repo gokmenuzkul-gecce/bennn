@@ -14,6 +14,8 @@ namespace VanguardLTE
         ];
         protected $fillable = [
             'password', 
+            'must_change_password',
+            'preferred_login_method',
             'email', 
             'username', 
             'first_name',
@@ -81,6 +83,11 @@ namespace VanguardLTE
         protected $hidden = [
             'password', 
             'remember_token'
+        ];
+        protected $casts = [
+            'must_change_password' => 'boolean',
+            'phone_verified_at' => 'datetime',
+            'email_verified_at' => 'datetime',
         ];
         public static function boot()
         {

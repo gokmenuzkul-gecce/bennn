@@ -4,7 +4,8 @@
 /public/storage
 /storage/*.key
 /storage/framework/*.cert
-/storage/framework/license.cert
+/storage/framework/license*.cert
+/storage/framework/promex.installation*
 /vendor
 .env
 .env.backup

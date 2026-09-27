@@ -1,8 +1,13 @@
 <!-- Auth Modal (Login / WhatsApp OTP) -->
+@php
+    $whatsAppLoginEnabled = (string) settings('enable_whatsapp_otp', '1') === '1';
+    $passwordLoginEnabled = (string) settings('enable_password_login', '1') === '1';
+@endphp
 <div id="modal-login" class="modal">
     <div class="modal-content glass-panel border border-white/10 shadow-2xl">
         <button type="button" class="close-modal" aria-label="Close">&times;</button>
         
+        @if($whatsAppLoginEnabled && $passwordLoginEnabled)
         <!-- Auth Method Tabs -->
         <div class="flex gap-2 mb-6 border-b border-white/[0.08] pb-3">
             <button type="button" id="tab-whatsapp" class="flex-1 py-2.5 rounded-xl text-xs font-bold bg-primary text-white uppercase tracking-wider shadow-sm transition-all flex items-center justify-center gap-1.5">
@@ -14,7 +19,9 @@
                 <span>Standard Login</span>
             </button>
         </div>
+        @endif
 
+        @if($whatsAppLoginEnabled)
         <!-- WhatsApp OTP Form -->
         <div id="form-container-whatsapp" class="space-y-4">
             <div>
@@ -53,9 +60,11 @@
 
             <div id="otp-status-msg" class="text-xs font-bold text-center mt-2 min-h-[18px]"></div>
         </div>
+        @endif
 
+        @if($passwordLoginEnabled)
         <!-- Standard Credentials Form -->
-        <div id="form-container-standard" class="space-y-4 hidden">
+        <div id="form-container-standard" class="space-y-4 {{ $whatsAppLoginEnabled ? 'hidden' : '' }}">
             <div>
                 <h2 class="text-lg font-bold text-white tracking-tight">Member Login</h2>
                 <p class="text-xs text-on-surface-muted mt-1">Access your account and wallet using standard credentials.</p>
@@ -63,8 +72,8 @@
             <form id="login-form" action="{{ route('frontend.auth.login.post') }}" method="POST" class="space-y-3.5">
                 @csrf
                 <div class="form-group">
-                    <label for="login-username">Username or Email</label>
-                    <input type="text" id="login-username" name="username" required placeholder="Enter username">
+                    <label for="login-username">Username, Email, or Phone</label>
+                    <input type="text" id="login-username" name="username" required placeholder="Enter username, email, or phone">
                 </div>
                 <div class="form-group">
                     <label for="login-password">Password</label>
@@ -77,6 +86,7 @@
                 Need an account? <a href="#" class="text-primary open-modal font-bold hover:underline" data-target="modal-register">Register Free</a>
             </p>
         </div>
+        @endif
     </div>
 </div>
 
@@ -217,6 +227,43 @@
                         <label for="prof-email">Email Address</label>
                         <input type="email" id="prof-email" name="email" value="{{ $u->email }}" placeholder="player@domain.com">
                     </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="form-group">
+                        <label for="prof-phone">Mobile / WhatsApp Number</label>
+                        <input type="tel" id="prof-phone" name="phone" value="{{ $u->phone }}" placeholder="+96170123456">
+                        <span class="text-[10px] {{ $u->phone_verified_at ? 'text-primary' : 'text-on-surface-muted' }}">
+                            {{ $u->phone_verified_at ? 'Verified' : 'Changing the number requires your password and a new OTP.' }}
+                        </span>
+                    </div>
+                    <div class="form-group">
+                        <label for="prof-login-method">Preferred Sign-In</label>
+                        <select id="prof-login-method" name="preferred_login_method">
+                            @if($whatsAppLoginEnabled)
+                            <option value="phone" {{ ($u->preferred_login_method ?: ($u->phone ? 'phone' : 'password')) === 'phone' ? 'selected' : '' }}>Phone / WhatsApp code (recommended)</option>
+                            @endif
+                            @if($passwordLoginEnabled)
+                            <option value="password" {{ ($u->preferred_login_method ?: ($u->phone ? 'phone' : 'password')) === 'password' ? 'selected' : '' }}>Username, email, or phone + password</option>
+                            @endif
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="form-group">
+                        <label for="prof-new-password">New Password (Optional)</label>
+                        <input type="password" id="prof-new-password" name="new_password" minlength="8" autocomplete="new-password">
+                    </div>
+                    <div class="form-group">
+                        <label for="prof-new-password-confirmation">Confirm New Password</label>
+                        <input type="password" id="prof-new-password-confirmation" name="new_password_confirmation" minlength="8" autocomplete="new-password">
+                    </div>
+                </div>
+
+                <div class="form-group p-3 rounded-xl border border-white/10 bg-black/20">
+                    <label for="prof-current-password">Current Password</label>
+                    <input type="password" id="prof-current-password" name="current_password" autocomplete="current-password" placeholder="Required for email, phone, login method, or password changes">
                 </div>
 
                 <button type="submit" class="w-full bg-secondary hover:bg-secondary-light text-white py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-md shadow-secondary/20">
@@ -779,6 +826,11 @@ document.addEventListener('DOMContentLoaded', function() {
             const email = document.getElementById('prof-email').value;
             const firstName = document.getElementById('prof-firstname').value;
             const lastName = document.getElementById('prof-lastname').value;
+            const phone = document.getElementById('prof-phone').value;
+            const preferredLoginMethod = document.getElementById('prof-login-method').value;
+            const currentPassword = document.getElementById('prof-current-password').value;
+            const newPassword = document.getElementById('prof-new-password').value;
+            const newPasswordConfirmation = document.getElementById('prof-new-password-confirmation').value;
 
             profMsg.className = "text-xs font-bold text-center mt-2 text-secondary";
             profMsg.innerText = "Saving Profile...";
@@ -792,6 +844,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 body: JSON.stringify({
                     username: username,
                     email: email,
+                    phone: phone,
+                    preferred_login_method: preferredLoginMethod,
+                    current_password: currentPassword,
+                    new_password: newPassword,
+                    new_password_confirmation: newPasswordConfirmation,
                     first_name: firstName,
                     last_name: lastName
                 })

@@ -16,14 +16,14 @@ Options -Indexes
     RewriteRule (^\.|/\.) - [F]
 
     # PHP may read these locally; browsers must never access application source or runtime state.
-    RewriteRule ^(?:_access|localscripts|tools|context)(?:/|$) - [F,L,NC]
+    RewriteRule ^(?:_access|localscripts|clients377live|tools|context)(?:/|$) - [F,L,NC]
     RewriteRule ^casino/(?:app|bootstrap|config|database|resources|routes|storage|tests|vendor)(?:/|$) - [F,L,NC]
     RewriteRule ^casino/.*\.php(?:/|$) - [F,L,NC]
     RewriteRule ^(?:casino/)?(?:artisan|composer\.(?:json|lock)|package(?:-lock)?\.json|phpunit\.xml|server\.php)(?:/|$) - [F,L,NC]
 
-    # Existing games request the historical filename. Serve the compiled bridge
-    # without shipping the private mock-websocket source as a public file.
-    RewriteRule ^js/mock-websocket\.js$ js/ws-bridge.js [L,NC]
+    # Existing games keep their historical filename; Promex supplies a plain
+    # JavaScript protocol adapter. Licensing is enforced by Laravel/the Hub.
+    RewriteRule ^js/mock-websocket\.js$ js/promex-legacy-bridge.js [L,NC]
 
     # Pragmatic loaders derive this path from their game URL. Keep their shared
     # operator-logo metadata reachable when the game files are present locally.
@@ -39,25 +39,14 @@ Options -Indexes
     RewriteRule ^install$ install.php [L]
     RewriteRule ^simple-install$ SimpleInstall.php [L]
 
-    # Prefer an existing local game file for development/source builds. Customer
-    # prepacks omit the games library and therefore continue to use the CDN.
     # gs2c loaders sometimes derive a nested provider path even though the
     # package stores the same bootstrap under gs2c/{desktop|mobile}. Remap only
-    # when that exact packaged file exists; otherwise preserve the CDN fallback.
+    # when that exact packaged local file exists. Legacy games are always served
+    # from this operator's own /games directory; they are never CDN-proxied.
     RewriteCond %{DOCUMENT_ROOT}/games/$1/gs2c/$2/$3 -f
     RewriteRule ^games/([^/]+)/gs2c/common/games-html5/games/[^/]+/[^/]+/(desktop|mobile)/(.*)$ games/$1/gs2c/$2/$3 [L]
     RewriteCond %{DOCUMENT_ROOT}/games/$1/gs2c/$2/$3 -f
     RewriteRule ^games/([^/]+)/gs2c/common/games-html5/games/[^/]+/(desktop|mobile)/(.*)$ games/$1/gs2c/$2/$3 [L]
-
-    # Proxy all remaining /games/* requests to Hosted Games CDN.
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteRule ^games/([^/]+)/gs2c/common/games-html5/games/[^/]+/[^/]+/(desktop|mobile)/(.*)$ https://clients.377.live/games/$1/gs2c/$2/$3 [P,L]
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteRule ^games/([^/]+)/gs2c/common/games-html5/games/[^/]+/(desktop|mobile)/(.*)$ https://clients.377.live/games/$1/gs2c/$2/$3 [P,L]
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteRule ^games/(.*)$ https://clients.377.live/games/$1 [P,L]
-
-
 
     # Redirect Trailing Slashes If Not A Folder...
     # ❗ but NEVER touch /games/* (avoid Apache <-> nginx slash ping-pong)
@@ -74,7 +63,7 @@ Options -Indexes
 
 <IfModule mod_headers.c>
     Header set Access-Control-Allow-Origin "*"
-    <FilesMatch "^(?:game-session\.js|promex-html-game\.js|cedar-client\.js|ws-bridge\.(?:js|wasm))$">
+    <FilesMatch "^(?:game-session\.js|promex-html-game\.js|cedar-client\.js|promex-legacy-bridge\.js)$">
         Header set Cache-Control "no-store, max-age=0"
     </FilesMatch>
 </IfModule>

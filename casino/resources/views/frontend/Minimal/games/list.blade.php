@@ -4,6 +4,14 @@
 
 @section('content')
 
+@php
+    $cedarBrand = settings('cedar_display_name', 'CEDAR');
+    $coinLabel = settings('coin_display_name', 'Cedar Coins');
+    $navCedarGames = settings('nav_label_cedar_games', 'CEDAR Games');
+    $navSports = settings('nav_label_sportsbook', 'Battle Odds');
+    $navPredictions = settings('nav_label_predictions', 'Future Vote');
+@endphp
+
 <!-- Hero Feature Banner Carousel -->
 <div class="relative overflow-hidden rounded-2xl md:rounded-3xl bg-gradient-to-r from-[#121826] via-[#162032] to-[#111624] border border-white/[0.08] shadow-2xl p-6 sm:p-8 md:p-10">
     <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
@@ -13,15 +21,15 @@
                 <span class="text-[11px] font-bold text-primary font-mono-jet uppercase tracking-wider">OFFICIAL SOCIAL CASINO</span>
             </div>
             <h1 class="text-2xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight leading-tight">
-                Play 1,000+ Slots & <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">CEDAR Originals</span>
+                Play 1,000+ Slots & <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">{{ $cedarBrand }} Originals</span>
             </h1>
             <p class="text-xs sm:text-sm text-on-surface-muted leading-relaxed">
-                Experience high-energy arcade slots, the thrilling Cedar Space Crash, live sports wagering, and multi-draw jackpots with 100% Free Cedar Coins.
+                Experience high-energy arcade slots, the thrilling {{ $cedarBrand }} Space Crash, live sports wagering, and multi-draw jackpots with 100% Free {{ $coinLabel }}.
             </p>
             <div class="flex flex-wrap items-center gap-3 pt-2">
                 <a href="/categories/cedar_games" class="bg-gradient-to-r from-accent-gold to-accent-amber hover:from-yellow-400 hover:to-accent-gold text-black font-extrabold px-5 py-2.5 rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-accent-gold/25 transition-all no-underline flex items-center gap-2">
                     <span class="material-symbols-outlined text-lg">rocket_launch</span>
-                    <span>Play CEDAR Crash</span>
+                    <span>Play {{ $cedarBrand }} Crash</span>
                 </a>
                 <button type="button" class="open-modal bg-white/[0.06] hover:bg-white/[0.12] text-white border border-white/10 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all" data-target="{{ Auth::check() ? 'modal-profile' : 'modal-login' }}">
                     {{ Auth::check() ? 'Claim Free Refill' : 'Sign In / Register' }}
@@ -31,7 +39,7 @@
 
         <!-- Featured Crash Multiplier Display -->
         <div class="hidden sm:flex flex-col items-center justify-center p-6 rounded-2xl bg-[#0b0e14]/60 border border-white/[0.08] backdrop-blur-md text-center min-w-[200px]">
-            <span class="text-[10px] font-bold text-on-surface-subtle uppercase tracking-widest mb-1">CEDAR CRASH MULTIPLIER</span>
+            <span class="text-[10px] font-bold text-on-surface-subtle uppercase tracking-widest mb-1">{{ $cedarBrand }} CRASH MULTIPLIER</span>
             <span class="font-mono-jet text-4xl font-extrabold text-accent-gold tracking-tighter animate-pulse">48.72x</span>
             <span class="text-[10px] text-primary font-bold mt-1">LAST TOP ROUND</span>
             <a href="/game/CedarCrash" class="mt-3 text-xs font-bold text-white bg-primary hover:bg-primary-dark px-4 py-1.5 rounded-lg no-underline transition-colors uppercase">
@@ -86,14 +94,14 @@
             All Games
         </a>
         <a href="/categories/cedar_games" class="px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap uppercase tracking-wider no-underline {{ request()->is('categories/cedar_games*') ? 'bg-accent-gold text-black shadow-md shadow-accent-gold/25' : 'bg-surface-card text-accent-gold hover:text-yellow-300 border border-accent-gold/20' }}">
-            🚀 CEDAR Games
+            🚀 {{ $navCedarGames }}
         </a>
-        <a href="/categories/cedar_cards" class="px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap uppercase tracking-wider no-underline {{ request()->is('categories/cedar_cards*') ? 'bg-primary text-white shadow-md shadow-primary/25' : 'bg-surface-card text-primary hover:text-primary-light border border-primary/20' }}">
-            ♠ CEDAR Cards
+        <a href="/categories/cedar_remakes" class="px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap uppercase tracking-wider no-underline {{ request()->is('categories/cedar_remakes*') ? 'bg-primary text-white shadow-md shadow-primary/25' : 'bg-surface-card text-primary hover:text-primary-light border border-primary/20' }}">
+            🌲 CEDAR Slots
         </a>
         @if(is_iterable($categories))
             @foreach($categories as $cat)
-                @continue(in_array($cat->href, ['cedar_games', 'cedar_cards'], true))
+                @continue(in_array($cat->href, ['cedar_games', 'cedar_cards', 'cedar_remakes'], true))
                 <a href="{{ route('frontend.game.list.category', $cat->href) }}" class="px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap uppercase tracking-wider no-underline {{ ($category1 ?? '') == $cat->href ? 'bg-primary text-white shadow-md shadow-primary/25' : 'bg-surface-card text-on-surface-muted hover:text-white border border-white/[0.06] hover:border-white/15' }}">
                     {{ $cat->title }}
                 </a>
@@ -107,7 +115,7 @@
             @php($isCedarProvider = str_starts_with($game->name, 'Cedar') || $game->name === 'RoyalSteps')
             <div class="group relative aspect-[3/4] rounded-2xl overflow-hidden bg-[#161c2b] border border-white/[0.07] hover:border-primary/50 shadow-md hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 flex flex-col justify-end">
                 <!-- Cover Image -->
-                <img src="/frontend/Default/ico/{{ $game->name }}.jpg{{ $isCedarProvider ? '?v=cedar-provider-1' : '' }}"
+                <img src="{{ in_array($game->name, \VanguardLTE\Services\CedarArcadeService::GAMES, true) ? rtrim(config('licensing.cedar_public_origin'), '/') . '/cedar/games/' . $game->name . '/cover.png?v=1' : '/frontend/Default/ico/' . $game->name . '.jpg' }}"
                      onerror="this.src='/frontend/Default/ico/DayofDead.jpg'"
                      alt="{{ $game->title }}" 
                      class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
@@ -119,7 +127,7 @@
                 <!-- Game Info & Action -->
                 <div class="relative z-10 p-3 sm:p-4 space-y-1.5">
                     <span class="text-[9px] text-primary font-mono-jet font-bold uppercase tracking-wider block">
-                        {{ $isCedarProvider ? (in_array($game->name, ['CedarHiLo', 'CedarBlackjack'], true) ? 'CEDAR CARDS' : 'CEDAR ORIGINAL') : strtoupper(substr($game->name, -2) === 'AM' ? 'AMATIC' : (substr($game->name, -3) === 'PGD' ? 'PGD' : 'SLOT')) }}
+                        {{ $isCedarProvider ? strtoupper($cedarBrand) . ' ORIGINAL' : strtoupper(substr($game->name, -2) === 'AM' ? 'AMATIC' : (substr($game->name, -3) === 'PGD' ? 'PGD' : 'SLOT')) }}
                     </span>
                     <h4 class="text-xs sm:text-sm font-bold text-white leading-tight truncate" title="{{ $game->title }}">
                         {{ $game->title }}
@@ -152,7 +160,7 @@
                     <span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">sports_soccer</span>
                 </div>
                 <div>
-                    <h3 class="text-base font-bold text-white tracking-tight">Battle Odds Arena</h3>
+                    <h3 class="text-base font-bold text-white tracking-tight">{{ $navSports }} Arena</h3>
                     <span class="text-[11px] text-on-surface-muted">Live Global Match Fixtures</span>
                 </div>
             </div>
@@ -188,7 +196,7 @@
                     <span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">query_stats</span>
                 </div>
                 <div>
-                    <h3 class="text-base font-bold text-white tracking-tight">Future Vote</h3>
+                    <h3 class="text-base font-bold text-white tracking-tight">{{ $navPredictions }}</h3>
                     <span class="text-[11px] text-on-surface-muted">Prediction Markets</span>
                 </div>
             </div>

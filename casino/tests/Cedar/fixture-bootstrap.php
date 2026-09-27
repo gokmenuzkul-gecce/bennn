@@ -51,7 +51,7 @@ $db->schema()->create('users', function (Blueprint $t) {
     foreach (['balance', 'unclaimed_commissions', 'total_affiliate_earnings', 'unclaimed_rakeback', 'total_rakeback_claimed'] as $col) $t->decimal($col, 20, 4)->default(0);
     $t->integer('vip_xp')->default(0); $t->string('vip_level')->default('Bronze'); $t->text('claimed_level_bonuses')->nullable(); $t->timestamps();
 });
-$db->schema()->create('games', function (Blueprint $t) { $t->id(); $t->string('name'); $t->integer('shop_id')->default(1); $t->integer('view')->default(1); });
+$db->schema()->create('games', function (Blueprint $t) { $t->id(); $t->string('name'); $t->string('delivery_mode')->default('LOCAL'); $t->integer('shop_id')->default(1); $t->integer('view')->default(1); });
 $db->schema()->create('stat_game', function (Blueprint $t) {
     $t->id(); $t->integer('user_id'); $t->decimal('balance', 20, 2); $t->decimal('bet', 20, 2); $t->decimal('win', 20, 2);
     $t->string('game'); $t->integer('in_game'); $t->integer('shop_id'); $t->dateTime('date_time');

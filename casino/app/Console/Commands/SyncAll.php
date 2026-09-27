@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Artisan;
 
 class SyncAll extends BaseSportsCommand
 {
-    protected $signature = 'sports:sync:all';
+    protected $signature = 'sports:sync:all {--sports=* : Import only these provider sport keys}';
     protected $description = 'Run full sequence sportsbook synchronization (leagues, games, odds, open, cleanup)';
     protected $jobAlias = 'sync_all';
 
@@ -21,6 +21,13 @@ class SyncAll extends BaseSportsCommand
 
     protected function handleCommand()
     {
+        if ($this->syncService->getProvider() === 'promex') {
+            $this->info('Fetching the licensed aggregate PRE-MATCH feed...');
+            $result = $this->syncService->syncAll((array) $this->option('sports'));
+            $this->info("Imported {$result['fixtures']} fixtures across {$result['sports']} sports. All included sports and leagues are enabled.");
+            return;
+        }
+
         $this->info("Step 1/5: Syncing categories & leagues...");
         $this->syncService->syncSports();
 

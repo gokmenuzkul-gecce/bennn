@@ -36,7 +36,7 @@ class WhatsAppService
      */
     public static function generateOtp(): string
     {
-        return sprintf('%06d', mt_rand(100000, 999999));
+        return (string) random_int(100000, 999999);
     }
 
     /**
@@ -44,62 +44,68 @@ class WhatsAppService
      */
     public function sendOtp(string $phoneE164, string $otp): bool
     {
-        $mode = env('WHATSAPP_MODE', 'devmode'); // 'devmode', 'cloud', 'webhook', 'log'
+        // Backend selection is authoritative, not the retired WHATSAPP_MODE override.
+        $mode = DeliveryGatewaySettings::provider('whatsapp');
 
-        Log::info("[WhatsApp OTP] Sending OTP {$otp} to {$phoneE164} (Mode: {$mode})");
-
-        if ($mode === 'devmode' || $mode === 'log') {
-            // Dev testing mode - OTP logged cleanly without API charges
-            return true;
+        if ($mode === 'devmode') {
+            return $this->isDevelopmentMode();
         }
 
-        if ($mode === 'cloud') {
-            $token = env('WHATSAPP_CLOUD_TOKEN');
-            $phoneId = env('WHATSAPP_PHONE_NUMBER_ID');
-
-            if (!$token || !$phoneId) {
-                Log::error("[WhatsApp OTP] Missing Meta Cloud API token or Phone Number ID in .env");
-                return false;
-            }
-
-            $url = "https://graph.facebook.com/v18.0/{$phoneId}/messages";
-
-            $response = Http::withToken($token)->post($url, [
-                'messaging_product' => 'whatsapp',
-                'recipient_type' => 'individual',
-                'to' => str_replace('+', '', $phoneE164),
-                'type' => 'template',
-                'template' => [
-                    'name' => env('WHATSAPP_TEMPLATE_NAME', 'verification_code'),
-                    'language' => ['code' => 'en_US'],
-                    'components' => [
-                        [
-                            'type' => 'body',
-                            'parameters' => [
-                                ['type' => 'text', 'text' => $otp]
-                            ]
-                        ],
-                        [
-                            'type' => 'button',
-                            'sub_type' => 'url',
-                            'index' => '0',
-                            'parameters' => [
-                                ['type' => 'text', 'text' => $otp]
-                            ]
-                        ]
-                    ]
-                ]
-            ]);
-
-            if ($response->successful()) {
-                Log::info("[WhatsApp OTP] Meta Cloud API Success: " . $response->body());
-                return true;
-            } else {
-                Log::error("[WhatsApp OTP] Meta Cloud API Error: " . $response->body());
-                return false;
-            }
+        if ($mode === 'promex') {
+            return $this->sendPromex($phoneE164, $otp);
         }
 
-        return true;
+        if ($mode === 'custom') {
+            return $this->sendCustom($phoneE164, $otp);
+        }
+
+        return false;
+    }
+
+    public function isDevelopmentMode(): bool
+    {
+        return DeliveryGatewaySettings::provider('whatsapp') === 'devmode'
+            && app()->environment('local', 'testing');
+    }
+
+    private function sendPromex(string $phoneE164, string $otp): bool
+    {
+        try {
+            $path = DeliveryGatewaySettings::PROMEX_WHATSAPP_PATH;
+            $body = json_encode([
+                'phone' => $phoneE164,
+                'code' => $otp,
+                'purpose' => 'login',
+            ], JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
+            $headers = PromexInstallationService::signedHeaders('POST', $path, $body);
+            return Http::withHeaders($headers)
+                ->withOptions((array) config('licensing.hub_http_options', ['allow_redirects' => false]))
+                ->withBody($body, 'application/json')
+                ->timeout(10)
+                ->post(rtrim((string) config('licensing.cedar_public_origin'), '/') . $path)
+                ->successful();
+        } catch (\Throwable $e) {
+            Log::warning('[WhatsApp OTP] Promex delivery failed.', ['type' => get_class($e)]);
+            return false;
+        }
+    }
+
+    private function sendCustom(string $phoneE164, string $otp): bool
+    {
+        $endpoint = DeliveryGatewaySettings::customEndpoint('whatsapp');
+        $token = DeliveryGatewaySettings::secret('whatsapp');
+        if ($endpoint === '' || $token === '') {
+            return false;
+        }
+        try {
+            return Http::withToken($token)->acceptJson()->asJson()->timeout(10)->post($endpoint, [
+                'phone' => $phoneE164,
+                'code' => $otp,
+                'purpose' => 'login',
+            ])->successful();
+        } catch (\Throwable $e) {
+            Log::warning('[WhatsApp OTP] Custom delivery failed.', ['type' => get_class($e)]);
+            return false;
+        }
     }
 }

@@ -6,6 +6,9 @@ namespace VanguardLTE\Http\Controllers\Web\Frontend {
     {
         public function index(\Illuminate\Http\Request $request, $category1 = '', $category2 = '')
         {
+            if ($category1 === 'cedar_cards' && $category2 === '') {
+                return redirect()->route('frontend.game.list.category', ['category1' => 'cedar_games']);
+            }
             if (\Illuminate\Support\Facades\Auth::check() && !auth()->user()->hasRole('user')) {
                 // Admins now use liteback; keep them here.
             }
@@ -63,6 +66,9 @@ namespace VanguardLTE\Http\Controllers\Web\Frontend {
                 } else {
                     $categories = \VanguardLTE\Category::where(['parent' => $cat1->id])->pluck('id')->toArray();
                     $categories[] = $cat1->id;
+                }
+                if ($category1 === 'cedar_games' && $category2 === '') {
+                    $categories = \VanguardLTE\Category::whereIn('href', ['cedar_games', 'cedar_cards'])->pluck('id')->toArray();
                 }
                 if ($frontend == 'Amatic') {
                     $Amatic = \VanguardLTE\Category::where(['title' => 'Amatic'])->first();
@@ -792,6 +798,15 @@ namespace VanguardLTE\Http\Controllers\Web\Frontend {
             $game = $gameObj;
             $is_api = false;
 
+            if ($game->source_type === \VanguardLTE\Services\LegacyCompatibilityService::SOURCE_TYPE) {
+                try {
+                    $externalUrl = url((new \VanguardLTE\Services\LegacyCompatibilityService())->launchPath($game));
+                } catch (\RuntimeException $e) {
+                    return \VanguardLTE\Services\GameLicenseBlockedResponse::make($request, $game->name);
+                }
+                return response()->view('frontend.games.external', compact('game', 'externalUrl'))
+                    ->header('Cache-Control', 'private, no-store');
+            }
 
             if ($game->source_type === 'external_url' && !empty($game->custom_path)) {
                 $externalUrl = $game->custom_path;
@@ -806,6 +821,58 @@ namespace VanguardLTE\Http\Controllers\Web\Frontend {
                     ->view('frontend.games.external', ['game' => $game, 'externalUrl' => $url]);
             }
 
+            if ($game->source_type === \VanguardLTE\Services\CedarGameRegistry::SOURCE_TYPE) {
+                if (($game->delivery_mode ?? \VanguardLTE\Services\PromexGameDeliveryService::LOCAL)
+                    === \VanguardLTE\Services\PromexGameDeliveryService::REMOTE) {
+                    try {
+                        $launch = (new \VanguardLTE\Services\PromexCedarCatalogService())->launch($game->name);
+                    } catch (\RuntimeException $e) {
+                        return \VanguardLTE\Services\GameLicenseBlockedResponse::make($request, $game->name);
+                    }
+                    $remoteOrigin = rtrim((string) config('licensing.cedar_public_origin', 'https://clients.377.live'), '/');
+                    $configuredApp = parse_url((string) config('app.url', ''));
+                    $operatorHost = strtolower(rtrim((string) ($configuredApp['host'] ?? ''), '.'));
+                    if (($configuredApp['scheme'] ?? '') !== 'https'
+                        || $operatorHost !== (string) $launch['operator_domain']) {
+                        return \VanguardLTE\Services\GameLicenseBlockedResponse::make($request, $game->name);
+                    }
+                    $operatorOrigin = 'https://' . $operatorHost
+                        . (isset($configuredApp['port']) ? ':' . (int) $configuredApp['port'] : '');
+                    $launchUrl = str_replace(
+                        '?promex_remote=1',
+                        '?promex_remote=1&operator_origin=' . rawurlencode($operatorOrigin),
+                        $launch['launch_url']
+                    );
+                    return response()->view('frontend.games.promex-remote', compact(
+                        'game', 'launch', 'launchUrl', 'remoteOrigin', 'operatorOrigin'
+                    ))->withHeaders([
+                        'Cache-Control' => 'private, no-store',
+                        'Content-Security-Policy' => "default-src 'self'; frame-src {$remoteOrigin}; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; img-src 'none'; object-src 'none'; base-uri 'none'; frame-ancestors 'self'; form-action 'none'",
+                        'Referrer-Policy' => 'no-referrer',
+                        'X-Content-Type-Options' => 'nosniff',
+                    ]);
+                }
+                $manifest = \VanguardLTE\Services\CedarGameRegistry::manifest($game->name);
+                if (!$manifest) {
+                    abort(404, 'Cedar game manifest is missing or invalid.');
+                }
+
+                // First-party Cedar games run as the licensed route response itself.
+                // Wrapping them in the legacy external-game iframe creates two runtime
+                // signers and can leave the inner game waiting on the wrong session.
+                $entry = \VanguardLTE\Services\CedarGameRegistry::root()
+                    . DIRECTORY_SEPARATOR . $game->name
+                    . DIRECTORY_SEPARATOR . $manifest['entry'];
+                $html = file_get_contents($entry);
+                if ($html === false) {
+                    abort(404, 'Cedar game entry could not be read.');
+                }
+
+                return response($html, 200)
+                    ->header('Content-Type', 'text/html; charset=UTF-8')
+                    ->header('Cache-Control', 'private, no-store');
+            }
+
             if (view()->exists('frontend.games.list.' . $game->name)) {
                 return response()
                     ->view('frontend.games.list.' . $game->name, compact('slot', 'game', 'is_api'));
@@ -815,18 +882,6 @@ namespace VanguardLTE\Http\Controllers\Web\Frontend {
             $url = url('/games/' . $game->name . '/index.html');
             return response()
                 ->view('frontend.games.external', ['game' => $game, 'externalUrl' => $url]);
-        }
-        public function runtimeSession(\Illuminate\Http\Request $request, $game)
-        {
-            if (!\Auth::check()) {
-                return response()->json(['error' => 'authentication_required'], 401);
-            }
-            try {
-                $runtime = \VanguardLTE\Services\GameRuntimeSession::issue($request, (string)$game);
-            } catch (\RuntimeException $e) {
-                return response()->json(['error' => 'license_required'], 403);
-            }
-            return response()->json($runtime)->header('Cache-Control', 'private, no-store');
         }
         public function progress()
         {
@@ -1037,6 +1092,21 @@ namespace VanguardLTE\Http\Controllers\Web\Frontend {
             } */
             if (!\Auth::check()) {
                 return response()->json(['status' => 'error', 'message' => 'Sign in to play.'], 401);
+            }
+            $legacyGame = \VanguardLTE\Game::where('name', (string) $game)->first();
+            $legacyCompatibility = new \VanguardLTE\Services\LegacyCompatibilityService();
+            if ($legacyGame && $legacyGame->source_type === \VanguardLTE\Services\LegacyCompatibilityService::SOURCE_TYPE) {
+                try {
+                    $legacyCompatibility->assertPlayable($legacyGame);
+                } catch (\RuntimeException $e) {
+                    return response()->json(['status' => 'error', 'message' => 'Legacy Compatibility rejected this game.'], 403);
+                }
+            }
+            if (\VanguardLTE\Services\CedarGameRegistry::isRegisteredSlot((string) $game)) {
+                return response()->json((new \VanguardLTE\Services\CedarSlotService())->handle($request, (string) $game));
+            }
+            if (in_array($game, \VanguardLTE\Services\CedarArcadeService::GAMES, true) && $request->has('command_id')) {
+                return response()->json((new \VanguardLTE\Services\CedarArcadeService())->handle($request, $game));
             }
             if (in_array($game, \VanguardLTE\Services\CedarGameService::GAMES, true)) {
                 return response()->json((new \VanguardLTE\Services\CedarGameService())->handle($request, $game));

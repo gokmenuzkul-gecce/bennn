@@ -8,11 +8,11 @@
     <meta name="theme-color" content="#0b0e14">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Casino du Liban">
+    <meta name="apple-mobile-web-app-title" content="{{ settings('app_name', 'Casino du Liban') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
 
-    <title>@yield('page-title', 'Casino du Liban - Premier Social Gaming')</title>
+    <title>@yield('page-title', settings('app_name', 'Casino du Liban'))</title>
 
     <!-- Tailwind CSS CDN with Forms & Container Queries -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -296,7 +296,7 @@
                     if (fmt === 'time') {
                         elem.innerText = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                     } else if (fmt === 'full') {
-                        elem.innerText = d.toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                        elem.innerText = d.toLocaleString([], { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
                     }
                 } catch (err) {
                     console.error('Timezone format error:', err);
