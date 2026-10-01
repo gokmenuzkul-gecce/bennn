@@ -1,12 +1,12 @@
 @extends('liteback.layout')
 
-@section('title', 'Manual Deposits Queue')
-@section('page_title', 'Manual Deposits Queue')
+@section('title', 'Manuel Yatırımlar Queue')
+@section('page_title', 'Manuel Yatırımlar Queue')
 
 @section('content')
 <div class="card">
     <div class="card-header">
-        <h3 class="card-title">Pending & Past Manual Bank Transfers</h3>
+        <h3 class="card-title">Bekleyen ve Geçmiş Manuel Banka Transferleri</h3>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
@@ -14,14 +14,14 @@
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>User</th>
-                        <th>Amount</th>
-                        <th>Holder Name</th>
-                        <th>Reference / Txn ID</th>
-                        <th>Screenshot</th>
-                        <th>Status</th>
-                        <th>Date Submitted</th>
-                        <th>Action / Admin Note</th>
+                        <th>Kullanıcı</th>
+                        <th>Tutar</th>
+                        <th>Hesap Sahibi Adı</th>
+                        <th>Referans / İşlem ID</th>
+                        <th>Ekran Görüntüsü</th>
+                        <th>Durum</th>
+                        <th>Gönderim Tarihi</th>
+                        <th>İşlem / Yönetici Notu</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -44,19 +44,19 @@
                                             data-title="Receipt from {{ $deposit->account_name }} ({{ number_format($deposit->amount, 2) }} {{ $deposit->currency }})"
                                             data-toggle="modal" 
                                             data-target="#screenshotModal">
-                                        <i class="fas fa-image mr-1"></i> View Receipt
+                                        <i class="fas fa-image mr-1"></i> Makbuzu Gör
                                     </button>
                                 @else
-                                    <span class="text-muted">No receipt file</span>
+                                    <span class="text-muted">Makbuz dosyası yok</span>
                                 @endif
                             </td>
                             <td>
                                 @if($deposit->status == 0)
-                                    <span class="badge badge-warning"><i class="fas fa-spinner fa-spin mr-1"></i> Pending</span>
+                                    <span class="badge badge-warning"><i class="fas fa-spinner fa-spin mr-1"></i> Beklemede</span>
                                 @elseif($deposit->status == 1)
-                                    <span class="badge badge-success"><i class="fas fa-check-circle mr-1"></i> Approved</span>
+                                    <span class="badge badge-success"><i class="fas fa-check-circle mr-1"></i> Onaylandı</span>
                                 @else
-                                    <span class="badge badge-danger"><i class="fas fa-times-circle mr-1"></i> Rejected</span>
+                                    <span class="badge badge-danger"><i class="fas fa-times-circle mr-1"></i> Reddedildi</span>
                                 @endif
                             </td>
                             <td>{{ $deposit->created_at }}</td>
@@ -66,7 +66,7 @@
                                         <form action="{{ route('liteback.payments.manual.approve', $deposit->id) }}" method="POST" class="mr-2" onsubmit="return confirm('Are you sure you want to approve this deposit and credit the user balance?');">
                                             @csrf
                                             <button type="submit" class="btn btn-sm btn-success">
-                                                <i class="fas fa-check"></i> Approve
+                                                <i class="fas fa-check"></i> Onayla
                                             </button>
                                         </form>
                                         <button class="btn btn-sm btn-danger reject-deposit-btn" 
@@ -74,7 +74,7 @@
                                                 data-action="{{ route('liteback.payments.manual.reject', $deposit->id) }}"
                                                 data-toggle="modal" 
                                                 data-target="#rejectModal">
-                                            <i class="fas fa-times"></i> Reject
+                                            <i class="fas fa-times"></i> Reddet
                                         </button>
                                     </div>
                                 @else
@@ -85,7 +85,7 @@
                     @empty
                         <tr>
                             <td colspan="9" class="text-center py-4">
-                                <span class="text-muted"><i class="fas fa-inbox fa-2x mb-2 d-block"></i> No manual deposits found in history.</span>
+                                <span class="text-muted"><i class="fas fa-inbox fa-2x mb-2 d-block"></i> Geçmişte manuel yatırım bulunamadı.</span>
                             </td>
                         </tr>
                     @endforelse
@@ -105,17 +105,17 @@
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="screenshotModalTitle">Receipt Proof</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <h5 class="modal-title" id="screenshotModalTitle">Makbuz Kanıtı</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Kapat">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body text-center bg-dark">
-                <img id="modalScreenshotImg" src="" class="img-fluid" style="max-height: 70vh;" alt="Receipt Screenshot">
+                <img id="modalScreenshotImg" src="" class="img-fluid" style="max-height: 70vh;" alt="Makbuz Ekran Görüntüsü">
             </div>
             <div class="modal-footer">
-                <a id="modalScreenshotDownload" href="" download class="btn btn-primary" target="_blank"><i class="fas fa-download mr-1"></i> Download Original</a>
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <a id="modalScreenshotDownload" href="" download class="btn btn-primary" target="_blank"><i class="fas fa-download mr-1"></i> Orijinali İndir</a>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Kapat</button>
             </div>
         </div>
     </div>
@@ -128,20 +128,20 @@
             <form id="rejectForm" action="" method="POST">
                 @csrf
                 <div class="modal-header">
-                    <h5 class="modal-title" id="rejectModalLabel">Reject Deposit Request</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <h5 class="modal-title" id="rejectModalLabel">Yatırım Talebini Reddet</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Kapat">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
-                        <label for="admin_note">Reason for Rejection / Internal Note</label>
-                        <textarea name="admin_note" id="admin_note" class="form-control" rows="4" placeholder="Enter reason (e.g. Invalid reference number, screenshot is unreadable, funds not received)"></textarea>
+                        <label for="admin_note">Reddetme Nedeni / Dahili Not</label>
+                        <textarea name="admin_note" id="admin_note" class="form-control" rows="4" placeholder="Neden girin (ör. Geçersiz referans numarası, ekran görüntüsü okunamıyor, para alınmadı)"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-danger">Confirm Rejection</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn btn-danger">Reddetmeyi Onayla</button>
                 </div>
             </form>
         </div>

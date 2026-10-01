@@ -72,6 +72,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(PermissionRepository::class, EloquentPermission::class);
         $this->app->singleton(SessionRepository::class, DbSession::class);
         $this->app->singleton(CountryRepository::class, EloquentCountry::class);
+        $this->app->singleton(\VanguardLTE\Sports\Providers\SportsProviderRegistry::class);
 
         if ($this->app->environment('local')) {
             //$this->app->register(\Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider::class);

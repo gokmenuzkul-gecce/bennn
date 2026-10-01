@@ -169,8 +169,8 @@
                 <a href="{{ route('liteback.users.index') }}" class="nav-link font-weight-bold">Liteback</a>
             </li>
             <li class="nav-item d-none d-md-inline-block">
-                <a href="{{ route('frontend.game.list') }}" target="_blank" class="nav-link text-muted font-weight-bold" title="Open Frontend Casino in new tab">
-                    <i class="fas fa-gamepad mr-1 text-primary"></i> Player Frontend &nearr;
+                <a href="{{ route('frontend.game.list') }}" target="_blank" class="nav-link text-muted font-weight-bold" title="Oyuncu arayüzünü yeni sekmede aç">
+                    <i class="fas fa-gamepad mr-1 text-primary"></i> Oyuncu Arayüzü &nearr;
                 </a>
             </li>
         </ul>
@@ -180,42 +180,42 @@
             <li class="nav-item mr-2">
                 @if($licenseState === 'active')
                     <div class="btn-group">
-                        <a href="{{ $operatorPortalUrl }}" target="_blank" class="btn btn-sm btn-outline-success font-weight-bold d-flex align-items-center shadow-sm" style="border-radius: 20px; padding: 4px 12px;" title="Promex SaaS Active: Click to open Operator Portal">
+                        <a href="{{ $operatorPortalUrl }}" target="_blank" class="btn btn-sm btn-outline-success font-weight-bold d-flex align-items-center shadow-sm" style="border-radius: 20px; padding: 4px 12px;" title="Promex SaaS Aktif: Operatör Portalını açmak için tıklayın">
                             <span class="badge badge-success mr-1.5 p-1" style="border-radius: 50%;"> </span>
                             <span>PROMEX SAAS: ACTIVE ({{ $daysLeft }}d)</span>
                             <i class="fas fa-external-link-alt ml-1.5 text-xs"></i>
                         </a>
-                        <a href="{{ route('liteback.store.index') }}" class="btn btn-sm btn-outline-secondary" style="border-radius: 20px; margin-left: 2px;" title="Store & License Settings">
+                        <a href="{{ route('liteback.store.index') }}" class="btn btn-sm btn-outline-secondary" style="border-radius: 20px; margin-left: 2px;" title="Mağaza ve Lisans Ayarları">
                             <i class="fas fa-cog"></i>
                         </a>
                     </div>
                 @elseif($licenseState === 'suspended' || $licenseState === 'expired')
                     <div class="btn-group">
-                        <a href="{{ $operatorPortalUrl }}" target="_blank" class="btn btn-sm btn-danger font-weight-bold d-flex align-items-center shadow-sm" style="border-radius: 20px; padding: 4px 12px;" title="License Suspended / Expired: Click to Renew">
+                        <a href="{{ $operatorPortalUrl }}" target="_blank" class="btn btn-sm btn-danger font-weight-bold d-flex align-items-center shadow-sm" style="border-radius: 20px; padding: 4px 12px;" title="Lisans Askıya Alındı / Süresi Doldu: Yenilemek için tıklayın">
                             <i class="fas fa-exclamation-triangle mr-1.5"></i>
-                            <span>LICENSE EXPIRED / SUSPENDED</span>
+                            <span>LİSANS SÜRESİ DOLDU / ASKIYA ALINDI</span>
                             <i class="fas fa-external-link-alt ml-1.5 text-xs"></i>
                         </a>
-                        <a href="{{ route('liteback.store.index') }}" class="btn btn-sm btn-outline-danger" style="border-radius: 20px; margin-left: 2px;" title="Manage License Key">
+                        <a href="{{ route('liteback.store.index') }}" class="btn btn-sm btn-outline-danger" style="border-radius: 20px; margin-left: 2px;" title="Lisans Anahtarını Yönet">
                             <i class="fas fa-key"></i>
                         </a>
                     </div>
                 @else
                     <div class="btn-group">
-                        <a href="{{ route('liteback.store.index') }}" class="btn btn-sm btn-warning font-weight-bold text-dark d-flex align-items-center shadow-sm" style="border-radius: 20px; padding: 4px 12px;" title="Community Edition: Click to activate full license">
+                        <a href="{{ route('liteback.store.index') }}" class="btn btn-sm btn-warning font-weight-bold text-dark d-flex align-items-center shadow-sm" style="border-radius: 20px; padding: 4px 12px;" title="Topluluk Sürümü: Tam lisansı etkinleştirmek için tıklayın">
                             <i class="fas fa-shield-alt mr-1.5 text-dark"></i>
-                            <span>COMMUNITY EDITION (UNREGISTERED)</span>
+                            <span>TOPLULUK SÜRÜMÜ (KAYITSIZ)</span>
                         </a>
-                        <a href="https://promex.me/platforms/promex-gaming-suite/" target="_blank" class="btn btn-sm btn-dark font-weight-bold text-white shadow-sm" style="border-radius: 20px; margin-left: 2px;" title="Buy License on Promex.me">
-                            <span>BUY &nearr;</span>
+                        <a href="https://promex.me/platforms/promex-gaming-suite/" target="_blank" class="btn btn-sm btn-dark font-weight-bold text-white shadow-sm" style="border-radius: 20px; margin-left: 2px;" title="Promex.me'den Lisans Satın Al">
+                            <span>SATIN AL &nearr;</span>
                         </a>
                     </div>
                 @endif
             </li>
 
             <li class="nav-item">
-                <a href="{{ route('liteback.profile.password') }}" class="nav-link font-weight-bold text-secondary" title="Account and login security">
-                    <i class="fas fa-user-shield mr-1"></i> Account
+                <a href="{{ route('liteback.profile.password') }}" class="nav-link font-weight-bold text-secondary" title="Hesap ve giriş güvenliği">
+                    <i class="fas fa-user-shield mr-1"></i> Hesap
                 </a>
             </li>
         </ul>
@@ -231,31 +231,51 @@
                     <li class="nav-item">
                         <a href="{{ route('liteback.help') }}" class="nav-link {{ Route::is('liteback.help') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-question-circle text-info"></i>
-                            <p>Help Guide</p>
+                            <p>Yardım Kılavuzu</p>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('liteback.users.index') }}" class="nav-link">
                             <i class="nav-icon fas fa-users"></i>
-                            <p>Users</p>
+                            <p>Kullanıcılar</p>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('liteback.games.index') }}" class="nav-link">
                             <i class="nav-icon fas fa-gamepad"></i>
-                            <p>Games</p>
+                            <p>Oyunlar</p>
                         </a>
                         <ul class="nav nav-treeview ml-3">
                             <li class="nav-item">
                                 <a href="{{ route('liteback.games.index') }}" class="nav-link">
                                     <i class="far fa-circle nav-icon"></i>
-                                    <p>Active</p>
+                                    <p>Aktif</p>
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a href="{{ route('liteback.games.inactive') }}" class="nav-link">
                                     <i class="far fa-circle nav-icon"></i>
-                                    <p>Inactive</p>
+                                    <p>Pasif</p>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('liteback.casino.providers') }}" class="nav-link">
+                            <i class="nav-icon fas fa-dice"></i>
+                            <p>Kumarhane Sağlayıcıları</p>
+                        </a>
+                        <ul class="nav nav-treeview ml-3">
+                            <li class="nav-item">
+                                <a href="{{ route('liteback.casino.providers') }}" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Bağlı Sağlayıcılar</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('liteback.casino.transactions') }}" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Cüzdan İşlemleri</p>
                                 </a>
                             </li>
                         </ul>
@@ -269,13 +289,13 @@
                             <li class="nav-item">
                                 <a href="{{ route('liteback.cedar.index', ['status' => 'active']) }}" class="nav-link">
                                     <i class="far fa-circle nav-icon"></i>
-                                    <p>Active</p>
+                                    <p>Aktif</p>
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a href="{{ route('liteback.cedar.inactive') }}" class="nav-link">
                                     <i class="far fa-circle nav-icon"></i>
-                                    <p>Inactive</p>
+                                    <p>Pasif</p>
                                 </a>
                             </li>
                         </ul>
@@ -284,7 +304,7 @@
                         <a href="#" class="nav-link">
                             <i class="nav-icon fas fa-trophy"></i>
                             <p>
-                                Sportsbook
+                                Spor Bahisleri
                                 <i class="right fas fa-angle-left"></i>
                             </p>
                         </a>
@@ -292,31 +312,37 @@
                             <li class="nav-item">
                                 <a href="{{ route('liteback.sports.dashboard') }}" class="nav-link">
                                     <i class="far fa-circle nav-icon"></i>
-                                    <p>Dashboard</p>
+                                    <p>Kontrol Paneli</p>
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a href="{{ route('liteback.sports.categories') }}" class="nav-link">
                                     <i class="far fa-circle nav-icon"></i>
-                                    <p>Categories / Leagues</p>
+                                    <p>Kategoriler / Ligler</p>
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a href="{{ route('liteback.sports.games') }}" class="nav-link">
                                     <i class="far fa-circle nav-icon"></i>
-                                    <p>Events & Odds</p>
+                                    <p>Etkinlikler ve Oranlar</p>
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a href="{{ route('liteback.sports.settlements') }}" class="nav-link">
                                     <i class="far fa-circle nav-icon"></i>
-                                    <p>Settlements</p>
+                                    <p>Sonuçlandırmalar</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('liteback.sports.providers') }}" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Sağlayıcılar</p>
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a href="{{ route('liteback.sports.settings') }}" class="nav-link">
                                     <i class="far fa-circle nav-icon"></i>
-                                    <p>Settings</p>
+                                    <p>Ayarlar</p>
                                 </a>
                             </li>
                         </ul>
@@ -325,7 +351,7 @@
                         <a href="#" class="nav-link">
                             <i class="nav-icon fas fa-credit-card"></i>
                             <p>
-                                Payments
+                                Ödemeler
                                 <i class="right fas fa-angle-left"></i>
                             </p>
                         </a>
@@ -333,19 +359,19 @@
                             <li class="nav-item">
                                 <a href="{{ route('liteback.payments.manual.index') }}" class="nav-link">
                                     <i class="far fa-circle nav-icon"></i>
-                                    <p>Manual Deposits</p>
+                                    <p>Manuel Yatırımlar</p>
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a href="{{ route('liteback.withdrawals.index') }}" class="nav-link">
                                     <i class="far fa-circle nav-icon text-warning"></i>
-                                    <p>Cashouts / Withdrawals</p>
+                                    <p>Para Çekme / Çekimler</p>
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a href="{{ route('liteback.payments.settings') }}" class="nav-link">
                                     <i class="far fa-circle nav-icon"></i>
-                                    <p>Gateways Settings</p>
+                                    <p>Ağ Geçidi Ayarları</p>
                                 </a>
                             </li>
                         </ul>
@@ -353,62 +379,62 @@
                     <li class="nav-item">
                         <a href="{{ route('liteback.lotto.index') }}" class="nav-link">
                             <i class="nav-icon fas fa-dice text-warning"></i>
-                            <p>Lotto Jackpot Zone</p>
+                            <p>Loto Jackpot Bölgesi</p>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('liteback.predictions.index') }}" class="nav-link">
                             <i class="nav-icon fas fa-magic text-purple"></i>
-                            <p>Prediction Markets</p>
+                            <p>Tahmin Piyasaları</p>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('liteback.crypto.index') }}" class="nav-link">
                             <i class="nav-icon fas fa-chart-line text-info"></i>
-                            <p>Crypto Trading</p>
+                            <p>Kripto Ticareti</p>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('liteback.stocks.index') }}" class="nav-link">
                             <i class="nav-icon fas fa-chart-line text-info"></i>
-                            <p>Stock Trading</p>
+                            <p>Hisse Ticareti</p>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('liteback.affiliates.index') }}" class="nav-link">
                             <i class="nav-icon fas fa-users text-success"></i>
-                            <p>Affiliate & Referrals</p>
+                            <p>Ortaklık ve Referanslar</p>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('liteback.vip.index') }}" class="nav-link">
                             <i class="nav-icon fas fa-gem text-warning"></i>
-                            <p>VIP Club & Rakeback</p>
+                            <p>VIP Kulübü ve Rakeback</p>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('liteback.settings.index') }}" class="nav-link">
                             <i class="nav-icon fas fa-cogs text-info"></i>
-                            <p>System & API Keys</p>
+                            <p>Sistem ve API Anahtarları</p>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('liteback.store.index') }}" class="nav-link {{ Route::is('liteback.store*') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-store text-primary"></i>
                             <p>
-                                Store & License
+                                Mağaza ve Lisans
                                 @if($licenseState === 'active')
-                                    <span class="badge badge-success right">Active</span>
+                                    <span class="badge badge-success right">Aktif</span>
                                 @elseif($licenseState === 'suspended' || $licenseState === 'expired')
-                                    <span class="badge badge-danger right">Expired</span>
+                                    <span class="badge badge-danger right">Süresi doldu</span>
                                 @else
-                                    <span class="badge badge-warning right">Community</span>
+                                    <span class="badge badge-warning right">Topluluk</span>
                                 @endif
                             </p>
                         </a>
                     </li>
                     @if((int) auth()->user()->role_id === 6)
-                    <li class="nav-item"><a href="{{ route('liteback.maintenance.index') }}" class="nav-link {{ Route::is('liteback.maintenance.*') ? 'active' : '' }}"><i class="nav-icon fas fa-tools text-info"></i><p>Backup &amp; Update</p></a></li>
+                    <li class="nav-item"><a href="{{ route('liteback.maintenance.index') }}" class="nav-link {{ Route::is('liteback.maintenance.*') ? 'active' : '' }}"><i class="nav-icon fas fa-tools text-info"></i><p>Yedekleme ve Güncelleme</p></a></li>
                     @endif
                 </ul>
             </nav>
@@ -434,23 +460,23 @@
                             <div class="mb-2 mb-md-0">
                                 <div class="d-flex align-items-center gap-2 mb-1">
                                     <span class="badge badge-warning text-dark font-weight-bold px-2 py-0.5 uppercase tracking-wider" style="font-size: 10px; border-radius: 6px;">
-                                        COMMUNITY / FREE EDITION
+                                        TOPLULUK / ÜCRETSİZ SÜRÜM
                                     </span>
                                     <span class="text-white-50 small font-mono-jet ml-2">Domain: <strong class="text-white">{{ $boundDomain }}</strong></span>
                                 </div>
                                 <h6 class="font-weight-bold text-white mb-1">
-                                    <i class="fas fa-exclamation-triangle mr-1 text-warning"></i> Running on Unregistered Community Mode
+                                    <i class="fas fa-exclamation-triangle mr-1 text-warning"></i> Kayıtsız Topluluk Modunda Çalışıyor
                                 </h6>
                                 <p class="mb-0 text-white-50 small" style="line-height: 1.5;">
-                                    Core features and free GitHub updates are available. Protected Cedar games, PROMEX feeds and managed patch delivery require an active license. Legacy game assets are hosted in your own games folder.
+                                    Temel özellikler ve ücretsiz GitHub güncellemeleri kullanılabilir. Korumalı Cedar oyunları, PROMEX akışları ve yönetilen yama dağıtımı aktif bir lisans gerektirir. Eski oyun varlıkları kendi games klasörünüzde barındırılır.
                                 </p>
                             </div>
                             <div class="d-flex align-items-center gap-2 flex-shrink-0 ml-md-3">
                                 <a href="{{ route('liteback.store.index') }}" class="btn btn-sm btn-warning font-weight-bold text-dark shadow-sm px-3 py-1.5" style="border-radius: 8px;">
-                                    <i class="fas fa-key mr-1"></i> Enter License Key
+                                    <i class="fas fa-key mr-1"></i> Lisans Anahtarını Girin
                                 </a>
                                 <a href="https://promex.me/platforms/promex-gaming-suite/" target="_blank" class="btn btn-sm btn-outline-light font-weight-bold shadow-sm px-3 py-1.5 ml-2" style="border-radius: 8px;">
-                                    <i class="fas fa-shopping-cart mr-1 text-warning"></i> Buy License on Promex.me &nearr;
+                                    <i class="fas fa-shopping-cart mr-1 text-warning"></i> Promex.me'den Lisans Satın Al &nearr;
                                 </a>
                             </div>
                         </div>
@@ -461,23 +487,23 @@
                             <div class="mb-2 mb-md-0">
                                 <div class="d-flex align-items-center gap-2 mb-1">
                                     <span class="badge badge-danger text-white font-weight-bold px-2 py-0.5 uppercase tracking-wider" style="font-size: 10px; border-radius: 6px;">
-                                        SUBSCRIPTION EXPIRED
+                                        ABONELİK SÜRESİ DOLDU
                                     </span>
                                     <span class="text-white-50 small font-mono-jet ml-2">Domain: <strong class="text-white">{{ $boundDomain }}</strong></span>
                                 </div>
                                 <h6 class="font-weight-bold text-danger mb-1">
-                                    <i class="fas fa-ban mr-1"></i> License Expired or Suspended
+                                    <i class="fas fa-ban mr-1"></i> Lisans Süresi Doldu veya Askıya Alındı
                                 </h6>
                                 <p class="mb-0 text-white-50 small" style="line-height: 1.5;">
-                                    Your Promex SaaS license for domain <code class="text-warning">{{ $boundDomain }}</code> has expired. Cloud data feeds and remote store downloads are paused. Renew your subscription to restore all verified cloud services.
+                                    Şu alan adı için Promex SaaS lisansınız <code class="text-warning">{{ $boundDomain }}</code> süresi doldu. Bulut veri akışları ve uzaktan mağaza indirmeleri duraklatıldı. Tüm doğrulanmış bulut hizmetlerini geri yüklemek için aboneliğinizi yenileyin.
                                 </p>
                             </div>
                             <div class="d-flex align-items-center gap-2 flex-shrink-0 ml-md-3">
                                 <a href="{{ $operatorPortalUrl }}" target="_blank" class="btn btn-sm btn-danger font-weight-bold shadow-sm px-3 py-1.5" style="border-radius: 8px;">
-                                    <i class="fas fa-sync-alt mr-1"></i> Operator Portal & Renew &nearr;
+                                    <i class="fas fa-sync-alt mr-1"></i> Operatör Portalı ve Yenile &nearr;
                                 </a>
                                 <a href="{{ route('liteback.store.index') }}" class="btn btn-sm btn-outline-light font-weight-bold shadow-sm px-3 py-1.5 ml-2" style="border-radius: 8px;">
-                                    Manage Key
+                                    Anahtarı Yönet
                                 </a>
                             </div>
                         </div>
@@ -490,12 +516,12 @@
                                     <i class="fas fa-clock mr-1 text-info"></i> License Expiring in {{ $daysLeft }} Days
                                 </h6>
                                 <p class="mb-0 text-white-50 small">
-                                    Your Promex SaaS license expires soon. Renew to avoid interruption to cloud odds feeds and game pack updates.
+                                    Promex SaaS lisansınızın süresi yakında doluyor. Bulut oran akışları ve oyun paketi güncellemelerinde kesinti yaşamamak için yenileyin.
                                 </p>
                             </div>
                             <div class="mt-2 mt-md-0 ml-md-3">
                                 <a href="{{ $operatorPortalUrl }}" target="_blank" class="btn btn-sm btn-info font-weight-bold shadow-sm px-3 py-1.5" style="border-radius: 8px;">
-                                    Renew on Operator Portal &nearr;
+                                    Operatör Portalından Yenile &nearr;
                                 </a>
                             </div>
                         </div>

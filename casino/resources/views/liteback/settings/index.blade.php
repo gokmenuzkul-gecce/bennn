@@ -20,7 +20,7 @@
                         <div class="form-row">
                             <div class="form-group col-md-6">
                                 <label class="font-weight-bold">Brand name</label>
-                                <input type="text" name="app_name" class="form-control" maxlength="60" value="{{ settings('app_name', 'Casino du Liban') }}" required>
+                                <input type="text" name="app_name" class="form-control" maxlength="60" value="{{ settings('app_name', 'Promex Gaming Suite') }}" required>
                             </div>
                             <div class="form-group col-md-6">
                                 <label class="font-weight-bold">Tagline</label>
@@ -31,7 +31,7 @@
                                 <input type="file" name="brand_logo" class="form-control-file" accept="image/png,image/jpeg,image/webp">
                                 <small class="form-text text-muted">PNG, JPG, or WebP up to 2 MB. Leave blank to keep the current logo.</small>
                                 @if(settings('brand_logo_path'))
-                                    <img src="{{ asset('storage/' . settings('brand_logo_path')) }}" alt="Current logo" class="mt-2 rounded border" style="height:48px;max-width:180px;object-fit:contain">
+                                    <img src="{{ asset('storage/' . settings('brand_logo_path')) }}" alt="Mevcut logo" class="mt-2 rounded border" style="height:48px;max-width:180px;object-fit:contain">
                                 @endif
                             </div>
                             <div class="form-group col-md-3">
@@ -41,6 +41,15 @@
                             <div class="form-group col-md-3">
                                 <label class="font-weight-bold">Coin label</label>
                                 <input type="text" name="coin_display_name" class="form-control" maxlength="40" value="{{ settings('coin_display_name', 'Cedar Coins') }}">
+                            </div>
+                            <div class="form-group col-md-3">
+                                <label class="font-weight-bold">Wallet currency</label>
+                                <select name="default_currency" class="form-control">
+                                    @foreach(['TRY' => 'TRY (₺) Türk Lirası', 'USD' => 'USD ($) US Dollar', 'EUR' => 'EUR (€) Euro', 'GBP' => 'GBP (£) Pound'] as $code => $label)
+                                        <option value="{{ $code }}" {{ settings('default_currency', 'TRY') === $code ? 'selected' : '' }}>{{ $label }}</option>
+                                    @endforeach
+                                </select>
+                                <small class="form-text text-muted">Site bakiyesi ve casino sağlayıcı cüzdanı bu para biriminde çalışır.</small>
                             </div>
                         </div>
                         <hr>
@@ -155,7 +164,7 @@
                                     <input type="hidden" name="enable_lotto" value="0">
                                     <input type="checkbox" class="custom-control-input" id="switchLotto" name="enable_lotto" value="1" {{ settings('enable_lotto', '1') == '1' ? 'checked' : '' }}>
                                     <label class="custom-control-label font-weight-bold text-dark" for="switchLotto">
-                                        Cedar Lotto Jackpot Zone
+                                        Cedar Loto Jackpot Bölgesi
                                     </label>
                                     <small class="text-muted d-block mt-1">3D ball selector & multi-draw jackpot.</small>
                                 </div>
@@ -167,7 +176,7 @@
                                     <input type="hidden" name="enable_predictions" value="0">
                                     <input type="checkbox" class="custom-control-input" id="switchPredictions" name="enable_predictions" value="1" {{ settings('enable_predictions', '1') == '1' ? 'checked' : '' }}>
                                     <label class="custom-control-label font-weight-bold text-dark" for="switchPredictions">
-                                        Future Vote Prediction Markets
+                                        Future Vote Tahmin Piyasaları
                                     </label>
                                     <small class="text-muted d-block mt-1">Polymarket-style YES/NO voting cards.</small>
                                 </div>
@@ -199,22 +208,22 @@
                         <div class="alert alert-primary py-2 small" role="note">
                             <strong>Launch faster with PROMEX:</strong> managed API access is included at no extra API cost with an active license, so you do not need to buy, configure, or monitor separate provider keys. Prefer your own provider? Select Custom below.
                         </div>
-                        <!-- Odds API -->
+                        <!-- Oran API -->
                         <div class="border-bottom pb-3 mb-3">
                             <h6 class="font-weight-bold text-primary"><i class="fas fa-satellite-dish mr-1"></i> Sportsbook Data & Automation</h6>
-                            <p class="text-muted small mb-2">Choose the licensed PROMEX feed or connect your own The Odds API account.</p>
+                            <p class="text-muted small mb-2">Choose the licensed PROMEX feed or connect your own The Oran API account.</p>
                             <div class="form-group mb-2">
-                                <label class="small font-weight-bold">Provider</label>
+                                <label class="small font-weight-bold">Sağlayıcı</label>
                                 <select id="sportsbookApiProvider" name="sportsbook_api_provider" class="form-control">
-                                    <option value="promex" {{ settings('sportsbook_api_provider', 'promex') === 'promex' ? 'selected' : '' }}>PROMEX Licensed API — free with active license (recommended)</option>
-                                    <option value="custom" {{ settings('sportsbook_api_provider', 'promex') === 'custom' ? 'selected' : '' }}>My own The Odds API key</option>
+                                    <option value="promex" {{ settings('sportsbook_api_provider', 'promex') === 'promex' ? 'selected' : '' }}>PROMEX Lisanslı API — aktif lisansla ücretsiz (önerilir)</option>
+                                    <option value="custom" {{ settings('sportsbook_api_provider', 'promex') === 'custom' ? 'selected' : '' }}>Kendi The Oran API anahtarım</option>
                                 </select>
                                 <small id="promexSportsbookHint" class="text-muted">Uses the licensed PROMEX PRE-MATCH odds feed. No upstream API key is stored in the customer app.</small>
                             </div>
                             <div id="customOddsApiFields" class="form-row align-items-center">
                                 <div class="form-group col-md-7 mb-2">
-                                    <label class="small font-weight-bold">API Key</label>
-                                    <input type="password" id="oddsApiKeyInput" name="odds_api_key" class="form-control" placeholder="Enter your Odds API Key" value="{{ settings('odds_api_key', '') }}">
+                                    <label class="small font-weight-bold">API Anahtarı</label>
+                                    <input type="password" id="oddsApiKeyInput" name="odds_api_key" class="form-control" placeholder="Oran API Anahtarınızı Girin" value="{{ settings('odds_api_key', '') }}">
                                 </div>
                                 <div class="form-group col-md-3 mb-2">
                                     <label class="small font-weight-bold">Default Region</label>
@@ -225,13 +234,13 @@
                                     </select>
                                 </div>
                                 <div class="form-group col-md-2 mb-2 d-flex align-items-end">
-                                    <button type="button" id="btnTestOddsApi" class="btn btn-outline-info btn-block" title="Verify provider connectivity">
+                                    <button type="button" id="btnTestOddsApi" class="btn btn-outline-info btn-block" title="Sağlayıcı bağlantısını doğrula">
                                         <i class="fas fa-plug mr-1"></i> Test
                                     </button>
                                 </div>
                             </div>
-                            <button type="button" id="btnTestPromexSportsApi" class="btn btn-outline-info btn-sm" title="Verify licensed provider connectivity">
-                                <i class="fas fa-plug mr-1"></i> Test PROMEX API
+                            <button type="button" id="btnTestPromexSportsApi" class="btn btn-outline-info btn-sm" title="Lisanslı sağlayıcı bağlantısını doğrula">
+                                <i class="fas fa-plug mr-1"></i> PROMEX API'sini Test Et
                             </button>
                             <div id="oddsApiStatus" class="small mt-1 d-none"></div>
                         </div>
@@ -241,7 +250,7 @@
                             <h6 class="font-weight-bold text-warning"><i class="fas fa-coins mr-1"></i> Crypto Market Prices</h6>
                             <p class="text-muted small mb-2">PROMEX uses the licensed hourly Hub cache. Custom accepts an operator-owned HTTPS endpoint returning CoinGecko-compatible market records.</p>
                             <div class="form-group mb-2">
-                                <label class="small font-weight-bold">Provider</label>
+                                <label class="small font-weight-bold">Sağlayıcı</label>
                                 <select id="cryptoPricesProvider" name="crypto_prices_provider" class="form-control">
                                     <option value="promex" {{ settings('crypto_prices_provider', 'promex') === 'promex' ? 'selected' : '' }}>PROMEX Licensed API — active license required</option>
                                     <option value="custom" {{ settings('crypto_prices_provider', 'promex') === 'custom' ? 'selected' : '' }}>My Custom Crypto API</option>
@@ -255,7 +264,7 @@
                                 </div>
                                 <div class="form-group col-md-3 mb-2"><button type="button" id="btnTestCryptoApi" class="btn btn-outline-info btn-block"><i class="fas fa-plug mr-1"></i> Test</button></div>
                             </div>
-                            <button type="button" id="btnTestPromexCryptoApi" class="btn btn-outline-info btn-sm"><i class="fas fa-plug mr-1"></i> Test PROMEX API</button>
+                            <button type="button" id="btnTestPromexCryptoApi" class="btn btn-outline-info btn-sm"><i class="fas fa-plug mr-1"></i> PROMEX API'sini Test Et</button>
                             <div id="cryptoApiStatus" class="small mt-1 d-none"></div>
                         </div>
 
@@ -265,9 +274,9 @@
                             <p class="text-warning">Development simulation exposes test codes on the login screen and sends no messages. Use only on private local/test installations; production blocks it. This selection replaces the old WHATSAPP_MODE environment override.</p>
                             <p class="text-muted small">PROMEX delivery is included with an active license. Choose Custom to send through your own HTTPS gateway.</p>
                             <div class="form-group mb-2">
-                                <label class="small font-weight-bold">Provider</label>
+                                <label class="small font-weight-bold">Sağlayıcı</label>
                                 <select id="whatsappDeliveryProvider" name="whatsapp_delivery_provider" class="form-control">
-                                    <option value="promex" {{ settings('whatsapp_delivery_provider', 'promex') === 'promex' ? 'selected' : '' }}>PROMEX Licensed API — free with active license (recommended)</option>
+                                    <option value="promex" {{ settings('whatsapp_delivery_provider', 'promex') === 'promex' ? 'selected' : '' }}>PROMEX Lisanslı API — aktif lisansla ücretsiz (önerilir)</option>
                                     <option value="custom" {{ settings('whatsapp_delivery_provider', 'promex') === 'custom' ? 'selected' : '' }}>My Custom API</option>
                                     @if(app()->environment('local', 'testing') || settings('whatsapp_delivery_provider') === 'devmode')
                                     <option value="devmode" {{ settings('whatsapp_delivery_provider') === 'devmode' ? 'selected' : '' }}>Development simulation — no WhatsApp sent (local/testing only)</option>
@@ -292,9 +301,9 @@
                             <h6 class="font-weight-bold text-primary"><i class="fas fa-envelope mr-1"></i> Transactional Email Delivery</h6>
                             <p class="text-muted small">Connect your own verified transactional-email account. PROMEX never receives your email token or sends your email.</p>
                             <div class="form-group mb-2">
-                                <label class="small font-weight-bold">Provider</label>
+                                <label class="small font-weight-bold">Sağlayıcı</label>
                                 <select id="emailDeliveryProvider" name="email_delivery_provider" class="form-control">
-                                    <option value="disabled" {{ settings('email_delivery_provider', 'disabled') === 'disabled' ? 'selected' : '' }}>Not configured — email is off</option>
+                                    <option value="disabled" {{ settings('email_delivery_provider', 'disabled') === 'disabled' ? 'selected' : '' }}>Yapılandırılmadı — email is off</option>
                                     <option value="brevo" {{ settings('email_delivery_provider', 'disabled') === 'brevo' ? 'selected' : '' }}>Brevo — recommended free transactional email</option>
                                     <option value="resend" {{ settings('email_delivery_provider', 'disabled') === 'resend' ? 'selected' : '' }}>Resend — developer-friendly transactional email</option>
                                     <option value="postmark" {{ settings('email_delivery_provider', 'disabled') === 'postmark' ? 'selected' : '' }}>Postmark — transactional deliverability</option>
@@ -322,19 +331,19 @@
                             </div>
                         </div>
 
-                        <!-- Polymarket Gamma API (Prediction Markets) -->
+                        <!-- Polymarket Gamma API (Tahmin Piyasaları) -->
                         <div class="border-bottom pb-3 mb-3">
                             <div class="d-flex justify-content-between align-items-center mb-1">
                                 <h6 class="font-weight-bold text-info mb-0">
-                                    <i class="fas fa-chart-pie mr-1"></i> Polymarket Gamma API (Prediction Markets)
+                                    <i class="fas fa-chart-pie mr-1"></i> Polymarket Gamma API (Tahmin Piyasaları)
                                 </h6>
                                 <span class="badge badge-success px-2 py-1"><i class="fas fa-check-circle mr-1"></i> FREE with active license</span>
                             </div>
                             <p class="text-muted small mb-2">Use the licensed PROMEX feed for real-time prediction markets, YES/NO probabilities, and order books, or connect a compatible custom API.</p>
                             <div class="form-group mb-2">
-                                <label class="small font-weight-bold">Provider</label>
+                                <label class="small font-weight-bold">Sağlayıcı</label>
                                 <select id="polymarketApiProvider" name="polymarket_api_provider" class="form-control">
-                                    <option value="promex" {{ settings('polymarket_api_provider', 'promex') === 'promex' ? 'selected' : '' }}>PROMEX Licensed API — free with active license (recommended)</option>
+                                    <option value="promex" {{ settings('polymarket_api_provider', 'promex') === 'promex' ? 'selected' : '' }}>PROMEX Lisanslı API — aktif lisansla ücretsiz (önerilir)</option>
                                     <option value="custom" {{ settings('polymarket_api_provider', 'promex') === 'custom' ? 'selected' : '' }}>My private prediction-market API</option>
                                 </select>
                                 <small id="promexPolymarketHint" class="text-muted">Uses the managed official Gamma feed. No API key or endpoint configuration is required in this app.</small>
@@ -351,7 +360,7 @@
                                 </div>
                             </div>
                             <button type="button" id="btnTestPromexPolyApi" class="btn btn-outline-info btn-sm" title="Test licensed prediction-market feed">
-                                <i class="fas fa-plug mr-1"></i> Test PROMEX API
+                                <i class="fas fa-plug mr-1"></i> PROMEX API'sini Test Et
                             </button>
                             <div id="polyApiStatus" class="small mt-1 d-none"></div>
                         </div>
@@ -409,7 +418,7 @@
                             </div>
                             <div class="form-group mb-0">
                                 <label class="small font-weight-bold">Allowed Withdrawal Methods (Comma-separated)</label>
-                                <input type="text" name="cashout_methods" class="form-control" value="{{ settings('cashout_methods', 'USDT (TRC-20), Whish Money, OMT, Bank Transfer, PayPal, Cash Agent') }}">
+                                <input type="text" name="cashout_methods" class="form-control" value="{{ settings('cashout_methods', 'USDT (TRC-20), Whish Money, OMT, Banka Transferi, PayPal, Nakit Temsilcisi') }}">
                                 <small class="text-muted">Shown in player withdrawal method dropdown</small>
                             </div>
                         </div>
@@ -479,11 +488,11 @@
                                 <div class="font-weight-bold text-success mb-2"><i class="fas fa-circle-notch mr-1"></i> CedarPlinko</div>
                                 <div class="form-row">
                                     <div class="form-group col-md-6 mb-2">
-                                        <label class="small font-weight-bold">Min Bet (Coins)</label>
+                                        <label class="small font-weight-bold">Min Bahis (Coin)</label>
                                         <input type="number" step="any" min="1" max="100000" name="cedar_plinko_min_bet" class="form-control" value="{{ settings('cedar_plinko_min_bet', '10') }}">
                                     </div>
                                     <div class="form-group col-md-6 mb-2">
-                                        <label class="small font-weight-bold">Max Bet (Coins)</label>
+                                        <label class="small font-weight-bold">Maks Bahis (Coin)</label>
                                         <input type="number" step="any" min="10" max="1000000" name="cedar_plinko_max_bet" class="form-control" value="{{ settings('cedar_plinko_max_bet', '50000') }}">
                                     </div>
                                 </div>
@@ -501,11 +510,11 @@
                                         </div>
                                     </div>
                                     <div class="form-group col-md-4 mb-2">
-                                        <label class="small font-weight-bold">Min Bet (Coins)</label>
+                                        <label class="small font-weight-bold">Min Bahis (Coin)</label>
                                         <input type="number" step="any" min="1" max="100000" name="cedar_mines_min_bet" class="form-control" value="{{ settings('cedar_mines_min_bet', '10') }}">
                                     </div>
                                     <div class="form-group col-md-4 mb-2">
-                                        <label class="small font-weight-bold">Max Bet (Coins)</label>
+                                        <label class="small font-weight-bold">Maks Bahis (Coin)</label>
                                         <input type="number" step="any" min="10" max="1000000" name="cedar_mines_max_bet" class="form-control" value="{{ settings('cedar_mines_max_bet', '50000') }}">
                                     </div>
                                 </div>
@@ -523,11 +532,11 @@
                                         </div>
                                     </div>
                                     <div class="form-group col-md-4 mb-2">
-                                        <label class="small font-weight-bold">Min Bet (Coins)</label>
+                                        <label class="small font-weight-bold">Min Bahis (Coin)</label>
                                         <input type="number" step="any" min="1" max="100000" name="cedar_dice_min_bet" class="form-control" value="{{ settings('cedar_dice_min_bet', '10') }}">
                                     </div>
                                     <div class="form-group col-md-4 mb-2">
-                                        <label class="small font-weight-bold">Max Bet (Coins)</label>
+                                        <label class="small font-weight-bold">Maks Bahis (Coin)</label>
                                         <input type="number" step="any" min="10" max="1000000" name="cedar_dice_max_bet" class="form-control" value="{{ settings('cedar_dice_max_bet', '50000') }}">
                                     </div>
                                 </div>
@@ -538,11 +547,11 @@
                                 <div class="font-weight-bold text-danger mb-2"><i class="fas fa-dharmachakra mr-1"></i> CedarWheel (Fortune Multipliers up to 49.5x)</div>
                                 <div class="form-row">
                                     <div class="form-group col-md-6 mb-2">
-                                        <label class="small font-weight-bold">Min Bet (Coins)</label>
+                                        <label class="small font-weight-bold">Min Bahis (Coin)</label>
                                         <input type="number" step="any" min="1" max="100000" name="cedar_wheel_min_bet" class="form-control" value="{{ settings('cedar_wheel_min_bet', '10') }}">
                                     </div>
                                     <div class="form-group col-md-6 mb-2">
-                                        <label class="small font-weight-bold">Max Bet (Coins)</label>
+                                        <label class="small font-weight-bold">Maks Bahis (Coin)</label>
                                         <input type="number" step="any" min="10" max="1000000" name="cedar_wheel_max_bet" class="form-control" value="{{ settings('cedar_wheel_max_bet', '50000') }}">
                                     </div>
                                 </div>
@@ -559,7 +568,7 @@
             <div class="card mt-3">
                 <div class="card-header font-weight-bold">Recent Cedar rounds</div>
                 <div class="table-responsive"><table class="table table-sm mb-0">
-                    <thead><tr><th>Round</th><th>Player</th><th>Game</th><th>Status</th><th>Wager</th><th>Paid</th></tr></thead>
+                    <thead><tr><th>Tur</th><th>Oyuncu</th><th>Oyun</th><th>Durum</th><th>Bahis</th><th>Paid</th></tr></thead>
                     <tbody>@forelse($cedarRounds ?? [] as $round)
                     <tr><td><small>{{ $round->id }}</small></td><td>{{ $round->user_id }}</td><td>{{ $round->game }}</td><td>{{ $round->status }}</td><td>{{ $round->wager }}</td><td>{{ $round->win }}</td></tr>
                     @empty
@@ -572,21 +581,21 @@
 
         <!-- Sidebar Actions & System Utilities -->
         <div class="col-lg-4">
-            <!-- Manual Operations & Sync Card -->
+            <!-- Manuel İşlemler & Sync Card -->
             <div class="card mb-4 shadow-sm border-primary">
                 <div class="card-header bg-primary text-white">
-                    <h5 class="card-title mb-0 font-weight-bold"><i class="fas fa-bolt mr-2"></i> Manual Operations</h5>
+                    <h5 class="card-title mb-0 font-weight-bold"><i class="fas fa-bolt mr-2"></i> Manuel İşlemler</h5>
                 </div>
                 <div class="card-body">
-                    <p class="text-muted small">Execute live server routines immediately without waiting for background cron schedules.</p>
+                    <p class="text-muted small">Arka plan cron programlarını beklemeden canlı sunucu rutinlerini hemen çalıştırın.</p>
                     
                     <!-- Flush Cache -->
                     <form method="post" action="{{ route('liteback.settings.clear_cache') }}" class="mb-3" onsubmit="return confirm('Flush all application caches now?');">
                         @csrf
                         <button type="submit" class="btn btn-outline-danger btn-block font-weight-bold">
-                            <i class="fas fa-trash-alt mr-1"></i> Flush System Caches
+                            <i class="fas fa-trash-alt mr-1"></i> Sistem Önbelleklerini Temizle
                         </button>
-                        <small class="text-muted d-block mt-1">Clears Blade templates, route caches, and Redis/file cache.</small>
+                        <small class="text-muted d-block mt-1">Blade şablonlarını, rota önbelleklerini ve Redis/dosya önbelleğini temizler.</small>
                     </form>
 
                     <hr>
@@ -595,7 +604,7 @@
                     <form method="post" action="{{ route('liteback.settings.sync_odds_now') }}" class="mb-3">
                         @csrf
                         <button type="submit" class="btn btn-outline-primary btn-block font-weight-bold">
-                            <i class="fas fa-sync mr-1"></i> Pull Sports Odds Now
+                            <i class="fas fa-sync mr-1"></i> Spor Oranlarını Şimdi Çek
                         </button>
                         <div class="d-flex justify-content-between align-items-center mt-1">
                             <small class="text-muted">Auto: Every 30 min</small>
@@ -609,7 +618,7 @@
                     <form method="post" action="{{ route('liteback.settings.settle_matches_now') }}" class="mb-3">
                         @csrf
                         <button type="submit" class="btn btn-outline-success btn-block font-weight-bold">
-                            <i class="fas fa-check-double mr-1"></i> Run Bet Auto-Settlement
+                            <i class="fas fa-check-double mr-1"></i> Bahis Otomatik Sonuçlandırmayı Çalıştır
                         </button>
                         <div class="d-flex justify-content-between align-items-center mt-1">
                             <small class="text-muted">Auto: Every 5 min</small>
@@ -623,7 +632,7 @@
                     <form method="post" action="{{ route('liteback.settings.draw_lotto_now') }}">
                         @csrf
                         <button type="submit" class="btn btn-outline-warning btn-block font-weight-bold">
-                            <i class="fas fa-ticket-alt mr-1"></i> Trigger Lotto Draw Now
+                            <i class="fas fa-ticket-alt mr-1"></i> Loto Çekilişini Şimdi Tetikle
                         </button>
                         <div class="d-flex justify-content-between align-items-center mt-1">
                             <small class="text-muted">Auto: Hourly</small>
@@ -638,24 +647,24 @@
             <!-- System Info Widget -->
             <div class="card shadow-sm">
                 <div class="card-header bg-light">
-                    <h6 class="card-title mb-0 font-weight-bold text-dark"><i class="fas fa-info-circle mr-1 text-info"></i> Server Environment</h6>
+                    <h6 class="card-title mb-0 font-weight-bold text-dark"><i class="fas fa-info-circle mr-1 text-info"></i> Sunucu Ortamı</h6>
                 </div>
                 <div class="card-body p-0">
                     <table class="table table-sm table-striped mb-0 small">
                         <tr>
-                            <td class="font-weight-bold">PHP Version</td>
+                            <td class="font-weight-bold">PHP Sürümü</td>
                             <td class="text-right">{{ phpversion() }}</td>
                         </tr>
                         <tr>
-                            <td class="font-weight-bold">Laravel Core</td>
+                            <td class="font-weight-bold">Laravel Çekirdeği</td>
                             <td class="text-right">{{ app()->version() }}</td>
                         </tr>
                         <tr>
-                            <td class="font-weight-bold">Database</td>
+                            <td class="font-weight-bold">Veritabanı</td>
                             <td class="text-right">{{ config('database.default') }} ({{ config('database.connections.' . config('database.default') . '.database') }})</td>
                         </tr>
                         <tr>
-                            <td class="font-weight-bold">Server Host</td>
+                            <td class="font-weight-bold">Sunucu Ana Bilgisayarı</td>
                             <td class="text-right">{{ request()->getHost() }}</td>
                         </tr>
                     </table>

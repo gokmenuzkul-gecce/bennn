@@ -1,0 +1,91 @@
+# AGENTS.md — Promex Gaming Suite (Laravel)
+
+## Proje
+- Kök: `/workspace/project/casino` (Laravel, namespace `VanguardLTE\`).
+- Frontend teması: `resources/views/frontend/Minimal` (ayar `frontend`).
+- Admin paneli: `/liteback` (`resources/views/liteback`).
+- Ödeme/API servisleri: `app/Services` (OddsApiService, PolymarketService), `app/Sports/Services/SportsOddsSyncService`.
+
+## Çalıştırma
+- Yerel sunucu: `php artisan serve --host=0.0.0.0 --port=8000` (pid dosyası yoksa `ps aux | grep artisan`).
+- View derleme: `php artisan view:clear && php artisan view:cache` (blade sözdizimi kontrolü için).
+- Yayın adresi (dev): https://work-1-tlcfjicrlanlyelk.prod-runtime.all-hands.dev/
+
+## Yerelleştirme (tr)
+- Varsayılan dil `tr`: `.env APP_LOCALE=tr`, `config/app.php` `'locale' => env('APP_LOCALE','tr')`.
+- Dil dosyaları: `resources/lang/tr/{app,auth,pagination,passwords,log,validation}.php`.
+- `app/Http/Middleware/SelectLanguage.php`: sıra → config varsayılanı → kullanıcı dili → `language` cookie.
+- Blade metinleri çeviri anahtarı yerine doğrudan Türkçe metinle değiştirildi (tasarım/kod korunarak).
+
+### Çeviri kuralı (önemli)
+Naif `str.replace` KULLANMA. `Play`, `All`, `in`, `on`, `Status` gibi kısa kelimeler CSS sınıflarına,
+JS koduna ve `material-symbols` ikon adlarına sızar ve sayfayı bozar.
+Bunun yerine:
+1. Yalnızca HTML metin düğümlerini (`>...<`) ve güvenli öznitelikleri (`placeholder`, `aria-label`,
+   `title`, `alt`) tam eşleşmeyle değiştir.
+2. Uzun, boşluklu ifadeleri (≥8 karakter, boşluk içeren) her yerde değiştirmek güvenlidir.
+3. İkon adlarını (`material-symbols-outlined` içeriği) ve marka adlarını (CEDAR, PROMEX, Liteback,
+   Battle Odds) ASLA çevirme.
+4. Değişiklikten sonra `git diff` ile `class="..."` içinde Türkçe karakter olup olmadığını kontrol et;
+   `php artisan view:cache` ile tüm şablonların derlendiğini doğrula.
+
+## Sağlayıcı katmanı
+- Sağlayıcı bağdaştırıcıları: `app/Sports/Services` + `liteback/sports/providers` sayfası.
+- PROMEX lisanslı akış varsayılan; özel anahtar (The Odds API) opsiyonel.
+
+## Kumarhane sağlayıcı entegrasyonu (seamless wallet)
+- Dört gerçek marka: Pragmatic, PGSoft, Amatic, Amusnet — tek agregatör protokolü.
+- Bağdaştırıcılar: `app/Casino/Providers/{AbstractCasinoProvider,PragmaticProvider,...}.php`,
+  kayıt defteri `CasinoProviderRegistry` (`findBySlug`, `callbackUrl`, `catalog`).
+- İmza: HMAC-SHA256, alanlar sabit sırayla birleştirilir, para alanları 2 ondalığa yuvarlanır
+  (`SIGN_ORDERS`, `MONEY_FIELDS`). Doğrulamada `hash_equals` + `strtoupper`.
+- Cüzdan: `app/Casino/Wallet/CasinoWalletService.php` — GetBalance/Withdraw/Deposit/BetWin/
+  RollbackTransaction; `casino_wallet_transactions` üzerinden idempotent (tekrar eden işlem reddi).
+- Webhook: `POST /webhooks/aggregator/{slug}/wallet/{Operation}` →
+  `CasinoWalletController`. CSRF'ten muaf (`VerifyCsrfToken`). Dönüş kodları:
+  0 başarı, 3 geçersiz imza, 5 kullanıcı yok, 6 yetersiz bakiye, 9 zaten geri alındı, 11 tekrar.
+- Oyun başlatma: `CasinoGameLaunchService` → `GamesController::go` içinde `provider_key` dolu
+  oyunlar için userAuth URL'i üretir (lisans kontrolünden önce). `AbstractCasinoProvider::launchUrl`
+  agregatöre **POST** yapar (`Authorization: Bearer`, JSON gövde) ve dönen `url`'i kullanır; userID
+  yalnızca alfanümerik olmalı (alt çizgi temizlenir), gameID ise satıcının **sayısal** id'si
+  (`games.launch_code`).
+- Site içi gömülü oynatma: lobi kartı `play-game` düğmesiyle `GET /game/{name}/launch`
+  (`GamesController::launch_json`) çağırır ve dönen oturum URL'ini `#game-player` modalındaki
+  iframe'e yükler; "Yeni Sekme" ile ayrı sekmeye açılabilir. `CasinoGameLaunchService::canEmbed`
+  gömülebilirliği belirler: Amatic `X-Frame-Options: SAMEORIGIN` gönderdiği için
+  `config/casino_providers.php` içinde `embeddable=false` ve modalda yeni sekme önerilir; diğer üç
+  sağlayıcı gömülü açılır (Amusnet önce kendi POST formunu çalıştırır, sonuç iframe'e gömülebilir).
+  Agregatör olmayan (Cedar/yerel) oyunlar doğrudan `game/{name}` bağlantısını korur.
+- Katalog senkronizasyonu: `CasinoCatalogSyncService` + `php artisan casino:sync-catalog`
+  (`--provider=`, `--link-only`). Eski `games` satırlarını normalize başlıkla eşleştirir, eksikleri
+  içe aktarır; `provider_key`, `provider_game_id` (sembol), `launch_code` (sayısal id), `icon_url`
+  (gerçek kapak) yazar ve `categories`/`game_categories` ile lobi filtresine bağlar. Toplu içe aktarma
+  `Game::withoutEvents` kullanır (admin denetim abonesini atlar).
+- Kırık yer tutucular: yerel klasörü olmayan ve sağlayıcıya bağlı olmayan `source_type='default'`
+  satırlar `view=0` yapılır (tıklanınca 404 veren eski oyunlar gizlenir).
+- Kimlik bilgileri `.env`'de (`PRAGMATIC_*`, `PGSOFT_*`, `AMATIC_*`, `AMUSNET_*`); config yalnızca
+  `env()` okur, sır tutmaz. Operatör Liteback'ten (`/liteback/casino/providers`) override edebilir.
+- Admin: `/liteback/casino/providers` (durum + test + aç/kapat), `/liteback/casino/transactions`.
+- Callback slug `gregmorn`; callback tabanı `CASINO_CALLBACK_BASE`.
+
+### Testler
+- `php scripts/verify_casino_wallet.php` — 15 cüzdan kontrolü (kendi verisini temizler).
+- `php tests/Casino/provider-integration-regression.php` — 19 entegrasyon kontrolü.
+- `php tests/Casino/catalog-sync-regression.php` — 16 katalog senkronizasyon kontrolü.
+- Spor regresyonları: `tests/Sports/*.php`.
+
+## Modern tasarım sistemi (frontend/Minimal)
+Tüm stiller `layouts/clean.blade.php` içindeki `<style>` bloğunda; tema `tailwind.config` ile uyumlu.
+- **Arka plan:** `.casino-bg` — sabit (fixed) katman; koyu degrade + ızgara (`::before`, `gridDrift`) + 4 adet
+  hareketli ışık küresi (`.orb-1..4`, `floatA/B/C`). `prefers-reduced-motion` desteği var.
+- **Slayt:** `.hero-slider` / `.hero-track` / `.hero-slide.is-active` + `.hero-dot` / `.hero-nav`.
+  Ana sayfa hero'su 3 slaytlı (Slot-Crash, Spor, Jackpot-VIP). JS `games/list.blade.php` `@section('scripts')`
+  içinde: otomatik geçiş 5.5s, nokta/ok kontrolleri, hover'da durur, dokunmatik kaydırma.
+- **Sağlayıcı butonları:** `.provider-tile` (gerçek sağlayıcı adları `categories` tablosundan, `--pc` ile
+  renk teması) + `.marquee-mask` / `.marquee-track` sonsuz kayan şerit. Liste iki kez basılır (kusursuz döngü).
+- **Oyun kartları:** `.game-card` (hover lift + parlama) + `.card-shine` + `.btn-glow` CTA.
+- **Yardımcılar:** `.text-gradient`, `.section-title-bar`, `.pulse-dot`.
+
+### Kural
+Yeni bölüm eklerken bu sınıfları kullan; satır içi stillerle yeni renk paleti icat etme.
+Slayt/şerit eklemek için `.hero-slide` ve `.provider-tile` kalıplarını kopyala.

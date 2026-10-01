@@ -136,12 +136,12 @@
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>User</th>
+                        <th>Kullanıcı</th>
                         <th>Invite Code</th>
                         <th>Direct Referrals</th>
                         <th>Unclaimed Balance</th>
                         <th>Total Lifetime Paid</th>
-                        <th>Action</th>
+                        <th>İşlem</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -189,14 +189,14 @@
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Time</th>
+                        <th>Zaman</th>
                         <th>Affiliate Earned</th>
                         <th>Referred Player</th>
-                        <th>Tier</th>
+                        <th>Kademe</th>
                         <th>Vertical</th>
-                        <th>Wager</th>
-                        <th>Commission</th>
-                        <th>Status</th>
+                        <th>Bahis</th>
+                        <th>Komisyon</th>
+                        <th>Durum</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -222,7 +222,7 @@
                             @if($item->status === 'claimed')
                                 <span class="badge badge-success">Claimed</span>
                             @else
-                                <span class="badge badge-warning">Pending</span>
+                                <span class="badge badge-warning">Beklemede</span>
                             @endif
                         </td>
                     </tr>

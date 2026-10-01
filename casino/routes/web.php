@@ -159,6 +159,7 @@ Route::namespace ('Frontend')->middleware(['siteisclosed', 'checker'])->group(fu
     ]);
 
     Route::get('game/{game}', ['as' => 'frontend.game.go', 'uses' => 'GamesController@go'])->middleware('game.homebutton');
+    Route::get('game/{game}/launch', ['as' => 'frontend.game.launch_json', 'uses' => 'GamesController@launch_json']);
     Route::post('game/{game}/server', ['as' => 'frontend.game.server', 'uses' => 'GamesController@server'])->middleware(\VanguardLTE\Http\Middleware\ProtectGameRequests::class);
 
     // Optional provider compatibility. Existing physical files bypass Laravel
@@ -253,6 +254,15 @@ Route::post('payment/webhook/btcpay', [\VanguardLTE\Http\Controllers\Web\Fronten
 Route::post('payment/webhook/stripe', [\VanguardLTE\Http\Controllers\Web\Frontend\TopupController::class, 'webhookStripe'])->name('payment.webhook.stripe');
 Route::post('payment/webhook/xtopay', [\VanguardLTE\Http\Controllers\Web\Frontend\TopupController::class, 'webhookXtopay'])->name('payment.webhook.xtopay');
 
+// Casino seamless-wallet callbacks (no auth, signature verified per provider).
+// Registered with the aggregator as <APP_URL>/webhooks/aggregator/<slug>/wallet.
+// The operation may arrive in the path (/wallet/BetWin) or in the body
+// (action=bet) when the vendor posts everything to the base URL.
+Route::post('webhooks/aggregator/{slug}/wallet/{operation?}', [
+    \VanguardLTE\Http\Controllers\Web\Webhooks\CasinoWalletController::class, 'handle',
+])->where('operation', 'GetBalance|Withdraw|Deposit|BetWin|RollbackTransaction')
+    ->name('webhooks.casino.wallet');
+
 
 /**
  *
@@ -318,6 +328,18 @@ Route::prefix('liteback')
 
             Route::get('/settings', ['as' => 'liteback.sports.settings', 'uses' => 'SportsControlController@settings']);
             Route::post('/settings', ['as' => 'liteback.sports.settings.update', 'uses' => 'SportsControlController@updateSettings']);
+            Route::get('/providers', ['as' => 'liteback.sports.providers', 'uses' => 'SportsProviderController@index']);
+            Route::post('/providers/select', ['as' => 'liteback.sports.providers.select', 'uses' => 'SportsProviderController@select']);
+            Route::post('/providers/test', ['as' => 'liteback.sports.providers.test', 'uses' => 'SportsProviderController@test']);
+        });
+
+        // Casino game provider (seamless wallet) admin routes
+        Route::prefix('casino')->group(function () {
+            Route::get('/providers', ['as' => 'liteback.casino.providers', 'uses' => 'CasinoProviderController@index']);
+            Route::post('/providers/update', ['as' => 'liteback.casino.providers.update', 'uses' => 'CasinoProviderController@update']);
+            Route::post('/providers/toggle', ['as' => 'liteback.casino.providers.toggle', 'uses' => 'CasinoProviderController@toggle']);
+            Route::post('/providers/test', ['as' => 'liteback.casino.providers.test', 'uses' => 'CasinoProviderController@test']);
+            Route::get('/transactions', ['as' => 'liteback.casino.transactions', 'uses' => 'CasinoProviderController@transactions']);
         });
 
         // Payments Admin routes

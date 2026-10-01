@@ -9,6 +9,8 @@ if (PHP_SAPI !== 'cli') {
 
 $root = dirname(__DIR__, 2);
 $service = file_get_contents($root . '/app/Sports/Services/SportsOddsSyncService.php');
+$promexProvider = file_get_contents($root . '/app/Sports/Providers/PromexLicensedProvider.php');
+$registry = file_get_contents($root . '/app/Sports/Providers/SportsProviderRegistry.php');
 $command = file_get_contents($root . '/app/Console/Commands/Sports/SyncAll.php');
 $dashboard = file_get_contents($root . '/app/Http/Controllers/Web/Liteback/SportsDashboardController.php');
 $dashboardView = file_get_contents($root . '/resources/views/liteback/sports/dashboard.blade.php');
@@ -19,8 +21,9 @@ $sportsView = file_get_contents($root . '/resources/views/frontend/Minimal/sport
 $frontendLayout = file_get_contents($root . '/resources/views/frontend/Minimal/layouts/clean.blade.php');
 
 $checks = [
-    'full sync routes PROMEX through installation-authenticated Hub' => str_contains($service, "settings('sportsbook_api_provider', 'promex')")
-        && str_contains($service, "PromexInstallationService::signedHeaders('GET', \$path)"),
+    'full sync routes PROMEX through installation-authenticated Hub' => str_contains($registry, "PromexLicensedProvider::KEY")
+        && str_contains($promexProvider, "PromexInstallationService::signedHeaders('GET', \$path)")
+        && str_contains($service, '->provider()'),
     'full sync never requires a customer API key in PROMEX mode' => str_contains($command, "if (\$this->syncService->getProvider() === 'promex')")
         && str_contains($command, 'syncAll((array) $this->option(\'sports\'))'),
     'feed import updates Battle Odds and advanced sportsbook records' => str_contains($service, 'SportsMatch::updateOrCreate')

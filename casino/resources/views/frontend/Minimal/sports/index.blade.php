@@ -1,6 +1,6 @@
 @extends('frontend.Minimal.layouts.clean')
 
-@section('page-title', 'Battle Odds Sportsbook - Casino du Liban')
+@section('page-title', 'Battle Odds Spor Bahisleri - Promex Gaming Suite')
 
 @section('content')
 
@@ -10,10 +10,10 @@
         <div>
             <div class="inline-flex items-center gap-2 bg-secondary/10 border border-secondary/25 px-3 py-1 rounded-full mb-1">
                 <span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
-                <span class="text-[11px] font-bold text-secondary font-mono-jet uppercase tracking-wider">FREE SOCIAL SPORTSBOOK</span>
+                <span class="text-[11px] font-bold text-secondary font-mono-jet uppercase tracking-wider">ÜCRETSİZ SOSYAL SPOR BAHİSLERİ</span>
             </div>
-            <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight uppercase">Battle Odds Arena</h1>
-            <p class="text-on-surface-muted text-xs sm:text-sm mt-0.5">Wager singles or multi-match parlays on global matches with 100% Free Cedar Coins.</p>
+            <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight uppercase">Battle Odds Arenasısısı</h1>
+            <p class="text-on-surface-muted text-xs sm:text-sm mt-0.5">Global maçlarda tekli veya çoklu maç parlay bahislerini %100 Ücretsiz TRY ile yapın.</p>
         </div>
         <span class="font-mono-jet text-xs text-primary font-bold bg-primary/10 border border-primary/20 px-3 py-1.5 rounded-xl self-start sm:self-auto">
             {{ (isset($matches) && (is_array($matches) || $matches instanceof \Countable)) ? count($matches) : 0 }} FIXTURES OPEN
@@ -24,10 +24,10 @@
     @php $cat = $selectedCategory ?? 'all'; @endphp
     <div class="flex items-center gap-2 overflow-x-auto pb-1.5 custom-scrollbar max-w-full">
         <a href="?sport=all" class="px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap uppercase tracking-wider no-underline {{ $cat === 'all' ? 'bg-secondary text-white shadow-md shadow-secondary/25' : 'bg-surface-card text-on-surface-muted hover:text-white border border-white/[0.06]' }}">
-            ⚽ All Sports
+            ⚽ Tüm Sporlar
         </a>
         <a href="?sport=soccer" class="px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap uppercase tracking-wider no-underline {{ str_contains($cat, 'soccer') ? 'bg-secondary text-white shadow-md shadow-secondary/25' : 'bg-surface-card text-on-surface-muted hover:text-white border border-white/[0.06]' }}">
-            🏆 Football / Soccer
+            🏆 Futbol
         </a>
         <a href="?sport=basketball" class="px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap uppercase tracking-wider no-underline {{ str_contains($cat, 'basketball') ? 'bg-secondary text-white shadow-md shadow-secondary/25' : 'bg-surface-card text-on-surface-muted hover:text-white border border-white/[0.06]' }}">
             🏀 Basketball
@@ -65,21 +65,21 @@
                     <!-- Home Win Button -->
                     <button type="button" class="btn-odd p-2.5 sm:p-3 rounded-xl bg-[#182030] border border-white/[0.08] hover:border-primary/50 text-xs font-bold text-white transition-all flex flex-col sm:flex-row justify-between items-center gap-1 cursor-pointer"
                             data-match-id="{{ $m->match_id }}" data-home="{{ $m->home_team }}" data-away="{{ $m->away_team }}" data-selection="home" data-odds="{{ $m->odds_home }}">
-                        <span class="text-on-surface-muted text-[10px] sm:text-xs truncate max-w-[90px]">1 (Home)</span>
+                        <span class="text-on-surface-muted text-[10px] sm:text-xs truncate max-w-[90px]">1 (Ev Sahibi)</span>
                         <span class="text-primary font-mono-jet text-xs sm:text-sm font-bold">{{ number_format($m->odds_home, 2) }}</span>
                     </button>
 
                     <!-- Draw Button -->
                     <button type="button" class="btn-odd p-2.5 sm:p-3 rounded-xl bg-[#182030] border border-white/[0.08] hover:border-primary/50 text-xs font-bold text-white transition-all flex flex-col sm:flex-row justify-between items-center gap-1 cursor-pointer"
                             data-match-id="{{ $m->match_id }}" data-home="{{ $m->home_team }}" data-away="{{ $m->away_team }}" data-selection="draw" data-odds="{{ $m->odds_draw ?? 3.20 }}">
-                        <span class="text-on-surface-muted text-[10px] sm:text-xs">X (Draw)</span>
+                        <span class="text-on-surface-muted text-[10px] sm:text-xs">X (Beraberlik)</span>
                         <span class="text-secondary font-mono-jet text-xs sm:text-sm font-bold">{{ number_format($m->odds_draw ?? 3.20, 2) }}</span>
                     </button>
 
                     <!-- Away Win Button -->
                     <button type="button" class="btn-odd p-2.5 sm:p-3 rounded-xl bg-[#182030] border border-white/[0.08] hover:border-primary/50 text-xs font-bold text-white transition-all flex flex-col sm:flex-row justify-between items-center gap-1 cursor-pointer"
                             data-match-id="{{ $m->match_id }}" data-home="{{ $m->home_team }}" data-away="{{ $m->away_team }}" data-selection="away" data-odds="{{ $m->odds_away }}">
-                        <span class="text-on-surface-muted text-[10px] sm:text-xs truncate max-w-[90px]">2 (Away)</span>
+                        <span class="text-on-surface-muted text-[10px] sm:text-xs truncate max-w-[90px]">2 (Deplasman)</span>
                         <span class="text-primary font-mono-jet text-xs sm:text-sm font-bold">{{ number_format($m->odds_away, 2) }}</span>
                     </button>
                 </div>
@@ -87,8 +87,8 @@
         @empty
             <div class="text-center py-16 bg-[#121622] rounded-3xl border border-white/[0.06]">
                 <span class="material-symbols-outlined text-4xl text-on-surface-subtle mb-2">sports_soccer</span>
-                <p class="text-on-surface-muted text-sm font-medium">No live fixtures currently scheduled.</p>
-                <p class="text-xs text-on-surface-subtle mt-1">Check back shortly or sync fixtures via Liteback admin.</p>
+                <p class="text-on-surface-muted text-sm font-medium">Şu anda planlanmış canlı maç yok.</p>
+                <p class="text-xs text-on-surface-subtle mt-1">Kısa süre sonra tekrar kontrol edin veya Liteback yöneticisinden fikstürleri senkronize edin.</p>
             </div>
         @endforelse
     </div>
@@ -99,45 +99,45 @@
             <div class="flex justify-between items-center pb-3 border-b border-white/[0.08]">
                 <div class="flex items-center gap-2">
                     <span class="material-symbols-outlined text-primary text-xl">receipt_long</span>
-                    <h3 class="font-extrabold text-sm text-white uppercase tracking-tight">Betslip</h3>
+                    <h3 class="font-extrabold text-sm text-white uppercase tracking-tight">Bahis Kuponu</h3>
                 </div>
                 <button type="button" id="btn-clear-slip" class="text-xs text-accent-rose hover:underline font-bold uppercase transition-colors">
-                    Clear Slip
+                    Kuponu Temizle
                 </button>
             </div>
 
             <!-- Mode Switcher Tabs (PARLAY vs SINGLES) -->
             <div class="grid grid-cols-2 gap-1 p-1 bg-black/40 rounded-xl border border-white/[0.08] text-xs font-bold uppercase">
                 <button type="button" id="btn-mode-parlay" class="py-2 rounded-lg transition-all text-center bg-primary text-white shadow-sm">
-                    🎟️ Parlay
+                    🎟️ Kombine
                 </button>
                 <button type="button" id="btn-mode-singles" class="py-2 rounded-lg transition-all text-center text-on-surface-muted hover:text-white">
-                    🎯 Singles
+                    🎯 Tekli
                 </button>
             </div>
 
             <!-- Selected Match Legs List -->
             <div id="betslip-legs" class="space-y-2 text-xs font-mono-jet max-h-[320px] overflow-y-auto custom-scrollbar pr-1">
-                <p class="text-on-surface-muted text-center py-8 text-xs">Click any odds on the left to build your betslip.</p>
+                <p class="text-on-surface-muted text-center py-8 text-xs">Bahis kuponunuzu oluşturmak için soldaki oranlardan birine tıklayın.</p>
             </div>
 
             <!-- Betslip Summary & Controls -->
             <div class="space-y-3 pt-3 border-t border-white/[0.08]">
                 <div class="flex justify-between text-xs font-mono-jet">
-                    <span class="text-on-surface-muted">Bet Mode:</span>
-                    <span id="betslip-type" class="text-primary font-bold uppercase">PARLAY</span>
+                    <span class="text-on-surface-muted">Bahis Modu:</span>
+                    <span id="betslip-type" class="text-primary font-bold uppercase">KOMBİNE</span>
                 </div>
                 <div id="row-total-odds" class="flex justify-between text-xs font-mono-jet">
-                    <span class="text-on-surface-muted">Combined Odds:</span>
+                    <span class="text-on-surface-muted">Birleşik Oranlar:</span>
                     <span id="betslip-total-odds" class="text-secondary font-bold text-sm">1.00</span>
                 </div>
                 <div id="row-parlay-boost" class="hidden justify-between text-xs font-mono-jet text-emerald-400 font-bold bg-emerald-500/10 p-2 rounded-lg border border-emerald-500/20">
-                    <span>🔥 Accumulator Boost:</span>
+                    <span>🔥 Akümülatör Bonusu:</span>
                     <span id="betslip-boost-val">+0%</span>
                 </div>
 
                 <div class="space-y-1.5">
-                    <label id="lbl-stake" for="betslip-stake" class="text-[11px] font-bold text-on-surface-muted uppercase">Stake per Bet (Cedar Coins)</label>
+                    <label id="lbl-stake" for="betslip-stake" class="text-[11px] font-bold text-on-surface-muted uppercase">Bahis Başına Miktar (TRY)</label>
                     <input type="number" id="betslip-stake" value="1000" min="100" step="100" class="w-full text-sm font-mono-jet text-primary font-bold p-3 bg-black/40 border border-white/10 rounded-xl focus:border-primary focus:outline-none">
                     
                     <!-- Quick Stake Chips -->
@@ -150,26 +150,26 @@
                 </div>
 
                 <div class="flex justify-between text-xs font-mono-jet text-on-surface-muted pt-1">
-                    <span>Total Cost:</span>
+                    <span>Toplam Maliyet:</span>
                     <span id="betslip-total-cost" class="text-white font-bold">1,000 CEDARS</span>
                 </div>
 
                 <div class="flex justify-between text-sm font-mono-jet font-bold pt-1">
-                    <span class="text-white">Potential Win:</span>
+                    <span class="text-white">Potansiyel Kazanç:</span>
                     <span id="betslip-potential" class="text-primary text-base">0 CEDARS</span>
                 </div>
 
-                <button type="button" id="btn-place-wager" class="w-full bg-primary hover:bg-primary-dark text-white py-3 rounded-xl font-bold text-xs uppercase tracking-wider shadow-lg shadow-primary/25 transition-all">
-                    Place Social Wager
+                <button type="button" id="btn-place-wager" class="w-full btn-glow bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white py-3 rounded-xl font-bold text-xs uppercase tracking-wider shadow-lg shadow-primary/25 transition-all">
+                    Sosyal Bahis Yap
                 </button>
             </div>
         </div>
 
-        <!-- Recent Wagers Card -->
+        <!-- Son Bahisler Card -->
         @if(isset($userBets) && count($userBets) > 0)
             <div class="bg-[#121622] rounded-3xl p-5 border border-white/[0.08] space-y-3">
                 <h3 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
-                    <span class="material-symbols-outlined text-secondary text-base">history</span> Recent Wagers
+                    <span class="material-symbols-outlined text-secondary text-base">history</span> Son Bahisler
                 </h3>
                 <div class="space-y-2 text-xs font-mono-jet">
                     @foreach($userBets as $b)
@@ -188,10 +188,10 @@
                             @if($b->status === 'pending')
                                 <div class="pt-2 border-t border-white/5 flex items-center justify-between">
                                     <button type="button" class="btn-cashout-action px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-bold text-[10px] border border-amber-500/40 transition-all flex items-center gap-1.5" data-bet-id="{{ $b->id }}" data-quoted="false">
-                                        <span>💰 Cash Out</span>
-                                        <span class="cashout-offer-val font-mono-jet text-white font-extrabold" id="cashout-label-{{ $b->id }}">Quote</span>
+                                        <span>💰 Para Çek</span>
+                                        <span class="cashout-offer-val font-mono-jet text-white font-extrabold" id="cashout-label-{{ $b->id }}">Teklif</span>
                                     </button>
-                                    <span class="text-[9px] text-on-surface-muted">Live Fair Value</span>
+                                    <span class="text-[9px] text-on-surface-muted">Canlı Adil Değer</span>
                                 </div>
                             @endif
                         </div>
@@ -221,7 +221,7 @@
             <span>Betslip (<span id="mobile-sheet-count">0</span> Legs)</span>
         </h3>
         <div class="flex items-center gap-3">
-            <button type="button" id="btn-clear-slip-mobile" class="text-xs text-accent-rose font-bold uppercase hover:underline">Clear</button>
+            <button type="button" id="btn-clear-slip-mobile" class="text-xs text-accent-rose font-bold uppercase hover:underline">Temizle</button>
             <button id="btn-close-betslip-sheet" type="button" class="text-on-surface-subtle hover:text-white p-1 rounded-xl bg-white/[0.04]">
                 <span class="material-symbols-outlined text-lg">close</span>
             </button>
@@ -231,50 +231,50 @@
     <!-- Mode Switcher Tabs (PARLAY vs SINGLES) -->
     <div class="grid grid-cols-2 gap-1 p-1 bg-black/40 rounded-xl border border-white/[0.08] text-xs font-bold uppercase mb-4">
         <button type="button" id="btn-mode-parlay-mobile" class="py-2.5 rounded-lg transition-all text-center bg-primary text-white shadow-sm">
-            🎟️ Parlay
+            🎟️ Kombine
         </button>
         <button type="button" id="btn-mode-singles-mobile" class="py-2.5 rounded-lg transition-all text-center text-on-surface-muted hover:text-white">
-            🎯 Singles
+            🎯 Tekli
         </button>
     </div>
 
     <!-- Selected Legs Container -->
     <div id="betslip-legs-mobile" class="space-y-2 text-xs font-mono-jet min-h-[80px] mb-4">
-        <p class="text-on-surface-muted text-center py-6 text-xs">Click any match odds to build your betslip.</p>
+        <p class="text-on-surface-muted text-center py-6 text-xs">Bahis kuponunuzu oluşturmak için herhangi bir maç oranına tıklayın.</p>
     </div>
 
     <!-- Betslip Summary -->
     <div class="space-y-3 pt-3 border-t border-white/[0.08] mb-2">
         <div class="flex justify-between text-xs font-mono-jet">
-            <span class="text-on-surface-muted">Bet Mode:</span>
-            <span id="betslip-type-mobile" class="text-primary font-bold uppercase">PARLAY</span>
+            <span class="text-on-surface-muted">Bahis Modu:</span>
+            <span id="betslip-type-mobile" class="text-primary font-bold uppercase">KOMBİNE</span>
         </div>
         <div id="row-total-odds-mobile" class="flex justify-between text-xs font-mono-jet">
-            <span class="text-on-surface-muted">Combined Odds:</span>
+            <span class="text-on-surface-muted">Birleşik Oranlar:</span>
             <span id="betslip-total-odds-mobile" class="text-secondary font-bold">1.00</span>
         </div>
         <div id="row-parlay-boost-mobile" class="hidden justify-between text-xs font-mono-jet text-emerald-400 font-bold bg-emerald-500/10 p-2 rounded-lg border border-emerald-500/20">
-            <span>🔥 Accumulator Boost:</span>
+            <span>🔥 Akümülatör Bonusu:</span>
             <span id="betslip-boost-val-mobile">+0%</span>
         </div>
 
         <div class="form-group space-y-1">
-            <label id="lbl-stake-mobile" for="betslip-stake-mobile" class="text-xs text-on-surface-muted uppercase">Stake per Bet (Cedar Coins)</label>
+            <label id="lbl-stake-mobile" for="betslip-stake-mobile" class="text-xs text-on-surface-muted uppercase">Bahis Başına Miktar (TRY)</label>
             <input type="number" id="betslip-stake-mobile" value="1000" min="100" step="100" class="w-full text-sm font-mono-jet text-primary font-bold p-3 bg-black/40 border border-white/10 rounded-xl focus:border-primary focus:outline-none">
         </div>
 
         <div class="flex justify-between text-xs font-mono-jet text-on-surface-muted">
-            <span>Total Cost:</span>
+            <span>Toplam Maliyet:</span>
             <span id="betslip-total-cost-mobile" class="text-white font-bold">1,000 CEDARS</span>
         </div>
 
         <div class="flex justify-between text-sm font-mono-jet font-bold pt-1">
-            <span class="text-white">Est. Payout:</span>
+            <span class="text-white">Tahmini Ödeme:</span>
             <span id="betslip-potential-mobile" class="text-primary text-base">0 CEDARS</span>
         </div>
 
-        <button type="button" id="btn-place-wager-mobile" class="w-full bg-primary hover:bg-primary-dark text-white py-3.5 rounded-xl font-bold text-xs uppercase tracking-wider shadow-lg shadow-primary/25 transition-all mt-2">
-            Place Social Wager
+        <button type="button" id="btn-place-wager-mobile" class="w-full btn-glow bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white py-3.5 rounded-xl font-bold text-xs uppercase tracking-wider shadow-lg shadow-primary/25 transition-all mt-2">
+            Sosyal Bahis Yap
         </button>
     </div>
 </div>
@@ -377,8 +377,8 @@ document.addEventListener('DOMContentLoaded', function() {
             if (typeElemMobile) typeElemMobile.innerText = "PARLAY";
             if (rowTotalOdds) rowTotalOdds.style.display = "flex";
             if (rowTotalOddsMobile) rowTotalOddsMobile.style.display = "flex";
-            if (stakeLabel) stakeLabel.innerText = "Parlay Stake (Cedar Coins)";
-            if (stakeLabelMobile) stakeLabelMobile.innerText = "Parlay Stake (Cedar Coins)";
+            if (stakeLabel) stakeLabel.innerText = "Parlay Stake (TRY)";
+            if (stakeLabelMobile) stakeLabelMobile.innerText = "Parlay Stake (TRY)";
         } else {
             if (btnModeSingles) btnModeSingles.className = activeCls;
             if (btnModeParlay) btnModeParlay.className = inactiveCls;
@@ -388,8 +388,8 @@ document.addEventListener('DOMContentLoaded', function() {
             if (typeElemMobile) typeElemMobile.innerText = "SINGLES";
             if (rowTotalOdds) rowTotalOdds.style.display = "none";
             if (rowTotalOddsMobile) rowTotalOddsMobile.style.display = "none";
-            if (stakeLabel) stakeLabel.innerText = "Stake Per Leg (Cedar Coins)";
-            if (stakeLabelMobile) stakeLabelMobile.innerText = "Stake Per Leg (Cedar Coins)";
+            if (stakeLabel) stakeLabel.innerText = "Stake Per Leg (TRY)";
+            if (stakeLabelMobile) stakeLabelMobile.innerText = "Stake Per Leg (TRY)";
         }
         renderBetslip();
     }
@@ -454,7 +454,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         let legsHtml = '';
         if (count === 0) {
-            legsHtml = '<p class="text-on-surface-muted text-center py-6 text-xs">Click any match odds to build your betslip.</p>';
+            legsHtml = '<p class="text-on-surface-muted text-center py-6 text-xs">Bahis kuponunuzu oluşturmak için herhangi bir maç oranına tıklayın.</p>';
         } else {
             betslip.forEach((item, idx) => {
                 let pickLabel = item.selection === 'home' ? item.home : (item.selection === 'away' ? item.away : 'Draw');
@@ -462,7 +462,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="p-2.5 rounded-xl bg-[#161c2b] border border-white/[0.06] flex justify-between items-center text-xs">
                         <div class="flex-1 pr-2">
                             <span class="text-white font-bold block truncate text-xs">${item.home} vs ${item.away}</span>
-                            <span class="text-on-surface-muted text-[11px]">Pick: <strong class="text-primary font-bold">${pickLabel}</strong></span>
+                            <span class="text-on-surface-muted text-[11px]">Seçim: <strong class="text-primary font-bold">${pickLabel}</strong></span>
                         </div>
                         <div class="flex items-center gap-2">
                             <span class="font-bold text-secondary font-mono-jet">${item.odds.toFixed(2)}</span>
@@ -658,7 +658,7 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 // Step 2: Confirm cashout execution
                 const cashoutVal = parseFloat(this.dataset.cashoutVal);
-                if (!confirm(`Confirm Early Cash Out for ${cashoutVal.toLocaleString()} Cedar Coins?`)) {
+                if (!confirm(`Confirm Early Para Çek for ${cashoutVal.toLocaleString()} TRY?`)) {
                     return;
                 }
 
@@ -678,9 +678,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     if (data.success) {
                         alert('🎉 ' + data.message);
-                        if (labelEl) labelEl.innerText = 'Cashed Out';
+                        if (labelEl) labelEl.innerText = 'Nakde Çevrildi';
                         this.className = 'px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 font-bold text-[10px] border border-emerald-500/40 cursor-default';
-                        this.innerHTML = '<span>✓ Cashed Out</span>';
+                        this.innerHTML = '<span>✓ Nakde Çevrildi</span>';
                         setTimeout(() => window.location.reload(), 1200);
                     } else {
                         alert('❌ ' + data.message);

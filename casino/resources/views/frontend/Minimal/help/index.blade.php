@@ -15,7 +15,7 @@
         </div>
     </section>
 
-    <nav class="flex gap-2 overflow-x-auto pb-1 custom-scrollbar" aria-label="Help languages" dir="ltr">
+    <nav class="flex gap-2 overflow-x-auto pb-1 custom-scrollbar" aria-label="Yardım dilleri" dir="ltr">
         @foreach($languages as $code => $label)
             <a href="{{ route('frontend.help', $code) }}" class="px-4 py-2 rounded-xl text-xs font-bold no-underline transition-all {{ $locale === $code ? 'bg-primary text-white shadow-md shadow-primary/25' : 'bg-surface-card border border-white/[0.08] text-on-surface-muted hover:text-white hover:border-white/20' }}">{{ $label }}</a>
         @endforeach

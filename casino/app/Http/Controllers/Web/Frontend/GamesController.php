@@ -485,19 +485,9 @@ namespace VanguardLTE\Http\Controllers\Web\Frontend {
         }
         public function search_json(\Illuminate\Http\Request $request)
         {
-            if (!\Illuminate\Support\Facades\Auth::check()) {
-                return response()->json([
-                    'fail' => true,
-                    'text' => __('app.no_permission')
-                ]);
-            }
-            if (!auth()->user()->hasRole('user')) {
-                return response()->json([
-                    'fail' => true,
-                    'text' => __('app.no_permission')
-                ]);
-            }
-            $shop = \VanguardLTE\Shop::find(auth()->user()->shop_id);
+            // Public lobby search: guests browse the default shop catalogue too.
+            $shopId = \Illuminate\Support\Facades\Auth::check() ? auth()->user()->shop_id : 1;
+            $shop = \VanguardLTE\Shop::find($shopId);
             if (!$shop) {
                 return response()->json([
                     'fail' => true,
@@ -606,8 +596,9 @@ namespace VanguardLTE\Http\Controllers\Web\Frontend {
                         'is_new' => $game->is_new(),
                         'is_hot' => $game->is_hot(),
                         'label' => mb_strtoupper($game->label),
-                        'icon' => ($game->name ? '/frontend/' . $shop->frontend . '/ico/' . $game->name . '.jpg' : ''),
+                        'icon' => game_cover($game),
                         'link' => route('frontend.game.go', $game->name),
+                        'provider_key' => (string) ($game->provider_key ?? ''),
                         'tournaments' => false
                     ];
                     if ($game->jackpot) {
@@ -767,10 +758,69 @@ namespace VanguardLTE\Http\Controllers\Web\Frontend {
                 'data' => $returns
             ]);
         }
+
+        /**
+         * Return the vendor session URL for in-page (embedded) launch.
+         *
+         * The lobby renders aggregator games inside an in-site frame so the
+         * player never leaves the page; the same URL can still be opened in a
+         * new tab on demand. Sessions are short lived, so the response is never
+         * cached.
+         */
+        public function launch_json(\Illuminate\Http\Request $request, $game)
+        {
+            if (!\Auth::check()) {
+                return response()->json(['success' => false, 'text' => 'Oyun oynamak için giriş yapmalısınız.'], 401);
+            }
+
+            $casinoGame = \VanguardLTE\Game::where('name', $game)->first();
+            if (!$casinoGame || empty($casinoGame->provider_key)) {
+                return response()->json(['success' => false, 'text' => 'Bu oyun gömülü açılmıyor.'], 404);
+            }
+
+            $launchService = app(\VanguardLTE\Casino\CasinoGameLaunchService::class);
+            if (!$launchService->isCasinoGame($casinoGame)) {
+                return response()->json(['success' => false, 'text' => 'Sağlayıcı tanımlı değil.'], 404);
+            }
+
+            try {
+                $launch = $launchService->launch($casinoGame, \Auth::user(), app()->getLocale());
+            } catch (\RuntimeException $e) {
+                return response()->json(['success' => false, 'text' => $e->getMessage()], 422);
+            }
+
+            return response()->json([
+                'success' => true,
+                'url' => $launch['url'],
+                'form' => $launch['form'] ?? null,
+                'title' => $casinoGame->title,
+                'provider' => $launch['provider'],
+                'embedded' => $launchService->canEmbed((string) $casinoGame->provider_key),
+            ], 200, [], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        }
+
         public function go(\Illuminate\Http\Request $request, $game, $prego = '')
         {
             if (!\Auth::check()) {
                 return redirect()->route('frontend.game.list')->with('modal', 'modal-login');
+            }
+
+            // Aggregator slots are delivered by their own provider and are not
+            // gated by the PROMEX license, so resolve them before that check.
+            $casinoGame = \VanguardLTE\Game::where('name', $game)->first();
+            if ($casinoGame && !empty($casinoGame->provider_key)) {
+                $launchService = app(\VanguardLTE\Casino\CasinoGameLaunchService::class);
+                if ($launchService->isCasinoGame($casinoGame)) {
+                    try {
+                        $launch = $launchService->launch($casinoGame, \Auth::user(), app()->getLocale());
+                    } catch (\RuntimeException $e) {
+                        return redirect()->route('frontend.game.list')->withErrors($e->getMessage());
+                    }
+
+                    return response()
+                        ->view('frontend.games.external', ['game' => $casinoGame, 'launch' => $launch])
+                        ->header('Cache-Control', 'private, no-store');
+                }
             }
 
             if (!\VanguardLTE\Services\LicenseService::canPlayGame((string)$game)) {

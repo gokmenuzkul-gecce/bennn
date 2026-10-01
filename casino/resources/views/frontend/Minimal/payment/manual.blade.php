@@ -1,6 +1,6 @@
 @extends('frontend.Minimal.layouts.clean')
 
-@section('page-title', 'Manual Deposit')
+@section('page-title', 'Manuel Yatırım')
 
 @section('styles')
 <style>
@@ -169,15 +169,15 @@
 <div class="manual-payment-wrapper">
     <div class="payment-card">
         <div class="payment-header">
-            <h2>Manual Transfer Proof</h2>
-            <p class="text-muted">Follow instructions below to complete your deposit.</p>
+            <h2>Manuel Transfer Kanıtı</h2>
+            <p class="text-muted">Para yatırma işleminizi tamamlamak için aşağıdaki talimatları izleyin.</p>
             <div class="payment-amount-badge">
                 {{ number_format($intent->amount, 2) }} {{ $intent->currency }}
             </div>
         </div>
 
         <div class="instruction-box">
-            <strong>Payment Instructions:</strong><br>
+            <strong>Ödeme Talimatları:</strong><br>
             {{ $instructions }}
         </div>
 
@@ -185,29 +185,29 @@
             @csrf
 
             <div class="form-group">
-                <label for="account_name">Sender Account Name / Account Holder</label>
+                <label for="account_name">Gönderen Hesap Adı / Hesap Sahibi</label>
                 <input type="text" name="account_name" id="account_name" class="form-control" placeholder="e.g. John Doe" required value="{{ old('account_name') }}">
             </div>
 
             <div class="form-group">
-                <label for="transaction_id">Transaction Reference ID / Receipt number</label>
+                <label for="transaction_id">İşlem Referans No / Makbuz numarası</label>
                 <input type="text" name="transaction_id" id="transaction_id" class="form-control" placeholder="e.g. TXN987654321" required value="{{ old('transaction_id') }}">
             </div>
 
             <div class="form-group">
-                <label>Screenshot of Receipt / Payment Proof</label>
+                <label>Makbuz Ekran Görüntüsü / Ödeme Kanıtı</label>
                 <div class="file-upload-wrapper">
                     <div class="file-upload-icon">
                         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-upload-cloud"><polyline points="16 16 12 12 8 16"></polyline><line x1="12" y1="12" x2="12" y2="21"></line><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path><polyline points="16 16 12 12 8 16"></polyline></svg>
                     </div>
-                    <div class="file-upload-text">Click or drag screenshot file here to upload (max 5MB)</div>
+                    <div class="file-upload-text">Yüklemek için ekran görüntüsü dosyasını buraya tıklayın veya sürükleyin (maks 5MB)</div>
                     <div class="file-upload-name" id="file-name"></div>
                     <input type="file" name="screenshot" id="screenshot" accept="image/*" required>
                 </div>
             </div>
 
-            <button type="submit" class="submit-btn">Submit Payment Proof</button>
-            <a href="{{ url('/') }}" class="cancel-link">Cancel and Go Back</a>
+            <button type="submit" class="submit-btn">Ödeme Kanıtını Gönder</button>
+            <a href="{{ url('/') }}" class="cancel-link">İptal Et ve Geri Dön</a>
         </form>
     </div>
 </div>

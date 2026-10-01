@@ -1,39 +1,39 @@
 @php
-    $brandName = settings('app_name') ?: 'Casino du Liban';
-    $brandTagline = settings('brand_tagline') ?: 'Social Gaming';
+    $brandName = settings('app_name') ?: 'Promex Gaming Suite';
+    $brandTagline = settings('brand_tagline') ?: 'Sosyal Oyun';
     $brandLogoPath = settings('brand_logo_path');
     $cedarBrand = settings('cedar_display_name') ?: 'CEDAR';
-    $coinLabel = settings('coin_display_name') ?: 'Cedar Coins';
-    $navCasino = settings('nav_label_casino') ?: 'Casino Slots';
+    $coinLabel = settings('coin_display_name') ?: 'TRY';
+    $navCasino = settings('nav_label_casino') ?: 'Casino Slotları';
     $navCedarGames = settings('nav_label_cedar_games') ?: 'CEDAR Games';
     $navCedarGamesBadge = settings('nav_badge_cedar_games') ?: 'HOT';
     $navCedarSlots = settings('nav_label_cedar_slots') ?: 'CEDAR Slots';
     $navCedarSlotsBadge = settings('nav_badge_cedar_slots');
     $navSports = settings('nav_label_sportsbook') ?: 'Battle Odds';
-    $navLotto = settings('nav_label_lotto') ?: 'Jackpot Zone';
-    $navPredictions = settings('nav_label_predictions') ?: 'Future Vote';
+    $navLotto = settings('nav_label_lotto') ?: 'Jackpot Bölgesi';
+    $navPredictions = settings('nav_label_predictions') ?: 'Gelecek Oyu';
 @endphp
 
 <!-- Left Sidebar Navigation (Desktop) -->
-<aside class="hidden lg:flex flex-col w-sidebar-width h-screen sticky top-0 bg-[#0e121b]/95 border-r border-white/[0.07] backdrop-blur-xl z-50 p-5 flex-shrink-0">
+<aside class="hidden lg:flex flex-col w-sidebar-width h-screen sticky top-0 bg-[#0b0f17]/90 border-r border-white/[0.07] backdrop-blur-2xl z-50 p-5 flex-shrink-0">
     <!-- Brand Logo -->
-    <div class="mb-8 flex items-center gap-3 px-2">
+    <div class="mb-7 flex items-center gap-3 px-2">
         @if($brandLogoPath)
             <img src="{{ asset('storage/' . $brandLogoPath) }}" alt="{{ $brandName }}" class="w-10 h-10 rounded-xl object-contain bg-primary/10 shadow-lg shadow-primary/20 flex-shrink-0">
         @else
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center shadow-lg shadow-primary/20 flex-shrink-0">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 via-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/30 flex-shrink-0">
                 <span class="material-symbols-outlined text-white text-2xl" style="font-variation-settings: 'FILL' 1;">park</span>
             </div>
         @endif
         <a href="{{ route('frontend.game.list') }}" class="flex flex-col no-underline">
             <span class="text-base font-extrabold tracking-tight text-white leading-tight">{{ strtoupper($brandName) }}</span>
-            <span class="text-[10px] font-bold tracking-widest text-primary uppercase">{{ $brandTagline }}</span>
+            <span class="text-[10px] font-bold tracking-widest text-emerald-400 uppercase">{{ $brandTagline }}</span>
         </a>
     </div>
 
     <!-- Main Navigation Links -->
     <nav class="flex-1 space-y-1.5 overflow-y-auto custom-scrollbar pr-1">
-        <div class="text-[10px] font-bold uppercase tracking-wider text-on-surface-subtle px-3 py-1">Gaming Hub</div>
+        <div class="text-[10px] font-bold uppercase tracking-wider text-on-surface-subtle px-3 py-1">Oyun Merkezi</div>
 
         <!-- Casino Lobby -->
         @if(settings('enable_casino_slots', '1') == '1')
@@ -93,83 +93,42 @@
 
         <a class="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all group no-underline {{ Route::is('frontend.crypto*') ? 'bg-cyan-400/10 text-cyan-300 border border-cyan-400/20 shadow-sm' : 'text-on-surface-muted hover:text-white hover:bg-white/[0.04]' }}" href="{{ route('frontend.crypto.index') }}">
             <span class="material-symbols-outlined text-xl {{ Route::is('frontend.crypto*') ? 'text-cyan-300' : 'text-on-surface-subtle group-hover:text-white' }} transition-colors" style="font-variation-settings: 'FILL' 1;">candlestick_chart</span>
-            <span>Crypto Trading</span>
+            <span>Kripto Ticareti</span>
         </a>
         <a class="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all group no-underline {{ Route::is('frontend.stocks*') ? 'bg-cyan-400/10 text-cyan-300 border border-cyan-400/20 shadow-sm' : 'text-on-surface-muted hover:text-white hover:bg-white/[0.04]' }}" href="{{ route('frontend.stocks.index') }}">
             <span class="material-symbols-outlined text-xl {{ Route::is('frontend.stocks*') ? 'text-cyan-300' : 'text-on-surface-subtle group-hover:text-white' }} transition-colors" style="font-variation-settings: 'FILL' 1;">show_chart</span>
-            <span>Stock Trading</span>
+            <span>Hisse Ticareti</span>
         </a>
 
         <!-- 3-Tier Affiliate & Referral Program -->
         <a class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all group no-underline {{ Route::is('frontend.affiliates*') ? 'bg-amber-500/10 text-amber-400 border border-amber-500/25 shadow-sm' : 'text-on-surface-muted hover:text-white hover:bg-white/[0.04]' }}" href="{{ route('frontend.affiliates.index') }}">
             <div class="flex items-center gap-3.5">
                 <span class="material-symbols-outlined text-xl {{ Route::is('frontend.affiliates*') ? 'text-amber-400' : 'text-amber-400/80 group-hover:text-amber-400' }} transition-colors" style="font-variation-settings: 'FILL' 1;">groups</span>
-                <span>Affiliates</span>
+                <span>Ortaklık</span>
             </div>
-            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 uppercase tracking-wider">EARN</span>
+            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 uppercase tracking-wider">KAZAN</span>
         </a>
 
-        <!-- VIP Club & Loyalty Vault -->
+        <!-- VIP Kulübü ve Sadakat Kasası -->
         <a class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all group no-underline {{ Route::is('frontend.vip*') ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 shadow-sm' : 'text-on-surface-muted hover:text-white hover:bg-white/[0.04]' }}" href="{{ route('frontend.vip.index') }}">
             <div class="flex items-center gap-3.5">
                 <span class="material-symbols-outlined text-xl {{ Route::is('frontend.vip*') ? 'text-emerald-400' : 'text-emerald-400/80 group-hover:text-emerald-400' }} transition-colors" style="font-variation-settings: 'FILL' 1;">workspace_premium</span>
-                <span>VIP Club</span>
+                <span>VIP Kulübü</span>
             </div>
-            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 uppercase tracking-wider">VAULT</span>
+            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 uppercase tracking-wider">KASA</span>
         </a>
     </nav>
 
-    <!-- Bottom Wallet & Profile Card -->
+    <!-- Bottom Utility Bar (wallet + profile now live in the top-right account menu) -->
     <div class="mt-auto space-y-3 pt-4 border-t border-white/[0.07]">
-        <!-- Coin Wallet Card -->
-        <div class="bg-[#121622] p-3.5 rounded-2xl border border-white/[0.08] shadow-inner">
-            <div class="flex items-center justify-between mb-1.5">
-                <span class="text-[11px] font-bold text-on-surface-muted uppercase tracking-wider">{{ $coinLabel }}</span>
-                <span class="text-[10px] font-bold text-accent-gold bg-accent-gold/10 px-2 py-0.5 rounded-full border border-accent-gold/20">FREE</span>
-            </div>
-            <div class="flex items-baseline gap-1.5">
-                <span class="font-mono-jet text-lg font-bold text-primary tracking-tight" id="user-coin-balance-sidebar">{{ Auth::check() ? number_format(Auth::user()->balance, 0) : '50,000' }}</span>
-                <span class="text-xs font-bold text-primary-light">{{ strtoupper($cedarBrand) }}</span>
-            </div>
-            <div class="mt-3 flex gap-2">
-                <button id="btn-sidebar-refill" type="button" class="flex-1 bg-gradient-to-r from-primary to-primary-dark hover:from-primary-light hover:to-primary text-white py-2 rounded-xl font-bold transition-all text-xs tracking-wide uppercase shadow-md shadow-primary/20 flex items-center justify-center gap-1">
-                    <span class="material-symbols-outlined text-sm">add_circle</span>
-                    <span>Power Up</span>
-                </button>
-                @if(settings('enable_cashout', '1') == '1')
-                <button type="button" class="flex-1 bg-white/[0.05] hover:bg-white/[0.1] text-accent-gold border border-accent-gold/30 py-2 rounded-xl font-bold transition-all text-xs tracking-wide uppercase shadow-sm flex items-center justify-center gap-1 open-modal" data-target="{{ Auth::check() ? 'modal-cashout' : 'modal-login' }}">
-                    <span class="material-symbols-outlined text-sm">payments</span>
-                    <span>Cashout</span>
-                </button>
-                @endif
-            </div>
-        </div>
-
-        <!-- User Profile Chip -->
-        <div class="flex items-center justify-between p-2.5 rounded-xl hover:bg-white/[0.04] transition-all cursor-pointer open-modal border border-transparent hover:border-white/[0.06]" data-target="{{ Auth::check() ? 'modal-profile' : 'modal-login' }}">
-            <div class="flex items-center gap-3 min-w-0">
-                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-surface to-surface-elevated border border-white/10 flex items-center justify-center font-bold text-primary text-sm shadow-sm flex-shrink-0">
-                    {{ Auth::check() ? strtoupper(substr(Auth::user()->username ?? 'U', 0, 1)) : 'G' }}
-                </div>
-                <div class="flex flex-col min-w-0">
-                    <span class="font-bold text-xs text-white truncate max-w-[130px]">{{ Auth::check() ? (Auth::user()->username ?? Auth::user()->email) : 'Guest Player' }}</span>
-                    <span class="text-[10px] {{ (Auth::check() && (in_array((int)Auth::user()->role_id, [2, 3, 4, 5, 6]) || Auth::user()->hasRole('admin') || Auth::user()->hasRole('manager') || (env('ADMIN_PHONE') && Auth::user()->phone == env('ADMIN_PHONE')))) ? 'text-amber-400 font-bold' : 'text-primary' }} flex items-center gap-1">
-                        <span class="w-1.5 h-1.5 rounded-full {{ (Auth::check() && (in_array((int)Auth::user()->role_id, [2, 3, 4, 5, 6]) || Auth::user()->hasRole('admin') || Auth::user()->hasRole('manager') || (env('ADMIN_PHONE') && Auth::user()->phone == env('ADMIN_PHONE')))) ? 'bg-amber-400 animate-ping' : 'bg-primary animate-pulse' }}"></span>
-                        {{ Auth::check() ? ((in_array((int)Auth::user()->role_id, [2, 3, 4, 5, 6]) || Auth::user()->hasRole('admin') || Auth::user()->hasRole('manager') || (env('ADMIN_PHONE') && Auth::user()->phone == env('ADMIN_PHONE'))) ? 'Admin / Staff' : 'VIP Platinum') : 'Tap to Login' }}
-                    </span>
-                </div>
-            </div>
-            <span class="material-symbols-outlined text-on-surface-subtle text-lg">chevron_right</span>
-        </div>
-
         <!-- Help is public; the compact admin shortcut appears beside it for staff. -->
         <div class="flex gap-2">
-            <a href="{{ route('frontend.help') }}" class="flex items-center justify-center w-11 rounded-xl bg-primary/10 border border-primary/30 text-primary hover:text-white hover:bg-primary/20 transition-all no-underline shadow-md shadow-primary/10" title="Player Help" aria-label="Player Help">
+            <a href="{{ route('frontend.help') }}" class="flex items-center justify-center w-11 rounded-xl bg-primary/10 border border-primary/30 text-primary hover:text-white hover:bg-primary/20 transition-all no-underline shadow-md shadow-primary/10" title="Oyuncu Yardımı" aria-label="Oyuncu Yardımı">
                 <span class="material-symbols-outlined text-xl">help</span>
             </a>
             @if(Auth::check() && (in_array((int)Auth::user()->role_id, [2, 3, 4, 5, 6]) || Auth::user()->hasRole('admin') || Auth::user()->hasRole('manager') || (env('ADMIN_PHONE') && Auth::user()->phone == env('ADMIN_PHONE'))))
             <a href="{{ route('liteback.users.index') }}" target="_blank" class="flex-1 flex items-center justify-between px-3 py-2.5 rounded-xl bg-gradient-to-r from-amber-500/20 via-amber-600/10 to-[#121622] border border-amber-500/40 text-amber-300 hover:text-white hover:border-amber-400 hover:bg-amber-500/25 transition-all text-xs font-bold no-underline shadow-md shadow-amber-500/10 group">
-                <span class="flex items-center gap-2"><span class="material-symbols-outlined text-lg text-amber-400 group-hover:rotate-12 transition-transform">admin_panel_settings</span><span class="tracking-wide uppercase">Admin</span></span>
+                <span class="flex items-center gap-2"><span class="material-symbols-outlined text-lg text-amber-400 group-hover:rotate-12 transition-transform">admin_panel_settings</span><span class="tracking-wide uppercase">Yönetici</span></span>
                 <span class="text-[9px] font-mono-jet font-bold px-2 py-0.5 rounded bg-amber-400 text-black uppercase flex items-center gap-0.5"><span>LITEBACK</span><span class="material-symbols-outlined text-[11px]">north_east</span></span>
             </a>
             @endif
@@ -183,27 +142,27 @@
         <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center shadow-md shadow-primary/20 flex-shrink-0">
             <span class="material-symbols-outlined text-white text-lg" style="font-variation-settings: 'FILL' 1;">park</span>
         </div>
-        <span class="font-extrabold text-sm tracking-tight text-white truncate">CASINO LIBAN</span>
+        <span class="font-extrabold text-sm tracking-tight text-white truncate">{{ strtoupper($brandName) }}</span>
     </a>
     
     <div class="flex items-center gap-2 flex-shrink-0">
-        <a href="{{ route('frontend.help') }}" class="bg-primary/10 border border-primary/30 hover:bg-primary/20 text-primary p-2 rounded-xl flex items-center justify-center no-underline transition-all" title="Player Help" aria-label="Player Help">
+        <a href="{{ route('frontend.help') }}" class="bg-primary/10 border border-primary/30 hover:bg-primary/20 text-primary p-2 rounded-xl flex items-center justify-center no-underline transition-all" title="Oyuncu Yardımı" aria-label="Oyuncu Yardımı">
             <span class="material-symbols-outlined text-base">help</span>
         </a>
         @if(Auth::check() && (in_array((int)Auth::user()->role_id, [2, 3, 4, 5, 6]) || Auth::user()->hasRole('admin') || Auth::user()->hasRole('manager') || (env('ADMIN_PHONE') && Auth::user()->phone == env('ADMIN_PHONE'))))
-        <a href="{{ route('liteback.users.index') }}" target="_blank" class="bg-amber-500/20 border border-amber-500/40 hover:bg-amber-500/30 text-amber-400 p-2 rounded-xl flex items-center justify-center no-underline transition-all shadow-sm shadow-amber-500/10" title="Open Liteback Admin Console">
+        <a href="{{ route('liteback.users.index') }}" target="_blank" class="bg-amber-500/20 border border-amber-500/40 hover:bg-amber-500/30 text-amber-400 p-2 rounded-xl flex items-center justify-center no-underline transition-all shadow-sm shadow-amber-500/10" title="Liteback Yönetici Konsolunu Aç">
             <span class="material-symbols-outlined text-base">admin_panel_settings</span>
         </a>
         @endif
         <!-- Balance Badge -->
         <div class="flex items-center gap-1 bg-[#161c2b] border border-white/[0.08] px-2.5 py-1.5 rounded-xl">
-            <span class="font-mono-jet text-xs font-bold text-primary" id="user-coin-balance-mobile">{{ Auth::check() ? number_format(Auth::user()->balance, 0) : '50,000' }}</span>
-            <span class="text-[10px] font-bold text-primary-light">C</span>
+            <span class="font-mono-jet text-xs font-bold text-primary" id="user-coin-balance-mobile">{{ Auth::check() ? number_format(Auth::user()->balance, 0) : '0' }}</span>
+            <span class="text-[10px] font-bold text-primary-light">₺</span>
         </div>
         <!-- Quick Refill Button -->
-        <button id="btn-mobile-refill" type="button" class="bg-gradient-to-r from-primary to-primary-dark text-white text-xs font-bold px-2.5 py-1.5 rounded-xl uppercase tracking-wide shadow-md shadow-primary/20 flex items-center gap-1">
+        <button id="btn-mobile-refill" type="button" class="btn-glow bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-xs font-bold px-2.5 py-1.5 rounded-xl uppercase tracking-wide shadow-md shadow-primary/20 flex items-center gap-1">
             <span class="material-symbols-outlined text-sm">add</span>
-            <span>Refill</span>
+            <span>Doldur</span>
         </button>
     </div>
 </header>
@@ -223,10 +182,10 @@
                 {{ Auth::check() ? strtoupper(substr(Auth::user()->username ?? 'U', 0, 1)) : 'G' }}
             </div>
             <div class="flex flex-col min-w-0">
-                <span class="font-bold text-sm text-white truncate max-w-[180px]">{{ Auth::check() ? (Auth::user()->username ?? Auth::user()->email) : 'Guest Player' }}</span>
+                <span class="font-bold text-sm text-white truncate max-w-[180px]">{{ Auth::check() ? (Auth::user()->username ?? Auth::user()->email) : 'Misafir Oyuncu' }}</span>
                 <span class="text-xs {{ (Auth::check() && (in_array((int)Auth::user()->role_id, [2, 3, 4, 5, 6]) || Auth::user()->hasRole('admin') || Auth::user()->hasRole('manager') || (env('ADMIN_PHONE') && Auth::user()->phone == env('ADMIN_PHONE')))) ? 'text-amber-400 font-bold' : 'text-primary' }} flex items-center gap-1 mt-0.5">
                     <span class="w-1.5 h-1.5 rounded-full {{ (Auth::check() && (in_array((int)Auth::user()->role_id, [2, 3, 4, 5, 6]) || Auth::user()->hasRole('admin') || Auth::user()->hasRole('manager') || (env('ADMIN_PHONE') && Auth::user()->phone == env('ADMIN_PHONE')))) ? 'bg-amber-400 animate-ping' : 'bg-primary animate-pulse' }}"></span>
-                    {{ Auth::check() ? ((in_array((int)Auth::user()->role_id, [2, 3, 4, 5, 6]) || Auth::user()->hasRole('admin') || Auth::user()->hasRole('manager') || (env('ADMIN_PHONE') && Auth::user()->phone == env('ADMIN_PHONE'))) ? 'Admin / Staff' : 'VIP Platinum Member') : 'Tap to Login / Register' }}
+                    {{ Auth::check() ? ((in_array((int)Auth::user()->role_id, [2, 3, 4, 5, 6]) || Auth::user()->hasRole('admin') || Auth::user()->hasRole('manager') || (env('ADMIN_PHONE') && Auth::user()->phone == env('ADMIN_PHONE'))) ? 'Yönetici / Personel' : 'VIP Platin Üye') : 'Giriş için Dokun / Kayıt Ol' }}
                 </span>
             </div>
         </div>
@@ -244,33 +203,33 @@
                 <span class="material-symbols-outlined text-lg">admin_panel_settings</span>
             </div>
             <div>
-                <div class="text-xs font-bold text-amber-300 uppercase tracking-wide">Operator Backend</div>
-                <div class="text-[10px] text-on-surface-subtle">Direct Access to Liteback Console</div>
+                <div class="text-xs font-bold text-amber-300 uppercase tracking-wide">Operatör Arka Ucu</div>
+                <div class="text-[10px] text-on-surface-subtle">Liteback Konsoluna Doğrudan Erişim</div>
             </div>
         </div>
         <span class="text-[10px] font-mono-jet font-bold px-2 py-1 rounded-lg bg-amber-400 text-black uppercase flex items-center gap-1">
-            <span>OPEN</span>
+            <span>AÇIK</span>
             <span class="material-symbols-outlined text-xs">open_in_new</span>
         </span>
     </a>
     @endif
 
-    <!-- Wallet Power Up Banner -->
+    <!-- Wallet Güçlendir Banner -->
     <div class="bg-[#182030] p-4 rounded-2xl mb-5 flex justify-between items-center border border-white/[0.08]">
         <div>
-            <span class="text-[10px] font-bold text-on-surface-subtle uppercase tracking-wider block">{{ $coinLabel }} Balance</span>
+            <span class="text-[10px] font-bold text-on-surface-subtle uppercase tracking-wider block">{{ $coinLabel }} Bakiyesi</span>
             <div class="flex items-baseline gap-1 mt-0.5">
-                <span class="font-mono-jet text-xl font-bold text-primary" id="user-coin-balance-sheet">{{ Auth::check() ? number_format(Auth::user()->balance, 0) : '50,000' }}</span>
+                <span class="font-mono-jet text-xl font-bold text-primary" id="user-coin-balance-sheet">{{ Auth::check() ? number_format(Auth::user()->balance, 0) : '0' }}</span>
                 <span class="text-xs font-bold text-primary-light">{{ strtoupper($cedarBrand) }}</span>
             </div>
         </div>
         <div class="flex gap-2">
-            <button id="btn-sheet-refill" type="button" class="bg-gradient-to-r from-primary to-primary-dark text-white text-xs font-bold px-3 py-2 rounded-xl uppercase tracking-wider shadow-lg shadow-primary/25 transition-all">
-                + Power Up
+            <button id="btn-sheet-refill" type="button" class="btn-glow bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-xs font-bold px-3 py-2 rounded-xl uppercase tracking-wider shadow-lg shadow-primary/25 transition-all">
+                + Güçlendir
             </button>
             @if(settings('enable_cashout', '1') == '1')
             <button type="button" class="bg-white/[0.06] hover:bg-white/[0.12] text-accent-gold border border-accent-gold/30 text-xs font-bold px-3 py-2 rounded-xl uppercase tracking-wider transition-all open-modal" data-target="{{ Auth::check() ? 'modal-cashout' : 'modal-login' }}">
-                Cashout
+                Para Çekme
             </button>
             @endif
         </div>
@@ -284,7 +243,7 @@
             </div>
             <div class="flex flex-col">
                 <span class="text-xs font-bold">{{ $navCasino }}</span>
-                <span class="text-[10px] text-on-surface-subtle">1,000+ Slots</span>
+                <span class="text-[10px] text-on-surface-subtle">1.000+ Slot</span>
             </div>
         </a>
         @if(settings('enable_cedar_remakes', '1') == '1')
@@ -292,7 +251,7 @@
             <div class="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
                 <span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">park</span>
             </div>
-            <div class="flex flex-col"><span class="text-xs font-bold">{{ $navCedarSlots }}</span><span class="text-[10px] text-primary/80">Classic Slots</span></div>
+            <div class="flex flex-col"><span class="text-xs font-bold">{{ $navCedarSlots }}</span><span class="text-[10px] text-primary/80">Klasik Slotlar</span></div>
         </a>
         @endif
 
@@ -302,7 +261,7 @@
             </div>
             <div class="flex flex-col">
                 <span class="text-xs font-bold">{{ $navCedarGames }}</span>
-                <span class="text-[10px] text-accent-gold/80">Crash Games</span>
+                <span class="text-[10px] text-accent-gold/80">Crash Oyunları</span>
             </div>
         </a>
 
@@ -312,7 +271,7 @@
             </div>
             <div class="flex flex-col">
                 <span class="text-xs font-bold">{{ $navSports }}</span>
-                <span class="text-[10px] text-on-surface-subtle">Sportsbook</span>
+                <span class="text-[10px] text-on-surface-subtle">Spor Bahisleri</span>
             </div>
         </a>
 
@@ -322,7 +281,7 @@
             </div>
             <div class="flex flex-col">
                 <span class="text-xs font-bold">{{ $navLotto }}</span>
-                <span class="text-[10px] text-on-surface-subtle">Multi-Draw</span>
+                <span class="text-[10px] text-on-surface-subtle">Çoklu Çekiliş</span>
             </div>
         </a>
 
@@ -333,18 +292,18 @@
                 </div>
                 <div class="flex flex-col">
                     <span class="text-xs font-bold">{{ $navPredictions }}</span>
-                    <span class="text-[10px] text-on-surface-subtle">Vote YES / NO on Global Events</span>
+                    <span class="text-[10px] text-on-surface-subtle">Global Olaylara EVET / HAYIR Oyla</span>
                 </div>
             </div>
-            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-secondary/20 text-secondary uppercase">LIVE</span>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-secondary/20 text-secondary uppercase">CANLI</span>
         </a>
 
         <a href="{{ route('frontend.crypto.index') }}" class="col-span-2 p-3.5 rounded-xl flex items-center justify-between no-underline border transition-all {{ Route::is('frontend.crypto*') ? 'bg-cyan-400/10 border-cyan-400/30 text-cyan-300' : 'bg-white/[0.02] border-white/[0.06] text-white hover:bg-white/[0.05]' }}">
-            <div class="flex items-center gap-3"><div class="w-9 h-9 rounded-lg bg-cyan-400/10 flex items-center justify-center text-cyan-300 flex-shrink-0"><span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">candlestick_chart</span></div><div class="flex flex-col"><span class="text-xs font-bold">Crypto Trading Simulator</span><span class="text-[10px] text-on-surface-subtle">Timed virtual Long / Short positions</span></div></div>
-            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-400/20 text-cyan-300 uppercase">NEW</span>
+            <div class="flex items-center gap-3"><div class="w-9 h-9 rounded-lg bg-cyan-400/10 flex items-center justify-center text-cyan-300 flex-shrink-0"><span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">candlestick_chart</span></div><div class="flex flex-col"><span class="text-xs font-bold">Kripto Ticaret Simülatörü</span><span class="text-[10px] text-on-surface-subtle">Zamanlı sanal Alış / Satış pozisyonları</span></div></div>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-400/20 text-cyan-300 uppercase">YENİ</span>
         </a>
         <a href="{{ route('frontend.stocks.index') }}" class="col-span-2 p-3.5 rounded-xl flex items-center justify-between no-underline border transition-all {{ Route::is('frontend.stocks*') ? 'bg-cyan-400/10 border-cyan-400/30 text-cyan-300' : 'bg-white/[0.02] border-white/[0.06] text-white hover:bg-white/[0.05]' }}">
-            <div class="flex items-center gap-3"><div class="w-9 h-9 rounded-lg bg-cyan-400/10 flex items-center justify-center text-cyan-300 flex-shrink-0"><span class="material-symbols-outlined text-xl">show_chart</span></div><div class="flex flex-col"><span class="text-xs font-bold">Stock Trading Simulator</span><span class="text-[10px] text-on-surface-subtle">Timed virtual Long / Short positions</span></div></div><span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-400/20 text-cyan-300 uppercase">NEW</span>
+            <div class="flex items-center gap-3"><div class="w-9 h-9 rounded-lg bg-cyan-400/10 flex items-center justify-center text-cyan-300 flex-shrink-0"><span class="material-symbols-outlined text-xl">show_chart</span></div><div class="flex flex-col"><span class="text-xs font-bold">Hisse Ticaret Simülatörü</span><span class="text-[10px] text-on-surface-subtle">Zamanlı sanal Alış / Satış pozisyonları</span></div></div><span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-400/20 text-cyan-300 uppercase">YENİ</span>
         </a>
 
         <a href="{{ route('frontend.affiliates.index') }}" class="col-span-2 p-3.5 rounded-xl flex items-center justify-between no-underline border transition-all {{ Route::is('frontend.affiliates*') ? 'bg-amber-500/10 border-amber-500/30 text-amber-400' : 'bg-white/[0.02] border-white/[0.06] text-white hover:bg-white/[0.05]' }}">
@@ -353,11 +312,11 @@
                     <span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">groups</span>
                 </div>
                 <div class="flex flex-col">
-                    <span class="text-xs font-bold">Affiliate & Referral Network</span>
-                    <span class="text-[10px] text-on-surface-subtle">Earn Up to 1.00% Across 3 Tiers</span>
+                    <span class="text-xs font-bold">Ortaklık ve Referans Ağı</span>
+                    <span class="text-[10px] text-on-surface-subtle">3 Kademede %1,00'e Kadar Kazanç</span>
                 </div>
             </div>
-            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 uppercase">EARN</span>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 uppercase">KAZAN</span>
         </a>
 
         <a href="{{ route('frontend.vip.index') }}" class="col-span-2 p-3.5 rounded-xl flex items-center justify-between no-underline border transition-all {{ Route::is('frontend.vip*') ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-white/[0.02] border-white/[0.06] text-white hover:bg-white/[0.05]' }}">
@@ -366,11 +325,11 @@
                     <span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">workspace_premium</span>
                 </div>
                 <div class="flex flex-col">
-                    <span class="text-xs font-bold">VIP Club & Loyalty Vault</span>
-                    <span class="text-[10px] text-on-surface-subtle">Instant Rakeback & Level-Up Rewards</span>
+                    <span class="text-xs font-bold">VIP Kulübü ve Sadakat Kasası</span>
+                    <span class="text-[10px] text-on-surface-subtle">Anında Rakeback ve Seviye Atlama Ödülleri</span>
                 </div>
             </div>
-            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 uppercase">VAULT</span>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 uppercase">KASA</span>
         </a>
     </div>
 
@@ -378,14 +337,14 @@
     <div class="flex gap-2 pt-2 border-t border-white/[0.08]">
         @if(Auth::check())
             <a href="{{ route('frontend.auth.logout') }}" class="flex-1 py-2.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] text-center text-xs font-bold text-accent-rose no-underline border border-white/[0.06] transition-colors">
-                Sign Out
+                Çıkış Yap
             </a>
         @else
             <button type="button" class="flex-1 py-2.5 rounded-xl bg-primary/10 hover:bg-primary/20 text-center text-xs font-bold text-primary border border-primary/20 transition-colors open-modal" data-target="modal-login">
-                Log In
+                Giriş Yap
             </button>
             <button type="button" class="flex-1 py-2.5 rounded-xl bg-primary text-white text-center text-xs font-bold shadow-md shadow-primary/20 transition-colors open-modal" data-target="modal-register">
-                Register Free
+                Ücretsiz Kayıt Ol
             </button>
         @endif
     </div>
@@ -428,6 +387,6 @@
     <!-- 5. Hub / Menu Toggle -->
     <button type="button" id="btn-open-mobile-menu" class="flex flex-col items-center gap-1 py-1 px-3 rounded-xl text-on-surface-subtle hover:text-white transition-all">
         <span class="material-symbols-outlined text-2xl">widgets</span>
-        <span class="text-[10px] font-bold tracking-tight">Hub</span>
+        <span class="text-[10px] font-bold tracking-tight">Merkez</span>
     </button>
 </nav>

@@ -60,10 +60,10 @@
                 Pending ({{ $pendingCount }})
             </a>
             <a href="{{ route('liteback.withdrawals.index', ['status' => 'approved']) }}" class="btn btn-{{ $statusFilter === 'approved' ? 'success font-weight-bold' : 'outline-secondary' }}">
-                Approved
+                Onaylandı
             </a>
             <a href="{{ route('liteback.withdrawals.index', ['status' => 'rejected']) }}" class="btn btn-{{ $statusFilter === 'rejected' ? 'danger font-weight-bold' : 'outline-secondary' }}">
-                Rejected
+                Reddedildi
             </a>
             <a href="{{ route('liteback.withdrawals.index', ['status' => 'all']) }}" class="btn btn-{{ $statusFilter === 'all' ? 'primary font-weight-bold' : 'outline-secondary' }}">
                 All Requests
@@ -88,14 +88,14 @@
                 <thead class="thead-light">
                     <tr>
                         <th style="width: 60px;">ID</th>
-                        <th>Player</th>
+                        <th>Oyuncu</th>
                         <th>Amount (Points)</th>
                         <th>Cash Worth (USD)</th>
-                        <th>Method</th>
+                        <th>Yöntem</th>
                         <th>Destination Account / Wallet</th>
-                        <th>Status</th>
+                        <th>Durum</th>
                         <th>Requested At</th>
-                        <th style="width: 200px;">Actions</th>
+                        <th style="width: 200px;">İşlemler</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -105,7 +105,7 @@
                             <td>
                                 @if($w->user)
                                     <strong class="text-dark">{{ $w->user->username }}</strong><br>
-                                    <small class="text-muted"><i class="fas fa-phone-alt mr-1"></i>{{ $w->user->phone ?? 'No phone' }}</small>
+                                    <small class="text-muted"><i class="fas fa-phone-alt mr-1"></i>{{ $w->user->phone ?? 'Telefon yok' }}</small>
                                     @if($w->user->email)
                                         <br><small class="text-muted"><i class="fas fa-envelope mr-1"></i>{{ $w->user->email }}</small>
                                     @endif
@@ -136,11 +136,11 @@
                             </td>
                             <td>
                                 @if($w->status == 0)
-                                    <span class="badge badge-warning"><i class="fas fa-clock mr-1"></i> Pending</span>
+                                    <span class="badge badge-warning"><i class="fas fa-clock mr-1"></i> Beklemede</span>
                                 @elseif($w->status == 1)
-                                    <span class="badge badge-success"><i class="fas fa-check-circle mr-1"></i> Approved</span>
+                                    <span class="badge badge-success"><i class="fas fa-check-circle mr-1"></i> Onaylandı</span>
                                 @else
-                                    <span class="badge badge-danger"><i class="fas fa-times-circle mr-1"></i> Rejected</span>
+                                    <span class="badge badge-danger"><i class="fas fa-times-circle mr-1"></i> Reddedildi</span>
                                 @endif
                             </td>
                             <td>
@@ -155,13 +155,13 @@
                                                 data-amount="${{ number_format($w->fiat_amount ?: (($w->coin_amount ?: $w->amount) / ($rate ?: 100)), 2) }}"
                                                 data-wallet="{{ $w->wallet }}"
                                                 data-method="{{ $w->method ?: 'Manual' }}">
-                                            <i class="fas fa-check mr-1"></i> Approve
+                                            <i class="fas fa-check mr-1"></i> Onayla
                                         </button>
                                         <button type="button" class="btn btn-danger btn-sm btn-reject" 
                                                 data-id="{{ $w->id }}"
                                                 data-user="{{ $w->user->username ?? 'User' }}"
                                                 data-coins="{{ number_format($w->coin_amount ?: $w->amount) }}">
-                                            <i class="fas fa-undo mr-1"></i> Reject
+                                            <i class="fas fa-undo mr-1"></i> Reddet
                                         </button>
                                     </div>
                                 @else
@@ -200,7 +200,7 @@
             <div class="modal-content">
                 <div class="modal-header bg-success text-white">
                     <h5 class="modal-title font-weight-bold"><i class="fas fa-check-circle mr-1"></i> Approve & Fulfill Cashout</h5>
-                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Kapat">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
@@ -222,7 +222,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">İptal</button>
                     <button type="submit" class="btn btn-success btn-sm font-weight-bold">Confirm & Mark Paid</button>
                 </div>
             </div>
@@ -238,7 +238,7 @@
             <div class="modal-content">
                 <div class="modal-header bg-danger text-white">
                     <h5 class="modal-title font-weight-bold"><i class="fas fa-undo mr-1"></i> Reject & Refund Player Coins</h5>
-                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Kapat">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
@@ -253,7 +253,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">İptal</button>
                     <button type="submit" class="btn btn-danger btn-sm font-weight-bold">Reject & Refund Balance</button>
                 </div>
             </div>

@@ -36,6 +36,7 @@ class SystemSettingsController extends Controller
         $request->validate([
             // Brand and navigation
             'app_name' => 'required|string|max:60',
+            'default_currency' => 'required|string|in:TRY,USD,EUR,GBP',
             'brand_tagline' => 'nullable|string|max:80',
             'brand_logo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'cedar_display_name' => 'nullable|string|max:40',
@@ -115,6 +116,7 @@ class SystemSettingsController extends Controller
 
         $keys = [
             'app_name',
+            'default_currency',
             'brand_tagline',
             'cedar_display_name',
             'coin_display_name',

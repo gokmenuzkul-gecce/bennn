@@ -10,7 +10,7 @@
             <div class="d-flex align-items-start">
                 <div class="rounded-circle bg-info d-flex align-items-center justify-content-center mr-3 flex-shrink-0" style="width:48px;height:48px;"><i class="fas fa-question text-white"></i></div>
                 <div>
-                    <div class="text-info text-xs font-weight-bold text-uppercase mb-1" style="letter-spacing:.14em">Operator console</div>
+                    <div class="text-info text-xs font-weight-bold text-uppercase mb-1" style="letter-spacing:.14em">Operatör konsolu</div>
                     <h2 class="h3 font-weight-bold mb-2">{{ $guide['title'] }}</h2>
                     <p class="text-muted mb-0">{{ $guide['intro'] }}</p>
                 </div>
@@ -18,7 +18,7 @@
         </div>
     </div>
 
-    <nav class="nav nav-pills flex-nowrap overflow-auto mb-4" dir="ltr" aria-label="Help languages">
+    <nav class="nav nav-pills flex-nowrap overflow-auto mb-4" dir="ltr" aria-label="Yardım dilleri">
         @foreach($languages as $code => $label)
             <a class="nav-link mr-2 {{ $locale === $code ? 'active' : '' }}" href="{{ route('liteback.help', $code) }}">{{ $label }}</a>
         @endforeach

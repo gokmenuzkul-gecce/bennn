@@ -9,7 +9,7 @@
         <div class="small-box bg-info" style="background-color: #17a2b8 !important; color: white; padding: 20px; border-radius: 5px; margin-bottom: 20px;">
             <div class="inner">
                 <h3>{{ $stats['total_bets'] }}</h3>
-                <p>Total Bets Placed</p>
+                <p>Verilen Toplam Bahis</p>
             </div>
             <div class="icon" style="float: right; margin-top: -60px; font-size: 40px; opacity: 0.3;"><i class="fas fa-ticket-alt"></i></div>
         </div>
@@ -18,7 +18,7 @@
         <div class="small-box bg-success" style="background-color: #28a745 !important; color: white; padding: 20px; border-radius: 5px; margin-bottom: 20px;">
             <div class="inner">
                 <h3>${{ number_format($stats['total_stakes'], 2) }}</h3>
-                <p>Total Stakes</p>
+                <p>Toplam Miktarlar</p>
             </div>
             <div class="icon" style="float: right; margin-top: -60px; font-size: 40px; opacity: 0.3;"><i class="fas fa-dollar-sign"></i></div>
         </div>
@@ -27,7 +27,7 @@
         <div class="small-box bg-warning" style="background-color: #ffc107 !important; color: #212529; padding: 20px; border-radius: 5px; margin-bottom: 20px;">
             <div class="inner">
                 <h3>${{ number_format($stats['total_payouts'], 2) }}</h3>
-                <p>Total Payouts</p>
+                <p>Toplam Ödemeler</p>
             </div>
             <div class="icon" style="float: right; margin-top: -60px; font-size: 40px; opacity: 0.3;"><i class="fas fa-gift"></i></div>
         </div>
@@ -36,7 +36,7 @@
         <div class="small-box bg-danger" style="background-color: #dc3545 !important; color: white; padding: 20px; border-radius: 5px; margin-bottom: 20px;">
             <div class="inner">
                 <h3>${{ number_format($stats['net_ggr'], 2) }}</h3>
-                <p>Net GGR (revenue)</p>
+                <p>Net GGR (gelir)</p>
             </div>
             <div class="icon" style="float: right; margin-top: -60px; font-size: 40px; opacity: 0.3;"><i class="fas fa-chart-line"></i></div>
         </div>
@@ -47,10 +47,10 @@
     <div class="col-md-6">
         <div class="card card-primary">
             <div class="card-header">
-                <h3 class="card-title">Manual Command Runner</h3>
+                <h3 class="card-title">Manuel Komut Çalıştırıcı</h3>
             </div>
             <div class="card-body">
-                <p class="text-muted">Run the licensed aggregate feed or maintenance commands. PROMEX verifies this installation before returning any data.</p>
+                <p class="text-muted">Lisanslı toplu akışı veya bakım komutlarını çalıştırın. PROMEX, herhangi bir veri döndürmeden önce bu kurulumu doğrular.</p>
                 <form action="{{ route('liteback.sports.commands.run') }}" method="POST" class="mb-3">
                     @csrf
                     <div class="form-group">
@@ -66,12 +66,12 @@
                         </select>
                     </div>
                     <div id="sportsSelection" class="border rounded p-2 mb-3">
-                        <div class="font-weight-bold mb-1">Sports included in this run</div>
-                        <small class="text-muted d-block mb-2">All currently available feed sports are selected by default. Uncheck any sport to skip it for this run.</small>
+                        <div class="font-weight-bold mb-1">Bu çalıştırmaya dahil edilen sporlar</div>
+                        <small class="text-muted d-block mb-2">Mevcut tüm akış sporları varsayılan olarak seçilidir. Bu çalıştırmada atlamak için bir sporun işaretini kaldırın.</small>
                         @if($sportsFeedError)
                             <div class="alert alert-warning py-2 mb-2">{{ $sportsFeedError }}</div>
                         @elseif(empty($availableSports))
-                            <div class="text-muted small">No PRE-MATCH sports are currently available.</div>
+                            <div class="text-muted small">Şu anda MAÇ ÖNCESİ spor yok.</div>
                         @else
                             <div class="row">
                                 @foreach($availableSports as $sport)
@@ -85,16 +85,16 @@
                             </div>
                         @endif
                     </div>
-                    <button type="submit" class="btn btn-primary btn-block">Run Command</button>
+                    <button type="submit" class="btn btn-primary btn-block">Komutu Çalıştır</button>
                 </form>
                 <hr>
                 <form action="{{ route('liteback.sports.odds.clear_active') }}" method="POST" onsubmit="return confirm('Hide every active site odd? Bets and historical records will be preserved.');">
                     @csrf
                     <button type="submit" class="btn btn-outline-danger btn-block font-weight-bold">
-                        <i class="fas fa-eraser mr-1"></i> Clear Active Site Odds
+                        <i class="fas fa-eraser mr-1"></i> Aktif Site Oranlarını Temizle
                     </button>
                     <small class="text-muted d-block mt-1">
-                        Hides active Battle Odds and sportsbook markets without deleting bets or history. The next full feed sync restores available odds.
+                        Bahisleri veya geçmişi silmeden aktif Battle Odds ve spor bahis piyasalarını gizler. Bir sonraki tam akış senkronizasyonu mevcut oranları geri yükler.
                     </small>
                 </form>
             </div>
@@ -104,16 +104,16 @@
     <div class="col-md-6">
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title">Recent Sync logs</h3>
+                <h3 class="card-title">Son Senkronizasyon kayıtları</h3>
             </div>
             <div class="card-body p-0">
                 <table class="table table-striped table-valign-middle">
                     <thead>
                         <tr>
-                            <th>Job Alias</th>
-                            <th>Started At</th>
-                            <th>Duration</th>
-                            <th>Status</th>
+                            <th>İş Takma Adı</th>
+                            <th>Başlangıç</th>
+                            <th>Süre</th>
+                            <th>Durum</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -124,15 +124,15 @@
                                 <td>{{ $log->duration }}s</td>
                                 <td>
                                     @if($log->error)
-                                        <span class="badge badge-danger" title="{{ $log->error }}">Failed</span>
+                                        <span class="badge badge-danger" title="{{ $log->error }}">Başarısız</span>
                                     @else
-                                        <span class="badge badge-success">Success</span>
+                                        <span class="badge badge-success">Başarılı</span>
                                     @endif
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4" class="text-center text-muted">No logs recorded yet.</td>
+                                <td colspan="4" class="text-center text-muted">Henüz kayıt yok.</td>
                             </tr>
                         @endforelse
                     </tbody>

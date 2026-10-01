@@ -1,6 +1,6 @@
 @extends('frontend.Minimal.layouts.clean')
 
-@section('page-title', 'VIP Club & Rakeback Vault - Casino du Liban')
+@section('page-title', 'VIP Kulübü ve Rakeback Kasası - Promex Gaming Suite')
 
 @section('content')
 <div class="space-y-6">
@@ -9,11 +9,11 @@
         <div>
             <div class="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/25 px-3 py-1 rounded-full mb-2">
                 <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span class="text-[11px] font-bold text-emerald-400 font-mono-jet uppercase tracking-wider">RETENTION & HIGH-ROLLER SUITE</span>
+                <span class="text-[11px] font-bold text-emerald-400 font-mono-jet uppercase tracking-wider">ELDE TUTMA VE YÜKSEK OYUNCU PAKETİ</span>
             </div>
-            <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight uppercase">VIP Club & Loyalty Vault</h1>
+            <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight uppercase">VIP Kulübü ve Sadakat Kasası</h1>
             <p class="text-on-surface-muted text-xs sm:text-sm mt-1">
-                Wager on any game to earn XP, advance through 6 prestigious tiers, and collect automated instant rakeback and cash rewards.
+                XP kazanmak, 6 prestijli seviyede ilerlemek ve otomatik anında rakeback ile nakit ödüller toplamak için herhangi bir oyuna bahis yapın.
             </p>
         </div>
 
@@ -22,21 +22,21 @@
         <div class="bg-[#121622] border border-emerald-500/30 rounded-2xl p-4 flex items-center justify-between gap-6 shadow-xl relative overflow-hidden">
             <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-emerald-500/10 rounded-full blur-xl pointer-events-none"></div>
             <div>
-                <span class="text-[10px] uppercase font-bold text-emerald-400/80 tracking-widest block">UNCLAIMED RAKEBACK</span>
+                <span class="text-[10px] uppercase font-bold text-emerald-400/80 tracking-widest block">ALINMAMIŞ RAKEBACK</span>
                 <div class="text-2xl font-black text-emerald-300 font-mono-jet mt-0.5">
                     $<span id="unclaimed-rakeback">{{ number_format($vipProfile['unclaimed_rakeback'] ?? 0, 2) }}</span>
                 </div>
             </div>
             <button id="btn-claim-rakeback" class="bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-black font-extrabold text-xs uppercase px-5 py-3 rounded-xl shadow-lg shadow-emerald-500/25 transition-all transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2" {{ ($vipProfile['unclaimed_rakeback'] ?? 0) <= 0 ? 'disabled' : '' }}>
                 <span class="material-symbols-outlined text-sm font-bold">payments</span>
-                <span>Claim Rakeback</span>
+                <span>Rakeback Al</span>
             </button>
         </div>
         @else
         <div>
-            <a href="{{ route('frontend.auth.login') }}" class="bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-wider shadow-lg shadow-primary/25 transition-all inline-flex items-center gap-2">
+            <a href="{{ route('frontend.auth.login') }}" class="btn-glow bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-wider shadow-lg shadow-primary/25 transition-all inline-flex items-center gap-2">
                 <span class="material-symbols-outlined text-sm">login</span>
-                <span>Login to View Tier</span>
+                <span>Seviyeyi Görmek için Giriş Yapın</span>
             </a>
         </div>
         @endif
@@ -51,7 +51,7 @@
                     @if($vipProfile['vip_level'] === 'Cedar Elite') 🌲 @elseif($vipProfile['vip_level'] === 'Diamond') 💎 @elseif($vipProfile['vip_level'] === 'Platinum') 👑 @elseif($vipProfile['vip_level'] === 'Gold') 🥇 @elseif($vipProfile['vip_level'] === 'Silver') 🥈 @else 🥉 @endif
                 </div>
                 <div class="space-y-1 min-w-0">
-                    <span class="text-[10px] font-bold text-on-surface-muted uppercase tracking-widest block">CURRENT VIP STATUS</span>
+                    <span class="text-[10px] font-bold text-on-surface-muted uppercase tracking-widest block">MEVCUT VIP DURUMU</span>
                     <h2 class="text-xl sm:text-2xl font-black text-white uppercase tracking-tight truncate" style="color: {{ $vipProfile['current_tier']['badge_color'] }}">
                         {{ $vipProfile['vip_level'] }}
                     </h2>
@@ -65,7 +65,7 @@
             <div class="lg:col-span-8 space-y-3">
                 <div class="flex items-center justify-between text-xs">
                     <div class="flex items-center gap-2">
-                        <span class="text-on-surface-muted">Progress to:</span>
+                        <span class="text-on-surface-muted">İlerleme:</span>
                         <strong class="text-white uppercase font-mono-jet">{{ $vipProfile['next_tier']['name'] ?? 'MAX TIER REACHED' }}</strong>
                     </div>
                     <span class="font-bold text-emerald-400 font-mono-jet text-sm">{{ $vipProfile['progress_pct'] }}%</span>
@@ -77,11 +77,11 @@
                 </div>
 
                 <div class="flex justify-between items-center text-[11px] text-on-surface-muted font-mono-jet">
-                    <span>Active Rate: <strong class="text-white">{{ $vipProfile['current_tier']['rakeback'] }}% Rakeback</strong></span>
+                    <span>Aktif Oran: <strong class="text-white">{{ $vipProfile['current_tier']['rakeback'] }}% Rakeback</strong></span>
                     @if($vipProfile['next_tier'])
                         <span>{{ number_format($vipProfile['xp_to_next']) }} XP needed for {{ $vipProfile['next_tier']['name'] }}</span>
                     @else
-                        <span class="text-emerald-400">Peak Loyalty Milestone Unlocked!</span>
+                        <span class="text-emerald-400">En Yüksek Sadakat Kilometre Taşı Açıldı!</span>
                     @endif
                 </div>
             </div>
@@ -91,42 +91,42 @@
     <!-- Quick Metrics Strip -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <div class="bg-surface-card border border-white/[0.06] rounded-2xl p-4 sm:p-5 relative overflow-hidden">
-            <span class="text-[10px] sm:text-xs font-bold text-on-surface-muted uppercase tracking-wider block mb-1">Total Rakeback Claimed</span>
+            <span class="text-[10px] sm:text-xs font-bold text-on-surface-muted uppercase tracking-wider block mb-1">Alınan Toplam Rakeback</span>
             <div class="text-xl sm:text-2xl md:text-3xl font-black text-white font-mono-jet">
                 $<span id="total-claimed-stat">{{ number_format($vipProfile['total_rakeback_claimed'] ?? 0, 2) }}</span>
             </div>
             <div class="text-[11px] text-emerald-400 mt-1 flex items-center gap-1">
-                <span class="material-symbols-outlined text-xs">savings</span> Instant Zero-Fee Payouts
+                <span class="material-symbols-outlined text-xs">savings</span> Anında Sıfır Ücretli Ödemeler
             </div>
         </div>
 
         <div class="bg-surface-card border border-white/[0.06] rounded-2xl p-4 sm:p-5 relative overflow-hidden">
-            <span class="text-[10px] sm:text-xs font-bold text-on-surface-muted uppercase tracking-wider block mb-1">Current Rakeback Rate</span>
+            <span class="text-[10px] sm:text-xs font-bold text-on-surface-muted uppercase tracking-wider block mb-1">Mevcut Rakeback Oranı</span>
             <div class="text-xl sm:text-2xl md:text-3xl font-black text-emerald-300 font-mono-jet">
                 {{ $vipProfile['current_tier']['rakeback'] }}%
             </div>
             <div class="text-[11px] text-on-surface-muted mt-1 flex items-center gap-1">
-                <span class="material-symbols-outlined text-xs">percent</span> Of House Edge Returned
+                <span class="material-symbols-outlined text-xs">percent</span> İade Edilen House Edge
             </div>
         </div>
 
         <div class="bg-surface-card border border-white/[0.06] rounded-2xl p-4 sm:p-5 relative overflow-hidden">
-            <span class="text-[10px] sm:text-xs font-bold text-on-surface-muted uppercase tracking-wider block mb-1">Max Elite Rakeback</span>
+            <span class="text-[10px] sm:text-xs font-bold text-on-surface-muted uppercase tracking-wider block mb-1">Maksimum Elit Rakeback</span>
             <div class="text-xl sm:text-2xl md:text-3xl font-black text-amber-300 font-mono-jet">
                 20.0%
             </div>
             <div class="text-[11px] text-amber-400/80 mt-1 flex items-center gap-1">
-                <span class="material-symbols-outlined text-xs">workspace_premium</span> Cedar Elite Tier
+                <span class="material-symbols-outlined text-xs">workspace_premium</span> Cedar Elit Seviyesi
             </div>
         </div>
 
         <div class="bg-surface-card border border-white/[0.06] rounded-2xl p-4 sm:p-5 relative overflow-hidden">
-            <span class="text-[10px] sm:text-xs font-bold text-on-surface-muted uppercase tracking-wider block mb-1">XP Conversion Rate</span>
+            <span class="text-[10px] sm:text-xs font-bold text-on-surface-muted uppercase tracking-wider block mb-1">XP Dönüşüm Oranı</span>
             <div class="text-xl sm:text-2xl md:text-3xl font-black text-secondary font-mono-jet">
                 1 Coin = 1 XP
             </div>
             <div class="text-[11px] text-secondary mt-1 flex items-center gap-1">
-                <span class="material-symbols-outlined text-xs">military_tech</span> All Games Count
+                <span class="material-symbols-outlined text-xs">military_tech</span> Tüm Oyunlar Sayılır
             </div>
         </div>
     </div>
@@ -136,9 +136,9 @@
         <div class="flex items-center justify-between mb-3">
             <h2 class="text-base sm:text-lg font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
                 <span class="material-symbols-outlined text-amber-400 text-xl">redeem</span>
-                <span>Level-Up Cash Rewards</span>
+                <span>Seviye Atlama Nakit Ödülleri</span>
             </h2>
-            <span class="text-xs text-on-surface-muted font-mono-jet">ONE-TIME INSTANT CASH</span>
+            <span class="text-xs text-on-surface-muted font-mono-jet">TEK SEFERLİK ANINDA NAKİT</span>
         </div>
 
         <div class="grid grid-cols-2 md:grid-cols-5 gap-3 sm:gap-4">
@@ -158,7 +158,7 @@
                     @if(Auth::check())
                         @if($isClaimed)
                             <button disabled class="w-full py-2 rounded-xl bg-white/[0.04] text-on-surface-subtle text-[11px] font-bold uppercase tracking-wider">
-                                Claimed
+                                Alındı
                             </button>
                         @elseif($isUnlocked)
                             <button onclick="claimLevelBonus('{{ $tierName }}')" class="w-full py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-black text-[11px] font-extrabold uppercase tracking-wider shadow-md shadow-amber-500/25 transition-all">
@@ -166,12 +166,12 @@
                             </button>
                         @else
                             <button disabled class="w-full py-2 rounded-xl bg-white/[0.03] text-on-surface-subtle text-[11px] font-bold uppercase tracking-wider">
-                                Locked
+                                Kilitli
                             </button>
                         @endif
                     @else
                         <a href="{{ route('frontend.auth.login') }}" class="w-full py-2 rounded-xl bg-white/[0.05] text-white text-[11px] font-bold uppercase tracking-wider no-underline">
-                            Login
+                            Giriş
                         </a>
                     @endif
                 </div>
@@ -185,20 +185,20 @@
         <div class="flex items-center justify-between">
             <h3 class="text-sm sm:text-base font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
                 <span class="material-symbols-outlined text-secondary text-lg">workspace_premium</span>
-                <span>VIP Loyalty Tier Privileges</span>
+                <span>VIP Sadakat Seviyesi Ayrıcalıkları</span>
             </h3>
-            <span class="text-[11px] font-mono-jet text-on-surface-muted">6 LUXURY LEVELS</span>
+            <span class="text-[11px] font-mono-jet text-on-surface-muted">6 LÜKS SEVİYE</span>
         </div>
 
         <div class="overflow-x-auto">
             <table class="w-full text-left text-xs text-on-surface-muted">
                 <thead class="bg-[#0c101c] text-[10px] uppercase font-bold text-on-surface-subtle font-mono-jet">
                     <tr>
-                        <th class="p-3 rounded-l-lg">Tier Level</th>
-                        <th class="p-3">XP Requirement</th>
+                        <th class="p-3 rounded-l-lg">Seviye</th>
+                        <th class="p-3">XP Gereksinimi</th>
                         <th class="p-3">Rakeback %</th>
-                        <th class="p-3">Level-Up Cash</th>
-                        <th class="p-3 rounded-r-lg">Exclusive Perks</th>
+                        <th class="p-3">Seviye Atlama Nakit</th>
+                        <th class="p-3 rounded-r-lg">Özel Ayrıcalıklar</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-white/[0.04]">
@@ -208,7 +208,7 @@
                             <div class="flex items-center gap-2">
                                 <span>{{ $tName }}</span>
                                 @if($vipProfile['vip_level'] === $tName)
-                                    <span class="px-1.5 py-0.5 rounded text-[9px] font-black bg-emerald-500/20 text-emerald-400 uppercase tracking-widest">YOU</span>
+                                    <span class="px-1.5 py-0.5 rounded text-[9px] font-black bg-emerald-500/20 text-emerald-400 uppercase tracking-widest">SİZ</span>
                                 @endif
                             </div>
                         </td>
@@ -263,7 +263,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         const cur = parseFloat(statEl.innerText.replace(/,/g, '')) || 0;
                         statEl.innerText = (cur + parseFloat(data.amount)).toFixed(2);
                     }
-                    claimBtn.innerHTML = '<span class="material-symbols-outlined text-sm">check_circle</span><span>Claimed!</span>';
+                    claimBtn.innerHTML = '<span class="material-symbols-outlined text-sm">check_circle</span><span>Alındı!</span>';
                     claimBtn.classList.remove('from-emerald-500', 'to-teal-400');
                     claimBtn.classList.add('bg-emerald-500', 'text-white');
                     alert(data.message);
@@ -271,13 +271,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 } else {
                     alert(data.message || 'Error claiming rakeback');
                     claimBtn.disabled = false;
-                    claimBtn.innerHTML = '<span class="material-symbols-outlined text-sm">payments</span><span>Claim Rakeback</span>';
+                    claimBtn.innerHTML = '<span class="material-symbols-outlined text-sm">payments</span><span>Rakeback Al</span>';
                 }
             })
             .catch(() => {
                 alert('Connection error claiming rakeback.');
                 claimBtn.disabled = false;
-                claimBtn.innerHTML = '<span class="material-symbols-outlined text-sm">payments</span><span>Claim Rakeback</span>';
+                claimBtn.innerHTML = '<span class="material-symbols-outlined text-sm">payments</span><span>Rakeback Al</span>';
             });
         });
     }

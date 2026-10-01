@@ -1,0 +1,77 @@
+<?php
+
+return [
+
+    'accepted'             => ':attribute kabul edilmelidir.',
+    'active_url'           => ':attribute geçerli bir URL değil.',
+    'after'                => ':attribute, :date tarihinden sonraki bir tarih olmalıdır.',
+    'alpha'                => ':attribute yalnızca harf içerebilir.',
+    'alpha_dash'           => ':attribute yalnızca harf, sayı ve tire içerebilir.',
+    'alpha_num'            => ':attribute yalnızca harf ve sayı içerebilir.',
+    'array'                => ':attribute bir dizi olmalıdır.',
+    'before'               => ':attribute, :date tarihinden önceki bir tarih olmalıdır.',
+    'between'              => [
+        'numeric' => ':attribute, :min ile :max arasında olmalıdır.',
+        'file'    => ':attribute, :min ile :max kilobayt arasında olmalıdır.',
+        'string'  => ':attribute, :min ile :max karakter arasında olmalıdır.',
+        'array'   => ':attribute, :min ile :max arasında öğe içermelidir.',
+    ],
+    'boolean'              => ':attribute alanı doğru veya yanlış olmalıdır.',
+    'confirmed'            => ':attribute onayı eşleşmiyor.',
+    'date'                 => ':attribute geçerli bir tarih değil.',
+    'date_format'          => ':attribute, :format biçimiyle eşleşmiyor.',
+    'different'            => ':attribute ve :other farklı olmalıdır.',
+    'digits'               => ':attribute, :digits basamak olmalıdır.',
+    'digits_between'       => ':attribute, :min ile :max basamak arasında olmalıdır.',
+    'email'                => ':attribute geçerli bir e-posta adresi olmalıdır.',
+    'exists'               => 'Seçilen :attribute geçersiz.',
+    'filled'               => ':attribute alanı zorunludur.',
+    'image'                => ':attribute bir görsel olmalıdır.',
+    'in'                   => 'Seçilen :attribute geçersiz.',
+    'integer'              => ':attribute bir tam sayı olmalıdır.',
+    'ip'                   => ':attribute geçerli bir IP adresi olmalıdır.',
+    'json'                 => ':attribute geçerli bir JSON dizesi olmalıdır.',
+    'max'                  => [
+        'numeric' => ':attribute, :max değerinden büyük olamaz.',
+        'file'    => ':attribute, :max kilobayttan büyük olamaz.',
+        'string'  => ':attribute, :max karakterden uzun olamaz.',
+        'array'   => ':attribute, :max öğeden fazla içeremez.',
+    ],
+    'mimes'                => ':attribute, şu türde bir dosya olmalıdır: :values.',
+    'min'                  => [
+        'numeric' => ':attribute en az :min olmalıdır.',
+        'file'    => ':attribute en az :min kilobayt olmalıdır.',
+        'string'  => ':attribute en az :min karakter olmalıdır.',
+        'array'   => ':attribute en az :min öğe içermelidir.',
+    ],
+    'not_in'               => 'Seçilen :attribute geçersiz.',
+    'numeric'              => ':attribute bir sayı olmalıdır.',
+    'regex'                => ':attribute biçimi geçersiz. Geçerli olan a-z0-9',
+    'required'             => ':attribute alanı zorunludur.',
+    'required_if'          => ':other, :value olduğunda :attribute alanı zorunludur.',
+    'required_with'        => ':values mevcut olduğunda :attribute alanı zorunludur.',
+    'required_with_all'    => ':values mevcut olduğunda :attribute alanı zorunludur.',
+    'required_without'     => ':values mevcut olmadığında :attribute alanı zorunludur.',
+    'required_without_all' => ':values değerlerinin hiçbiri mevcut olmadığında :attribute alanı zorunludur.',
+    'same'                 => ':attribute ve :other eşleşmelidir.',
+    'size'                 => [
+        'numeric' => ':attribute, :size olmalıdır.',
+        'file'    => ':attribute, :size kilobayt olmalıdır.',
+        'string'  => ':attribute, :size karakter olmalıdır.',
+        'array'   => ':attribute, :size öğe içermelidir.',
+    ],
+    'string'               => ':attribute bir metin olmalıdır.',
+    'timezone'             => ':attribute geçerli bir saat dilimi olmalıdır.',
+    'unique'               => ':attribute zaten alınmış.',
+    'url'                  => ':attribute biçimi geçersiz.',
+    'captcha'              => 'reCAPTCHA değeri geçersiz.',
+
+    'custom' => [
+        'attribute-name' => [
+            'rule-name' => 'custom-message',
+        ],
+    ],
+
+    'attributes' => [],
+
+];

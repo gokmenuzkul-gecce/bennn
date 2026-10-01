@@ -1,20 +1,20 @@
 @extends('liteback.layout')
 
-@section('title', 'Events & Odds')
-@section('page_title', 'Sports Events & Odds')
+@section('title', 'Etkinlikler ve Oranlar')
+@section('page_title', 'Sports Etkinlikler ve Oranlar')
 
 @section('content')
 <div class="row">
     <div class="col-md-4">
         <div class="card card-primary">
             <div class="card-header">
-                <h3 class="card-title">Add Manual Game</h3>
+                <h3 class="card-title">Manuel Oyun Ekle</h3>
             </div>
             <form action="{{ route('liteback.sports.games.store') }}" method="POST">
                 @csrf
                 <div class="card-body">
                     <div class="form-group">
-                        <label for="league_id">Select League</label>
+                        <label for="league_id">Lig Seç</label>
                         <select name="league_id" class="form-control" required style="width:100%; padding:8px;">
                             @foreach($leagues as $lg)
                                 <option value="{{ $lg->id }}">{{ $lg->category->name }} &raquo; {{ $lg->name }}</option>
@@ -22,28 +22,28 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="title">Event Title</label>
+                        <label for="title">Etkinlik Başlığı</label>
                         <input type="text" name="title" class="form-control" id="title" placeholder="e.g. Arsenal vs Chelsea" required style="width:100%; padding:8px;">
                     </div>
                     <div class="form-group">
-                        <label for="team_one">Home Team (Team 1)</label>
+                        <label for="team_one">Ev Sahibi Takım (Takım 1)</label>
                         <input type="text" name="team_one" class="form-control" id="team_one" placeholder="e.g. Arsenal" required style="width:100%; padding:8px;">
                     </div>
                     <div class="form-group">
-                        <label for="team_two">Away Team (Team 2)</label>
+                        <label for="team_two">Deplasman Takımı (Takım 2)</label>
                         <input type="text" name="team_two" class="form-control" id="team_two" placeholder="e.g. Chelsea" required style="width:100%; padding:8px;">
                     </div>
                     <div class="form-group">
-                        <label for="start_time">Start Time (Commence Time)</label>
+                        <label for="start_time">Başlangıç Zamanı</label>
                         <input type="datetime-local" name="start_time" class="form-control" id="start_time" required style="width:100%; padding:8px;">
                     </div>
                     <div class="form-group">
-                        <label for="bet_start_time">Bet Window Opens At</label>
+                        <label for="bet_start_time">Bahis Penceresi Açılış</label>
                         <input type="datetime-local" name="bet_start_time" class="form-control" id="bet_start_time" required style="width:100%; padding:8px;">
                     </div>
                 </div>
                 <div class="card-footer">
-                    <button type="submit" class="btn btn-primary">Create Event</button>
+                    <button type="submit" class="btn btn-primary">Etkinlik Oluştur</button>
                 </div>
             </form>
         </div>
@@ -52,10 +52,10 @@
     <div class="col-md-8">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center" style="display: flex; justify-content: space-between; align-items: center;">
-                <h3 class="card-title">Events List</h3>
+                <h3 class="card-title">Etkinlik Listesi</h3>
                 <form action="{{ route('liteback.sports.games') }}" method="GET" class="card-tools ml-auto">
                     <div class="input-group input-group-sm" style="width: 250px;">
-                        <input type="text" name="q" class="form-control float-right" placeholder="Search events..." value="{{ $term ?? '' }}">
+                        <input type="text" name="q" class="form-control float-right" placeholder="Etkinlik ara..." value="{{ $term ?? '' }}">
                         <div class="input-group-append">
                             <button type="submit" class="btn btn-default"><i class="fas fa-search"></i></button>
                         </div>
@@ -66,12 +66,12 @@
                 <table class="table table-striped table-valign-middle mb-0">
                     <thead>
                         <tr>
-                            <th>Category / League</th>
-                            <th>Event Details</th>
-                            <th>Commence Time</th>
-                            <th>Bet Start Time</th>
-                            <th>Status</th>
-                            <th>Action</th>
+                            <th>Kategori / Lig</th>
+                            <th>Etkinlik Detayları</th>
+                            <th>Başlangıç Zamanı</th>
+                            <th>Bahis Başlangıç Zamanı</th>
+                            <th>Durum</th>
+                            <th>İşlem</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -84,24 +84,24 @@
                                 <td>
                                     <strong>{{ $game->title }}</strong><br>
                                     @if($game->manually_added)
-                                        <span class="badge badge-warning">Manual</span>
+                                        <span class="badge badge-warning">Manuel</span>
                                     @else
-                                        <span class="badge badge-info">Odds API</span>
+                                        <span class="badge badge-info">Oran API</span>
                                     @endif
                                 </td>
                                 <td><small>{{ $game->start_time }}</small></td>
                                 <td><small>{{ $game->bet_start_time }}</small></td>
                                 <td>
                                     @if($game->status === 1)
-                                        <span class="badge badge-success">Open for Betting</span>
+                                        <span class="badge badge-success">Bahse Açık</span>
                                     @elseif($game->status === 0)
-                                        <span class="badge badge-secondary">Not Open Yet</span>
+                                        <span class="badge badge-secondary">Henüz Açık Değil</span>
                                     @elseif($game->status === 3)
-                                        <span class="badge badge-dark">Closed</span>
+                                        <span class="badge badge-dark">Kapalı</span>
                                     @elseif($game->status === 4)
-                                        <span class="badge badge-info">Ended</span>
+                                        <span class="badge badge-info">Bitti</span>
                                     @elseif($game->status === 2)
-                                        <span class="badge badge-danger">Cancelled</span>
+                                        <span class="badge badge-danger">İptal Edildi</span>
                                     @endif
                                 </td>
                                 <td>
@@ -115,7 +115,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="text-center text-muted">No games found. Check API key and run sync commands.</td>
+                                <td colspan="6" class="text-center text-muted">Oyun bulunamadı. API anahtarını kontrol edin ve senkronizasyon komutlarını çalıştırın.</td>
                             </tr>
                         @endforelse
                     </tbody>

@@ -1,29 +1,29 @@
 @extends('liteback.layout')
 
-@section('title', 'Categories & Leagues')
-@section('page_title', 'Sports Categories / Leagues')
+@section('title', 'Kategoriler ve Ligler')
+@section('page_title', 'Sports Kategoriler / Ligler')
 
 @section('content')
 <div class="row">
     <div class="col-md-4">
         <div class="card card-primary">
             <div class="card-header">
-                <h3 class="card-title">Add Custom Category</h3>
+                <h3 class="card-title">Özel Kategori Ekle</h3>
             </div>
             <form action="{{ route('liteback.sports.categories.store') }}" method="POST">
                 @csrf
                 <div class="card-body">
                     <div class="form-group">
-                        <label for="name">Category Name</label>
+                        <label for="name">Kategori Adı</label>
                         <input type="text" name="name" class="form-control" id="name" placeholder="e.g. Soccer" required style="width:100%; padding:8px;">
                     </div>
                     <div class="form-group">
-                        <label for="odds_api_name">Odds API Group Name</label>
+                        <label for="odds_api_name">Oran API Grup Adı</label>
                         <input type="text" name="odds_api_name" class="form-control" id="odds_api_name" placeholder="e.g. Soccer (optional)" style="width:100%; padding:8px;">
                     </div>
                 </div>
                 <div class="card-footer">
-                    <button type="submit" class="btn btn-primary">Create Category</button>
+                    <button type="submit" class="btn btn-primary">Kategori Oluştur</button>
                 </div>
             </form>
         </div>
@@ -32,7 +32,7 @@
     <div class="col-md-8">
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title">Categories & Leagues</h3>
+                <h3 class="card-title">Kategoriler ve Ligler</h3>
             </div>
             <div class="card-body">
                 @forelse($categories as $category)
@@ -53,10 +53,10 @@
                             <table class="table table-sm table-striped mb-0">
                                 <thead>
                                     <tr>
-                                        <th>League Name</th>
-                                        <th>Odds API Key</th>
-                                        <th>API Status</th>
-                                        <th>Action</th>
+                                        <th>Lig Adı</th>
+                                        <th>Oran API Anahtarı</th>
+                                        <th>API Durumu</th>
+                                        <th>İşlem</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -78,14 +78,14 @@
                                                         @csrf
                                                         <input type="hidden" name="sync" class="sync-input" value="0">
                                                         <button type="button" class="btn btn-xs btn-danger btn-toggle-league" data-league-name="{{ $league->name }}">
-                                                            Disabled
+                                                            Devre dışı
                                                         </button>
                                                     </form>
                                                 @else
                                                     <form action="{{ route('liteback.sports.leagues.toggle', $league->id) }}" method="POST" class="d-inline">
                                                         @csrf
                                                         <button type="submit" class="btn btn-xs btn-success">
-                                                            Enabled
+                                                            Etkin
                                                         </button>
                                                     </form>
                                                 @endif
@@ -93,7 +93,7 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="4" class="text-center text-muted">No leagues synced or added for this category yet.</td>
+                                            <td colspan="4" class="text-center text-muted">Bu kategori için henüz senkronize veya eklenmiş lig yok.</td>
                                         </tr>
                                     @endforelse
                                 </tbody>
@@ -101,7 +101,7 @@
                         </div>
                     </div>
                 @empty
-                    <div class="text-center text-muted">No categories seeded. Run migrations/seeders first.</div>
+                    <div class="text-center text-muted">Kategori tohumlanmadı. Önce migrations/seeders çalıştırın.</div>
                 @endforelse
             </div>
         </div>
@@ -117,7 +117,7 @@ document.addEventListener('DOMContentLoaded', function() {
             let leagueName = this.getAttribute('data-league-name');
             let syncInput = form.querySelector('.sync-input');
             
-            if (confirm("Would you like to automatically fetch current matches and odds for '" + leagueName + "' from the Odds API now?\n\n- Click OK to enable and sync active odds immediately.\n- Click Cancel to just enable it without running a sync.")) {
+            if (confirm("Would you like to automatically fetch current matches and odds for '" + leagueName + "' from the Oran API now?\n\n- Click OK to enable and sync active odds immediately.\n- Click Cancel to just enable it without running a sync.")) {
                 syncInput.value = "1";
             } else {
                 syncInput.value = "0";

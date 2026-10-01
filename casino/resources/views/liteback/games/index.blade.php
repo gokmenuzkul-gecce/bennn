@@ -12,7 +12,7 @@
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">
             <i class="fas fa-check-circle mr-2"></i> {{ session('success') }}
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Kapat">
                 <span aria-hidden="true">&times;</span>
             </button>
         </div>
@@ -21,7 +21,7 @@
     @if($errors->any())
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
             <i class="fas fa-exclamation-triangle mr-2"></i> {{ $errors->first() }}
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Kapat">
                 <span aria-hidden="true">&times;</span>
             </button>
         </div>
@@ -49,12 +49,12 @@
         <div class="card card-outline card-success mb-4">
             <div class="card-body d-flex flex-column flex-md-row justify-content-between align-items-md-center">
                 <div>
-                    <h3 class="h5 font-weight-bold mb-1"><i class="fas fa-cloud-download-alt mr-2"></i>Licensed CEDAR Catalog</h3>
+                    <h3 class="h5 font-weight-bold mb-1"><i class="fas fa-cloud-download-alt mr-2"></i>Lisanslı CEDAR Kataloğu</h3>
                     <p class="text-muted mb-0">Pull entitled hosted games, add titles missing from this installation, and refresh existing metadata. Protected math and source remain on PROMEX servers.</p>
                 </div>
                 <form method="post" action="{{ route('liteback.cedar.sync') }}" class="mt-3 mt-md-0 ml-md-3">
                     @csrf
-                    <button class="btn btn-success font-weight-bold" type="submit"><i class="fas fa-sync-alt mr-1"></i> Pull & Install Games</button>
+                    <button class="btn btn-success font-weight-bold" type="submit"><i class="fas fa-sync-alt mr-1"></i> Oyunları Çek ve Kur</button>
                 </form>
             </div>
         </div>
@@ -62,7 +62,7 @@
     <div class="card card-outline {{ $legacyEnabled ? 'card-warning' : 'card-secondary' }} mb-4">
         <div class="card-header d-flex justify-content-between align-items-center">
             <div>
-                <h3 class="card-title font-weight-bold"><i class="fas fa-puzzle-piece mr-2"></i>Legacy Compatibility Plugin</h3>
+                <h3 class="card-title font-weight-bold"><i class="fas fa-puzzle-piece mr-2"></i>Eski Uyumluluk Eklentisi</h3>
                 <div class="small text-muted mt-1">Operator-supplied local files only. Promex does not provide, upload, or claim rights to provider content.</div>
             </div>
             <form method="post" action="{{ route('liteback.games.legacy_plugin') }}">
@@ -86,7 +86,7 @@
             </div>
             @if(count($legacyDiscovered))
                 <details class="small mb-3">
-                    <summary class="text-info" style="cursor:pointer">Show discovered folder names</summary>
+                    <summary class="text-info" style="cursor:pointer">Bulunan klasör adlarını göster</summary>
                     <div class="mt-2">
                         @foreach(array_slice($legacyDiscovered, 0, 100) as $candidate)
                             <span class="badge {{ $candidate['backend'] ? 'badge-light border' : 'badge-secondary' }} mr-1 mb-1" title="{{ $candidate['backend'] ? 'Matching server found' : 'Server.php missing' }}">{{ $candidate['name'] }}</span>
@@ -105,7 +105,7 @@
                         <input class="form-control-file" type="file" name="csv" accept=".csv,.txt" {{ $legacyEnabled ? '' : 'disabled' }}>
                     </div>
                     <div class="col-lg-2 mb-2">
-                        <button class="btn btn-warning btn-block" type="submit" {{ $legacyEnabled ? '' : 'disabled' }}>Register Disabled</button>
+                        <button class="btn btn-warning btn-block" type="submit" {{ $legacyEnabled ? '' : 'disabled' }}>Kayıt Devre Dışı</button>
                     </div>
                 </div>
                 <div class="custom-control custom-checkbox">
@@ -124,36 +124,36 @@
             <div class="small-box bg-info">
                 <div class="inner">
                     <h3>{{ $games->total() }}</h3>
-                    <p>Total Filtered Games</p>
+                    <p>Toplam Filtrelenmiş Oyun</p>
                 </div>
                 <div class="icon">
                     <i class="fas fa-gamepad"></i>
                 </div>
-                <a href="{{ route($listRoute) }}" class="small-box-footer">Reset Filter <i class="fas fa-arrow-circle-right"></i></a>
+                <a href="{{ route($listRoute) }}" class="small-box-footer">Filtreyi Sıfırla <i class="fas fa-arrow-circle-right"></i></a>
             </div>
         </div>
         <div class="col-lg-3 col-6">
             <div class="small-box bg-success">
                 <div class="inner">
                     <h3>{{ $totalActive }}</h3>
-                    <p>Active Games (Playable)</p>
+                    <p>Aktif Oyunlar (Oynanabilir)</p>
                 </div>
                 <div class="icon">
                     <i class="fas fa-check-circle"></i>
                 </div>
-                <a href="{{ route($listRoute, ['status' => 'active']) }}" class="small-box-footer">View Active Only <i class="fas fa-arrow-circle-right"></i></a>
+                <a href="{{ route($listRoute, ['status' => 'active']) }}" class="small-box-footer">View Yalnızca Aktif <i class="fas fa-arrow-circle-right"></i></a>
             </div>
         </div>
         <div class="col-lg-3 col-6">
             <div class="small-box bg-danger">
                 <div class="inner">
                     <h3>{{ $totalDisabled }}</h3>
-                    <p>Disabled Games (Hidden)</p>
+                    <p>Devre Dışı Oyunlar (Gizli)</p>
                 </div>
                 <div class="icon">
                     <i class="fas fa-ban"></i>
                 </div>
-                <a href="{{ route($inactiveRoute) }}" class="small-box-footer">View Disabled Only <i class="fas fa-arrow-circle-right"></i></a>
+                <a href="{{ route($inactiveRoute) }}" class="small-box-footer">Yalnızca Devre Dışıları Gör <i class="fas fa-arrow-circle-right"></i></a>
             </div>
         </div>
         <div class="col-lg-3 col-6">
@@ -206,7 +206,7 @@
                             </div>
                             <div class="d-flex justify-content-between align-items-center pt-2 border-top">
                                 <a href="{{ route($listRoute, ['category_id' => $p->id]) }}" class="btn btn-xs btn-outline-info" title="Filter list to {{ $p->title }}">
-                                    <i class="fas fa-filter"></i> Filter
+                                    <i class="fas fa-filter"></i> Filtrele
                                 </a>
                                 <div class="btn-group btn-group-sm">
                                     <form method="post" action="{{ route('liteback.games.bulk_provider_toggle') }}" class="d-inline" onsubmit="return confirm('Enable all {{ $p->total_games }} games for provider \'{{ $p->title }}\'?');">
@@ -214,7 +214,7 @@
                                         <input type="hidden" name="category_id" value="{{ $p->id }}">
                                         <input type="hidden" name="action" value="enable">
                                         <button type="submit" class="btn btn-xs btn-outline-success font-weight-bold" {{ $p->disabled_games == 0 ? 'disabled' : '' }}>
-                                            Enable All
+                                            Tümünü Etkinleştir
                                         </button>
                                     </form>
                                     <form method="post" action="{{ route('liteback.games.bulk_provider_toggle') }}" class="d-inline ml-1" onsubmit="return confirm('Disable all {{ $p->total_games }} games for provider \'{{ $p->title }}\'?');">
@@ -222,7 +222,7 @@
                                         <input type="hidden" name="category_id" value="{{ $p->id }}">
                                         <input type="hidden" name="action" value="disable">
                                         <button type="submit" class="btn btn-xs btn-outline-danger font-weight-bold" {{ $p->active_games == 0 ? 'disabled' : '' }}>
-                                            Disable All
+                                            Tümünü Devre Dışı Bırak
                                         </button>
                                     </form>
                                 </div>
@@ -258,8 +258,8 @@
                 </div>
                 <div class="col-md-2 col-sm-4 mb-2">
                     <select name="status" class="form-control form-control-sm">
-                        <option value="all" {{ $selectedStatus === 'all' ? 'selected' : '' }}>All Statuses</option>
-                        <option value="active" {{ $selectedStatus === 'active' ? 'selected' : '' }}>Active Only</option>
+                        <option value="all" {{ $selectedStatus === 'all' ? 'selected' : '' }}>Tüm Durumlar</option>
+                        <option value="active" {{ $selectedStatus === 'active' ? 'selected' : '' }}>Yalnızca Aktif</option>
                         <option value="disabled" {{ $selectedStatus === 'disabled' ? 'selected' : '' }}>Disabled Only</option>
                     </select>
                 </div>
@@ -271,8 +271,8 @@
                     </select>
                 </div>
                 <div class="col-md-2 col-sm-4 mb-2 d-flex">
-                    <button type="submit" class="btn btn-sm btn-primary flex-fill mr-1"><i class="fas fa-filter"></i> Apply</button>
-                    <a href="{{ route($listRoute) }}" class="btn btn-sm btn-outline-secondary mr-1" title="Clear Filters"><i class="fas fa-undo"></i></a>
+                    <button type="submit" class="btn btn-sm btn-primary flex-fill mr-1"><i class="fas fa-filter"></i> Uygula</button>
+                    <a href="{{ route($listRoute) }}" class="btn btn-sm btn-outline-secondary mr-1" title="Filtreleri Temizle"><i class="fas fa-undo"></i></a>
                     @unless($isCedarLibrary)
                         <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#addManualGameModal" title="Add Custom / External Game"><i class="fas fa-plus"></i></button>
                     @endunless
@@ -318,13 +318,13 @@
                             <th style="width: 40px;" class="text-center">#</th>
                             <th style="width: 70px;">ID</th>
                             <th style="width: 60px;">Icon</th>
-                            <th>Game Title</th>
+                            <th>Oyun Adı</th>
                             <th>System Name</th>
-                            <th>Source</th>
+                            <th>Kaynak</th>
                             <th>Provider(s)</th>
                             <th>Bet Limits & Denom</th>
-                            <th style="width: 110px;" class="text-center">Status</th>
-                            <th style="width: 180px;" class="text-right">Actions</th>
+                            <th style="width: 110px;" class="text-center">Durum</th>
+                            <th style="width: 180px;" class="text-right">İşlemler</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -360,7 +360,7 @@
                                     @elseif(isset($game->source_type) && $game->source_type === 'external_url')
                                         <span class="badge badge-info" title="{{ $game->custom_path }}"><i class="fas fa-globe mr-1"></i> Ext URL</span>
                                     @else
-                                        <span class="badge badge-secondary"><i class="fas fa-cube mr-1"></i> Default</span>
+                                        <span class="badge badge-secondary"><i class="fas fa-cube mr-1"></i> Varsayılan</span>
                                     @endif
                                     @if(($game->delivery_mode ?? 'LOCAL') === 'PROMEX_REMOTE')
                                         @php($remoteReady = ($game->source_type ?? '') === 'legacy_compat'
@@ -370,19 +370,19 @@
                                             <i class="fas fa-cloud mr-1"></i>{{ $remoteReady ? 'PROMEX CDN' : 'REMOTE UNENTITLED' }}
                                         </span>
                                     @else
-                                        <span class="badge badge-light border d-block mt-1"><i class="fas fa-server mr-1"></i>LOCAL</span>
+                                        <span class="badge badge-light border d-block mt-1"><i class="fas fa-server mr-1"></i>YEREL</span>
                                     @endif
                                 </td>
                                 <td>
                                     @forelse($game->category_names ?? [] as $cname)
                                         <span class="badge badge-info">{{ $cname }}</span>
                                     @empty
-                                        <span class="text-muted small">None</span>
+                                        <span class="text-muted small">Yok</span>
                                     @endforelse
                                 </td>
                                 <td>
-                                    <div class="text-muted small">Bets: <strong class="text-dark">{{ $game->bet ?: '0.01-1.00' }}</strong></div>
-                                    <div class="text-muted small">Denom: <strong class="text-dark">{{ $game->denomination ?: '1.00' }}</strong></div>
+                                    <div class="text-muted small">Bahis: <strong class="text-dark">{{ $game->bet ?: '0.01-1.00' }}</strong></div>
+                                    <div class="text-muted small">Değer: <strong class="text-dark">{{ $game->denomination ?: '1.00' }}</strong></div>
                                 </td>
                                 <td class="text-center">
                                     @php($effective = (int)$game->view === 1
@@ -390,11 +390,11 @@
                                         && (($game->delivery_mode ?? 'LOCAL') !== 'PROMEX_REMOTE'
                                             || (($game->source_type ?? '') === 'legacy_compat' ? $legacyCdnAvailable : isset($remoteCatalog[$game->name]))))
                                     @if($effective)
-                                        <span class="badge badge-success px-2 py-1"><i class="fas fa-check-circle mr-1"></i> ACTIVE</span>
+                                        <span class="badge badge-success px-2 py-1"><i class="fas fa-check-circle mr-1"></i> AKTİF</span>
                                     @elseif((int)$game->view === 1)
                                         <span class="badge badge-warning px-2 py-1"><i class="fas fa-ban mr-1"></i> {{ ($game->source_type ?? '') === 'legacy_compat' ? 'PLUGIN BLOCKED' : 'HUB BLOCKED' }}</span>
                                     @else
-                                        <span class="badge badge-danger px-2 py-1"><i class="fas fa-ban mr-1"></i> DISABLED</span>
+                                        <span class="badge badge-danger px-2 py-1"><i class="fas fa-ban mr-1"></i> DEVRE DIŞI</span>
                                     @endif
                                 </td>
                                 <td class="text-right">
@@ -476,13 +476,13 @@
                     <h5 class="modal-title font-weight-bold" id="editLimitsModalLabel">
                         <i class="fas fa-sliders-h mr-2"></i> Edit Game Limits & Parameters
                     </h5>
-                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Kapat">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
-                        <label class="font-weight-bold">Game Title</label>
+                        <label class="font-weight-bold">Oyun Adı</label>
                         <input type="text" id="modal-game-title" class="form-control" readonly>
                     </div>
                     <div class="form-group">
@@ -497,7 +497,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">İptal</button>
                     <button type="submit" class="btn btn-primary font-weight-bold">
                         <i class="fas fa-save mr-1"></i> Save Changes
                     </button>
@@ -517,13 +517,13 @@
                     <h5 class="modal-title font-weight-bold" id="editSourceModalLabel">
                         <i class="fas fa-network-wired mr-2 text-info"></i> Configure Game Source
                     </h5>
-                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Kapat">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
-                        <label class="font-weight-bold">Game Title</label>
+                        <label class="font-weight-bold">Oyun Adı</label>
                         <input type="text" id="modal-source-title" class="form-control" readonly>
                     </div>
                     <div class="form-group">
@@ -545,7 +545,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">İptal</button>
                     <button type="submit" class="btn btn-primary font-weight-bold">
                         <i class="fas fa-save mr-1"></i> Save Source
                     </button>
@@ -578,14 +578,14 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">İptal</button>
                 <button type="submit" class="btn btn-dark">Validate & Import</button>
             </div>
         </form>
     </div></div>
 </div>
 
-<!-- Add Manual Game Modal -->
+<!-- Manuel Oyun Ekle Modal -->
 <div class="modal fade" id="addManualGameModal" tabindex="-1" role="dialog" aria-labelledby="addManualGameModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -595,14 +595,14 @@
                     <h5 class="modal-title font-weight-bold" id="addManualGameModalLabel">
                         <i class="fas fa-plus-circle mr-2"></i> Register New Custom / Manual Game
                     </h5>
-                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Kapat">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-6 form-group">
-                            <label class="font-weight-bold">Game Title <span class="text-danger">*</span></label>
+                            <label class="font-weight-bold">Oyun Adı <span class="text-danger">*</span></label>
                             <input type="text" name="title" class="form-control" placeholder="e.g. Sweet Bonanza Deluxe" required>
                         </div>
                         <div class="col-md-6 form-group">
@@ -646,7 +646,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">İptal</button>
                     <button type="submit" class="btn btn-success font-weight-bold">
                         <i class="fas fa-plus mr-1"></i> Register & Activate Game
                     </button>

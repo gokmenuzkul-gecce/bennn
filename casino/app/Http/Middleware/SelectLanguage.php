@@ -1,26 +1,25 @@
-<?php 
+<?php
 namespace VanguardLTE\Http\Middleware
 {
     class SelectLanguage
     {
         public function handle($request, \Closure $next)
         {
-            if( auth()->check() ) 
+            $locale = config('app.locale', 'tr');
+
+            if (auth()->check() && auth()->user()->language)
             {
-                \App::setLocale(auth()->user()->language);
+                $locale = auth()->user()->language;
             }
-            
-            if (isset($_COOKIE['language'])) {
-                $laut = htmlspecialchars($_COOKIE['language']);
-                \App::setLocale($laut);
-            }
-            else
+
+            if (isset($_COOKIE['language']))
             {
-                \App::setLocale("en");
+                $locale = htmlspecialchars($_COOKIE['language']);
             }
+
+            \App::setLocale($locale);
 
             return $next($request);
         }
     }
-
 }

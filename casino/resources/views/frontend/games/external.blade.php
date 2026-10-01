@@ -54,10 +54,20 @@
     </div>
 
     <iframe id="game-frame" 
-            src="{{ $externalUrl }}" 
+            name="game-frame"
+            src="{{ !empty($launch['form']) ? 'about:blank' : $launch['url'] }}" 
             allow="autoplay; fullscreen; screen-wake-lock"
             allowfullscreen>
     </iframe>
+
+    @if(!empty($launch['form']))
+    <form id="vendor-form" method="POST" action="{{ $launch['form']['action'] }}" target="game-frame" style="display:none">
+        @foreach($launch['form']['fields'] as $name => $value)
+            <input type="hidden" name="{{ $name }}" value="{{ $value }}">
+        @endforeach
+    </form>
+    <script>document.getElementById('vendor-form').submit();</script>
+    @endif
 
     <script>
         function toggleFullscreen() {

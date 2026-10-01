@@ -26,6 +26,8 @@ namespace VanguardLTE\Http\Middleware
             'lotto/play',
             '/liteback/*',
             'liteback/*',
+            'webhooks/aggregator/*',
+            '/webhooks/aggregator/*',
             'register'
         ];
     }

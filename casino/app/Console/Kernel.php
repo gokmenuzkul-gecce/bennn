@@ -23,6 +23,7 @@ namespace VanguardLTE\Console
             Commands\SettleSportsBets::class,
             Commands\SyncSportsOdds::class,
             Commands\SettleSportsMatches::class,
+            Commands\CasinoSyncCatalog::class,
         ];
 
         protected function schedule(\Illuminate\Console\Scheduling\Schedule $schedule)

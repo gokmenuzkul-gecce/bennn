@@ -8,7 +8,7 @@
     <div class="col-md-12">
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title">Pending Unsettled Events</h3>
+                <h3 class="card-title">Bekleyen Sonuçlandırılmamış Etkinlikler</h3>
             </div>
             <div class="card-body">
                 @forelse($games as $game)
@@ -33,7 +33,7 @@
                                                 <span><strong>{{ $outcome->name }}</strong> (Odds: {{ number_format($outcome->odds, 2) }})</span>
                                                 <form action="{{ route('liteback.sports.settlements.settle', $outcome->id) }}" method="POST" class="d-inline">
                                                     @csrf
-                                                    <button type="submit" class="btn btn-xs btn-success ml-2">Declare Winner</button>
+                                                    <button type="submit" class="btn btn-xs btn-success ml-2">Kazananı İlan Et</button>
                                                 </form>
                                             </div>
                                         @endforeach
@@ -45,8 +45,8 @@
                 @empty
                     <div class="text-center text-muted p-5" style="padding: 50px; text-align: center;">
                         <i class="fas fa-check-circle text-success" style="font-size: 48px; margin-bottom: 15px;"></i>
-                        <h4>All synced sports events have been fully settled!</h4>
-                        <p class="text-muted">Check back later or run odds sync commands to import new matches.</p>
+                        <h4>Tüm senkronize spor etkinlikleri tamamen sonuçlandırıldı!</h4>
+                        <p class="text-muted">Daha sonra tekrar kontrol edin veya yeni maçları içe aktarmak için oran senkronizasyon komutlarını çalıştırın.</p>
                     </div>
                 @endforelse
             </div>

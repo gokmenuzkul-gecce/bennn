@@ -9,11 +9,11 @@
     </div>
     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
         <div>
-            <span style="font-size: 0.85rem; color: var(--muted);">Odds:</span>
+            <span style="font-size: 0.85rem; color: var(--muted);">Oran:</span>
             <strong class="outcome-odds" style="color: var(--accent);">{{ number_format($item['odds'], 2) }}</strong>
         </div>
         <div style="display: flex; align-items: center; gap: 5px;">
-            <span style="font-size: 0.85rem; color: var(--muted);">Stake:</span>
+            <span style="font-size: 0.85rem; color: var(--muted);">Miktar:</span>
             <input type="number" class="betslip-stake" data-outcome-id="{{ $item['outcome_id'] }}" data-odds="{{ $item['odds'] }}" value="{{ $item['stake_amount'] }}" style="width: 70px; padding: 4px 8px; background: #121212; border: 1px solid var(--border); border-radius: 4px; color: white; text-align: right;" min="1">
         </div>
     </div>

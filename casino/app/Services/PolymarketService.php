@@ -46,7 +46,7 @@ class PolymarketService
             Log::warning("[Polymarket Gamma Search Error] " . $e->getMessage());
         }
 
-        return $this->getMockSearchResults($keyword);
+        return [];
     }
 
     /**
@@ -286,59 +286,5 @@ class PolymarketService
             return 'tech';
         }
         return 'popculture';
-    }
-
-    /**
-     * Fallback mock results if offline or unpopulated
-     */
-    protected function getMockSearchResults(string $keyword): array
-    {
-        $allMocks = [
-            [
-                'market_id' => 'poly_mock_101',
-                'title' => 'Will AI Humanoid Robots achieve 10,000 home sales before 2027?',
-                'description' => 'Resolves YES if at least one commercial humanoid achieves 10,000 consumer sales before Dec 31, 2026.',
-                'category' => 'tech',
-                'yes_price' => 0.42,
-                'no_price' => 0.58,
-                'yes_percent' => 42,
-                'no_percent' => 58,
-                'yes_odds' => 2.38,
-                'no_odds' => 1.72,
-                'total_volume' => 12500,
-                'end_date' => now()->addMonths(6)->toIso8601String(),
-                'is_local' => false,
-            ],
-            [
-                'market_id' => 'poly_mock_102',
-                'title' => 'Will SpaceX Starship land uncrewed payload on Mars before 2027?',
-                'description' => 'Resolves YES if Starship lands on Mars surface before Jan 1, 2027.',
-                'category' => 'tech',
-                'yes_price' => 0.64,
-                'no_price' => 0.36,
-                'yes_percent' => 64,
-                'no_percent' => 36,
-                'yes_odds' => 1.56,
-                'no_odds' => 2.75,
-                'total_volume' => 35400,
-                'end_date' => now()->addMonths(8)->toIso8601String(),
-                'is_local' => false,
-            ]
-        ];
-
-        if (empty($keyword)) {
-            return $allMocks;
-        }
-
-        $kw = strtolower($keyword);
-        $filtered = [];
-
-        foreach ($allMocks as $m) {
-            if (str_contains(strtolower($m['title'] . ' ' . $m['description']), $kw)) {
-                $filtered[] = $m;
-            }
-        }
-
-        return $filtered;
     }
 }

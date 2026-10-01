@@ -1,6 +1,6 @@
 @extends('frontend.Minimal.layouts.clean')
 
-@section('page-title', 'Affiliate & Referral Rewards - Casino du Liban')
+@section('page-title', 'Ortaklık ve Referans Ödülleri - Promex Gaming Suite')
 
 @section('content')
 <div class="space-y-6">
@@ -28,7 +28,7 @@
             </div>
             <button id="btn-claim-commissions" class="bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-black font-extrabold text-xs uppercase px-5 py-3 rounded-xl shadow-lg shadow-amber-500/25 transition-all transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2" {{ ($stats['unclaimed_commissions'] ?? 0) <= 0 ? 'disabled' : '' }}>
                 <span class="material-symbols-outlined text-sm font-bold">savings</span>
-                <span>Claim to Cash</span>
+                <span>Nakde Çevir</span>
             </button>
         </div>
         @else
@@ -58,7 +58,7 @@
                         <input type="text" id="ref-link-input" readonly value="{{ $stats['referral_link'] ?? '' }}" class="w-full bg-[#0b0e17] border border-white/[0.12] rounded-xl px-4 py-3 text-xs sm:text-sm text-secondary font-mono-jet focus:outline-none select-all pr-24">
                         <button type="button" onclick="copyRefLink()" class="absolute right-1.5 top-1.5 bottom-1.5 bg-secondary hover:bg-secondary-dark text-white px-4 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5">
                             <span class="material-symbols-outlined text-sm">content_copy</span>
-                            <span id="copy-btn-text">Copy</span>
+                            <span id="copy-btn-text">Kopyala</span>
                         </button>
                     </div>
                 </div>
@@ -113,7 +113,7 @@
                 1.00%
             </div>
             <div class="text-[11px] text-on-surface-muted mt-1 flex items-center gap-1">
-                <span class="material-symbols-outlined text-xs">verified</span> 0.5% / 0.3% / 0.2% Split
+                <span class="material-symbols-outlined text-xs">doğrulandı</span> 0.5% / 0.3% / 0.2% Split
             </div>
         </div>
     </div>
@@ -145,7 +145,7 @@
                         <span class="font-bold text-white font-mono-jet text-sm">{{ $stats['tier1']['count'] ?? 0 }} Users</span>
                     </div>
                     <div class="flex justify-between items-center text-xs">
-                        <span class="text-on-surface-muted">Total Earned:</span>
+                        <span class="text-on-surface-muted">Toplam Kazanç:</span>
                         <span class="font-bold text-amber-300 font-mono-jet text-sm">${{ number_format($stats['tier1']['earnings'] ?? 0, 2) }}</span>
                     </div>
                     <div class="pt-2 border-t border-white/[0.06] text-[11px] text-on-surface-muted leading-relaxed">
@@ -170,7 +170,7 @@
                         <span class="font-bold text-white font-mono-jet text-sm">{{ $stats['tier2']['count'] ?? 0 }} Users</span>
                     </div>
                     <div class="flex justify-between items-center text-xs">
-                        <span class="text-on-surface-muted">Total Earned:</span>
+                        <span class="text-on-surface-muted">Toplam Kazanç:</span>
                         <span class="font-bold text-blue-300 font-mono-jet text-sm">${{ number_format($stats['tier2']['earnings'] ?? 0, 2) }}</span>
                     </div>
                     <div class="pt-2 border-t border-white/[0.06] text-[11px] text-on-surface-muted leading-relaxed">
@@ -195,7 +195,7 @@
                         <span class="font-bold text-white font-mono-jet text-sm">{{ $stats['tier3']['count'] ?? 0 }} Users</span>
                     </div>
                     <div class="flex justify-between items-center text-xs">
-                        <span class="text-on-surface-muted">Total Earned:</span>
+                        <span class="text-on-surface-muted">Toplam Kazanç:</span>
                         <span class="font-bold text-purple-300 font-mono-jet text-sm">${{ number_format($stats['tier3']['earnings'] ?? 0, 2) }}</span>
                     </div>
                     <div class="pt-2 border-t border-white/[0.06] text-[11px] text-on-surface-muted leading-relaxed">
@@ -226,7 +226,7 @@
                         <th class="p-3">Vertical</th>
                         <th class="p-3 text-right">Wager</th>
                         <th class="p-3 text-right">Commission</th>
-                        <th class="p-3 text-center rounded-r-lg">Status</th>
+                        <th class="p-3 text-center rounded-r-lg">Durum</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-white/[0.04]">
@@ -240,11 +240,11 @@
                         </td>
                         <td class="p-3">
                             @if($comm->tier == 1)
-                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 font-mono-jet">Tier 1</span>
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 font-mono-jet">Kademe 1</span>
                             @elseif($comm->tier == 2)
-                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-500/20 text-blue-300 font-mono-jet">Tier 2</span>
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-500/20 text-blue-300 font-mono-jet">Kademe 2</span>
                             @else
-                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-500/20 text-purple-300 font-mono-jet">Tier 3</span>
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-500/20 text-purple-300 font-mono-jet">Kademe 3</span>
                             @endif
                         </td>
                         <td class="p-3">
@@ -260,9 +260,9 @@
                         </td>
                         <td class="p-3 text-center">
                             @if($comm->status === 'claimed')
-                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400">Claimed</span>
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400">Alındı</span>
                             @else
-                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-yellow-500/20 text-yellow-300 animate-pulse">Pending</span>
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-yellow-500/20 text-yellow-300 animate-pulse">Beklemede</span>
                             @endif
                         </td>
                     </tr>
@@ -326,7 +326,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         headerBal.innerText = Number(data.balance).toLocaleString();
                     }
 
-                    claimBtn.innerHTML = '<span class="material-symbols-outlined text-sm">check_circle</span><span>Claimed!</span>';
+                    claimBtn.innerHTML = '<span class="material-symbols-outlined text-sm">check_circle</span><span>Alındı!</span>';
                     claimBtn.classList.remove('from-amber-500', 'to-yellow-400');
                     claimBtn.classList.add('bg-emerald-500', 'text-white');
                     
@@ -335,14 +335,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 } else {
                     alert(data.message || 'Error claiming commissions');
                     claimBtn.disabled = false;
-                    claimBtn.innerHTML = '<span class="material-symbols-outlined text-sm">savings</span><span>Claim to Cash</span>';
+                    claimBtn.innerHTML = '<span class="material-symbols-outlined text-sm">savings</span><span>Nakde Çevir</span>';
                 }
             })
             .catch(err => {
                 console.error(err);
                 alert('Network error claiming commissions.');
                 claimBtn.disabled = false;
-                claimBtn.innerHTML = '<span class="material-symbols-outlined text-sm">savings</span><span>Claim to Cash</span>';
+                claimBtn.innerHTML = '<span class="material-symbols-outlined text-sm">savings</span><span>Nakde Çevir</span>';
             });
         });
     }

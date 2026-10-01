@@ -23,6 +23,65 @@ if (file_exists(__DIR__.'/casino/storage/framework/maintenance.php')) {
 
 /*
 |--------------------------------------------------------------------------
+| Serve Static Assets With Correct MIME Types
+|--------------------------------------------------------------------------
+|
+| Under the PHP built-in server this file is used as the router, so every
+| request (including .svg/.css/.js) would otherwise be handed to Laravel and
+| returned as text/html. Browsers refuse to render images served that way.
+| When the request maps to a real asset, stream it directly with the right
+| Content-Type. PHP source and dotfiles are never served.
+|
+*/
+
+if (PHP_SAPI === 'cli-server' && isset($_SERVER['REQUEST_URI'])) {
+    $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+    if ($method === 'GET' || $method === 'HEAD') {
+        $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+        $path = rawurldecode($path);
+        if (strpos($path, '..') === false && strpos($path, "\0") === false) {
+            $assetTypes = [
+                'svg' => 'image/svg+xml', 'png' => 'image/png', 'jpg' => 'image/jpeg',
+                'jpeg' => 'image/jpeg', 'gif' => 'image/gif', 'webp' => 'image/webp',
+                'avif' => 'image/avif', 'ico' => 'image/x-icon', 'css' => 'text/css',
+                'js' => 'application/javascript', 'mjs' => 'application/javascript',
+                'json' => 'application/json', 'map' => 'application/json',
+                'woff' => 'font/woff', 'woff2' => 'font/woff2', 'ttf' => 'font/ttf',
+                'otf' => 'font/otf', 'eot' => 'application/vnd.ms-fontobject',
+                'mp4' => 'video/mp4', 'webm' => 'video/webm', 'mp3' => 'audio/mpeg',
+                'wasm' => 'application/wasm', 'txt' => 'text/plain', 'xml' => 'application/xml',
+                'pdf' => 'application/pdf', 'webmanifest' => 'application/manifest+json',
+            ];
+            $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+            $allowedDirs = ['frontend/', 'games/', 'js/', 'css/', 'img/', 'images/', 'icons/', 'assets/', 'uploads/', 'storage/'];
+            $allowedRootFiles = ['manifest.json', 'favicon.ico', 'robots.txt'];
+            $relative = ltrim($path, '/');
+            $inAllowedDir = false;
+            foreach ($allowedDirs as $dir) {
+                if (strpos($relative, $dir) === 0) { $inAllowedDir = true; break; }
+            }
+            $isAllowedRootFile = in_array(strtolower($relative), $allowedRootFiles, true);
+            if (isset($assetTypes[$ext]) && ($inAllowedDir || $isAllowedRootFile)) {
+                $file = realpath(__DIR__ . $path);
+                if ($file !== false && is_file($file)
+                    && strpos($file, __DIR__ . DIRECTORY_SEPARATOR) === 0
+                    && basename($file)[0] !== '.') {
+                    header('Content-Type: ' . $assetTypes[$ext]);
+                    header('Content-Length: ' . filesize($file));
+                    header('Cache-Control: public, max-age=604800');
+                    if ($method === 'HEAD') {
+                        exit;
+                    }
+                    readfile($file);
+                    exit;
+                }
+            }
+        }
+    }
+}
+
+/*
+|--------------------------------------------------------------------------
 | Register The Auto Loader
 |--------------------------------------------------------------------------
 |

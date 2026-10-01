@@ -266,7 +266,7 @@ $(document).ready(function () {
     });
 
     // Global Cedar Coin Refill (+50,000 Free Coins)
-    $(document).on('click', '#btn-sidebar-refill, #btn-mobile-refill, #btn-sheet-refill', function(e) {
+    $(document).on('click', '#btn-sidebar-refill, #btn-mobile-refill, #btn-sheet-refill, #btn-account-refill', function(e) {
         e.preventDefault();
         const $btn = $(this);
         $btn.prop('disabled', true);
@@ -283,6 +283,8 @@ $(document).ready(function () {
                     $('#user-coin-balance-sidebar').text(res.balance);
                     $('#user-coin-balance-mobile').text(res.balance);
                     $('#user-coin-balance-sheet').text(res.balance);
+                    $('#topbar-balance').text(res.balance);
+                    $('#account-menu-balance').text(res.balance);
                     alert('⚡ Power Up Success! +50,000 Cedar Coins added to your wallet.');
                 }
             },
