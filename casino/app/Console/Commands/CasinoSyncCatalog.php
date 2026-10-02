@@ -18,6 +18,7 @@ class CasinoSyncCatalog extends Command
         {--provider= : Only sync one provider key (pragmatic, pgsoft, amatic, amusnet)}
         {--link-only : Match existing rows without importing new games}
         {--prune : Hide rows the vendor no longer lists (they fail to launch)}
+        {--hide-unlinked : Hide lobby rows no aggregator provider owns (license-gated legacy titles)}
         {--shop=1 : Shop id the games belong to}';
 
     protected $description = 'Aggregator oyun kataloğunu yerel lobiye senkronize et';
@@ -33,6 +34,10 @@ class CasinoSyncCatalog extends Command
             $report = $provider !== ''
                 ? [$provider => $service->sync($provider, $createMissing, $shopId, $prune)]
                 : $service->syncAll($createMissing, $shopId, $prune);
+
+            if ($this->option('hide-unlinked')) {
+                $this->line('gizlenen (bağlantısız) = ' . $service->hideUnlinked($shopId));
+            }
         } catch (\Throwable $e) {
             $this->error($e->getMessage());
 

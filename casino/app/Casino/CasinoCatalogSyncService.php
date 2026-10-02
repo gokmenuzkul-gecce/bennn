@@ -215,6 +215,25 @@ class CasinoCatalogSyncService
         return $report;
     }
 
+    /**
+     * Hide lobby rows that no aggregator provider owns.
+     *
+     * These legacy rows carry a local title but no provider link, so their only
+     * launch path is the PROMEX-protected local runtime, which refuses to open
+     * without an active license. Until one is activated they would only ever
+     * answer "game temporarily unavailable", so they are hidden from the lobby.
+     * The rows stay intact; set view=1 again once a license is active.
+     */
+    public function hideUnlinked(int $shopId = 1): int
+    {
+        return Game::where('shop_id', $shopId)
+            ->where('view', 1)
+            ->where(function ($q) {
+                $q->whereNull('provider_key')->orWhere('provider_key', '');
+            })
+            ->update(['view' => 0]);
+    }
+
     private function createGame(array $entry, string $providerKey, int $shopId): Game
     {
         $name = $this->uniqueName($entry['symbol'] ?: ('g' . $entry['gameid']), $shopId);
