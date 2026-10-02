@@ -196,6 +196,7 @@ return [
         VanguardLTE\Providers\RouteServiceProvider::class,
 
         VanguardLTE\Providers\SMSToServiceProvider::class,
+        VanguardLTE\Providers\MailtrapServiceProvider::class,
 		
 		jeremykenedy\LaravelRoles\RolesServiceProvider::class,
 		
