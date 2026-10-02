@@ -38,6 +38,17 @@ class PaymentSettingsController extends Controller
             'payment_manual_enabled' => 'required|in:0,1',
             'payment_manual_instructions' => 'nullable|string|max:2000',
 
+            // Investment method details (Bakiye Yükle screen)
+            'payment_bank_transfer_bank' => 'nullable|string|max:255',
+            'payment_bank_transfer_holder' => 'nullable|string|max:255',
+            'payment_bank_transfer_iban' => 'nullable|string|max:64',
+            'payment_havale_bank' => 'nullable|string|max:255',
+            'payment_havale_holder' => 'nullable|string|max:255',
+            'payment_havale_iban' => 'nullable|string|max:64',
+            'payment_crypto_network' => 'nullable|string|max:255',
+            'payment_crypto_address' => 'nullable|string|max:255',
+            'payment_crypto_memo' => 'nullable|string|max:255',
+
             // XtoPay settings
             'payment_xto_enabled' => 'required|in:0,1',
             'payment_xto_website_name' => 'nullable|string|max:255',
@@ -61,6 +72,15 @@ class PaymentSettingsController extends Controller
             'payment_btcpay_webhook_secret',
             'payment_manual_enabled',
             'payment_manual_instructions',
+            'payment_bank_transfer_bank',
+            'payment_bank_transfer_holder',
+            'payment_bank_transfer_iban',
+            'payment_havale_bank',
+            'payment_havale_holder',
+            'payment_havale_iban',
+            'payment_crypto_network',
+            'payment_crypto_address',
+            'payment_crypto_memo',
             'payment_xto_enabled',
             'payment_xto_website_name',
             'payment_xto_token',

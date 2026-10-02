@@ -512,21 +512,53 @@
                 if ($depMin <= 0) $depMin = 50;
                 $depMax = (float) (function_exists('settings') ? settings('maximum_payment_amount', 10000) : 10000);
                 $depPresets = [100, 250, 500, 1000];
-                $depInstructions = function_exists('settings') ? settings('payment_manual_instructions', '') : '';
+                $depGet = fn($k, $d = '') => function_exists('settings') ? trim((string) settings($k, $d)) : $d;
+
+                $depMethods = [
+                    'bank' => [
+                        'label' => 'Banka Transferi',
+                        'icon'  => 'account_balance',
+                        'rows'  => [
+                            'Banka'          => $depGet('payment_bank_transfer_bank'),
+                            'Hesap Sahibi'   => $depGet('payment_bank_transfer_holder'),
+                            'IBAN'           => $depGet('payment_bank_transfer_iban'),
+                        ],
+                    ],
+                    'havale' => [
+                        'label' => 'Havale / EFT',
+                        'icon'  => 'swap_horiz',
+                        'rows'  => [
+                            'Banka'          => $depGet('payment_havale_bank'),
+                            'Hesap Sahibi'   => $depGet('payment_havale_holder'),
+                            'IBAN'           => $depGet('payment_havale_iban'),
+                        ],
+                    ],
+                    'crypto' => [
+                        'label' => 'Kripto Yatırım',
+                        'icon'  => 'currency_bitcoin',
+                        'rows'  => [
+                            'Ağ / Coin'      => $depGet('payment_crypto_network'),
+                            'Cüzdan Adresi'  => $depGet('payment_crypto_address'),
+                            'Not / Memo'     => $depGet('payment_crypto_memo'),
+                        ],
+                    ],
+                ];
+                $depAvailable = [];
+                foreach ($depMethods as $key => $method) {
+                    $method['rows'] = array_filter($method['rows'], fn($v) => $v !== '');
+                    if (!empty($method['rows'])) {
+                        $depAvailable[$key] = $method;
+                    }
+                }
             @endphp
             <div class="space-y-4">
                 <!-- Header -->
-                <div class="flex justify-between items-start">
-                    <div>
-                        <h2 class="text-xl font-extrabold text-white tracking-tight flex items-center gap-2">
-                            <span class="material-symbols-outlined text-primary text-2xl">add_card</span>
-                            <span>Bakiye Yükle</span>
-                        </h2>
-                        <p class="text-xs text-on-surface-muted mt-1">Gerçek yatırım ile bakiyenizi artırın. Onay sonrası bakiyeniz otomatik güncellenir.</p>
-                    </div>
-                    <span class="text-[10px] bg-primary/10 text-primary border border-primary/20 px-2.5 py-1 rounded-full font-mono-jet font-bold">
-                        {{ number_format($depRate) }} PUAN = {{ $depCurrency }}1,00
-                    </span>
+                <div>
+                    <h2 class="text-xl font-extrabold text-white tracking-tight flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-2xl">add_card</span>
+                        <span>Bakiye Yükle</span>
+                    </h2>
+                    <p class="text-xs text-on-surface-muted mt-1">Onay sonrası bakiyeniz otomatik güncellenir.</p>
                 </div>
 
                 <!-- Balance Info Card -->
@@ -549,17 +581,49 @@
                     </div>
                 </div>
 
-                @if(!empty($depInstructions))
-                <div class="bg-amber-500/[0.07] border border-amber-500/20 rounded-2xl p-3">
-                    <span class="text-[10px] font-bold text-amber-400 uppercase tracking-wider block mb-1">Ödeme Talimatları</span>
-                    <p class="text-[11px] text-on-surface-muted whitespace-pre-line leading-relaxed">{{ trim($depInstructions) }}</p>
+                <!-- Investment Methods -->
+                <div>
+                    <span class="text-[10px] font-bold text-on-surface-muted uppercase tracking-wider block mb-2">Yatırım Yöntemleri</span>
+                    @if(!empty($depAvailable))
+                    <div class="grid grid-cols-3 gap-2" id="deposit-method-tiles">
+                        @foreach($depAvailable as $key => $method)
+                            <button type="button" class="deposit-method-tile" data-method="{{ $key }}">
+                                <span class="material-symbols-outlined">{{ $method['icon'] }}</span>
+                                <span class="deposit-method-tile-label">{{ $method['label'] }}</span>
+                            </button>
+                        @endforeach
+                    </div>
+                    @else
+                    <div class="bg-white/[0.03] border border-white/[0.08] rounded-2xl p-3 text-center">
+                        <p class="text-[11px] text-on-surface-muted">Şu anda aktif bir yatırım yöntemi bulunmuyor. Lütfen daha sonra tekrar deneyin.</p>
+                    </div>
+                    @endif
                 </div>
-                @endif
+
+                <!-- Method Details -->
+                <div id="deposit-method-details" class="hidden space-y-2">
+                    @foreach($depAvailable as $key => $method)
+                        <div class="deposit-method-panel hidden" data-panel="{{ $key }}">
+                            <div class="bg-[#121622] border border-white/[0.08] rounded-2xl p-3 space-y-2">
+                                @foreach($method['rows'] as $rowLabel => $rowValue)
+                                    <div class="deposit-info-row" data-copy="{{ $rowValue }}">
+                                        <span class="deposit-info-label">{{ $rowLabel }}</span>
+                                        <span class="deposit-info-value">{{ $rowValue }}</span>
+                                        <button type="button" class="deposit-copy-btn" title="Kopyala" aria-label="Kopyala">
+                                            <span class="material-symbols-outlined">content_copy</span>
+                                        </button>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
 
                 <!-- Deposit Form -->
                 <form id="deposit-request-form" class="space-y-3.5">
                     @csrf
                     <input type="hidden" name="driver" value="manual">
+                    <input type="hidden" name="method" id="deposit-method" value="">
                     <div class="form-group">
                         <div class="flex justify-between items-center mb-1">
                             <label for="deposit-amount" class="text-xs font-bold text-white">Yatırım Tutarı ({{ $depCurrency }})</label>
@@ -577,12 +641,21 @@
                         </div>
                     </div>
 
-                    <button type="submit" id="btn-submit-deposit" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-extrabold py-3 rounded-xl text-xs uppercase tracking-wider transition-all shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2">
-                        <span class="material-symbols-outlined text-base">account_balance_wallet</span>
-                        <span>Yatırım Talebini Oluştur</span>
-                    </button>
+                    <div class="flex gap-2">
+                        <button type="submit" id="btn-submit-deposit" class="flex-1 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-extrabold py-3 rounded-xl text-xs uppercase tracking-wider transition-all shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2">
+                            <span class="material-symbols-outlined text-base">check_circle</span>
+                            <span>Ödemeyi Gerçekleştirdim</span>
+                        </button>
+                        <button type="button" id="btn-cancel-deposit" class="px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-wider bg-white/[0.04] hover:bg-white/[0.09] text-on-surface-muted hover:text-white border border-white/[0.08] transition-colors">
+                            İptal
+                        </button>
+                    </div>
 
                     <div id="deposit-status-msg" class="text-xs font-bold text-center mt-2 min-h-[18px]"></div>
+                    <div id="deposit-info-msg" class="hidden bg-emerald-500/[0.08] border border-emerald-500/25 rounded-2xl p-3 text-center">
+                        <span class="material-symbols-outlined text-emerald-400 text-2xl block mb-1">task_alt</span>
+                        <p class="text-[11px] text-emerald-300 font-bold leading-relaxed">Ödemeniz tarafımıza ulaştığında hesabınıza geçecektir. Onay sonrası bakiyeniz otomatik güncellenir.</p>
+                    </div>
                 </form>
             </div>
         @else
@@ -1091,9 +1164,11 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Deposit Modal Live Calculator & Presets
+    // Deposit Modal Live Calculator, Method Tiles & Presets
     const depositAmountInput = document.getElementById('deposit-amount');
     const depositLivePoints = document.getElementById('deposit-live-points');
+    const depositMethodInput = document.getElementById('deposit-method');
+    const depositMethodDetails = document.getElementById('deposit-method-details');
     const depositRate = {{ (float)(function_exists('settings') ? settings('coins_per_dollar', 100) : 100) ?: 100 }};
 
     function updateDepositLiveCalc() {
@@ -1115,9 +1190,44 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    // Selecting an investment method reveals the matching bank/transfer/crypto details.
+    document.querySelectorAll('.deposit-method-tile').forEach(tile => {
+        tile.addEventListener('click', function() {
+            const method = this.getAttribute('data-method');
+            document.querySelectorAll('.deposit-method-tile').forEach(t => t.classList.toggle('is-active', t === this));
+            if (depositMethodInput) depositMethodInput.value = method;
+            if (depositMethodDetails) depositMethodDetails.classList.remove('hidden');
+            document.querySelectorAll('.deposit-method-panel').forEach(panel => {
+                panel.classList.toggle('hidden', panel.getAttribute('data-panel') !== method);
+            });
+        });
+    });
+
+    // Copy buttons for account/IBAN/wallet fields.
+    document.querySelectorAll('.deposit-copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const row = this.closest('.deposit-info-row');
+            const value = row ? row.getAttribute('data-copy') : '';
+            if (!value) return;
+            const done = () => {
+                const icon = this.querySelector('.material-symbols-outlined');
+                if (icon) { icon.innerText = 'check'; setTimeout(() => { icon.innerText = 'content_copy'; }, 1400); }
+            };
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(value).then(done).catch(() => {});
+            } else {
+                const tmp = document.createElement('textarea');
+                tmp.value = value; document.body.appendChild(tmp); tmp.select();
+                try { document.execCommand('copy'); done(); } catch (e) {}
+                document.body.removeChild(tmp);
+            }
+        });
+    });
+
     // Deposit Request AJAX Submission -> real topup/create endpoint
     const depositForm = document.getElementById('deposit-request-form');
     const depositStatus = document.getElementById('deposit-status-msg');
+    const depositInfo = document.getElementById('deposit-info-msg');
     const depositBtn = document.getElementById('btn-submit-deposit');
 
     if (depositForm) {
@@ -1125,6 +1235,7 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             depositStatus.className = "text-xs font-bold text-center mt-2 text-secondary";
             depositStatus.innerText = "Yatırım talebi oluşturuluyor...";
+            if (depositInfo) depositInfo.classList.add('hidden');
             depositBtn.disabled = true;
 
             fetch('/topup/create', {
@@ -1136,17 +1247,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 body: JSON.stringify({
                     amount: depositAmountInput.value,
-                    driver: 'manual'
+                    driver: 'manual',
+                    method: depositMethodInput ? depositMethodInput.value : ''
                 })
             })
             .then(res => res.json())
             .then(data => {
+                depositBtn.disabled = false;
                 if (data.payment_url) {
-                    depositStatus.className = "text-xs font-bold text-center mt-2 text-primary";
-                    depositStatus.innerText = "Ödeme sayfasına yönlendiriliyorsunuz...";
-                    window.location.href = data.payment_url;
+                    depositStatus.innerText = "";
+                    if (depositInfo) depositInfo.classList.remove('hidden');
                 } else {
-                    depositBtn.disabled = false;
                     depositStatus.className = "text-xs font-bold text-center mt-2 text-accent-rose";
                     depositStatus.innerText = data.error || "Yatırım talebi oluşturulamadı.";
                 }
@@ -1156,6 +1267,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 depositStatus.className = "text-xs font-bold text-center mt-2 text-accent-rose";
                 depositStatus.innerText = "Bağlantı hatası: " + err.message;
             });
+        });
+    }
+
+    const depositCancelBtn = document.getElementById('btn-cancel-deposit');
+    if (depositCancelBtn) {
+        depositCancelBtn.addEventListener('click', function() {
+            const modal = document.getElementById('modal-deposit');
+            if (modal && window.closeModal) window.closeModal('modal-deposit');
         });
     }
 

@@ -152,6 +152,79 @@
                 </div>
             </div>
 
+            <!-- INVESTMENT METHOD DETAILS (shown in the deposit modal) -->
+            <div class="card card-info card-outline mb-4">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-list-ul text-info mr-2"></i> Yatırım Yöntemleri (Bakiye Yükle Ekranı)</h3>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Doldurduğunuz yöntemler, oyuncunun Bakiye Yükle ekranındaki Yatırım Yöntemleri seçeneklerinde görünür. Boş bıraktığınız yöntem gösterilmez.</p>
+
+                    <!-- Bank Transfer -->
+                    <h6 class="font-weight-bold text-info mt-3"><i class="fas fa-university mr-1"></i> Banka Transferi</h6>
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label">Banka Adı</label>
+                        <div class="col-sm-9">
+                            <input type="text" name="payment_bank_transfer_bank" class="form-control" value="{{ settings('payment_bank_transfer_bank') }}" placeholder="Örn: İş Bankası">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label">Hesap Sahibi</label>
+                        <div class="col-sm-9">
+                            <input type="text" name="payment_bank_transfer_holder" class="form-control" value="{{ settings('payment_bank_transfer_holder') }}" placeholder="Örn: Gökmen Uzkul">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label">IBAN</label>
+                        <div class="col-sm-9">
+                            <input type="text" name="payment_bank_transfer_iban" class="form-control" value="{{ settings('payment_bank_transfer_iban') }}" placeholder="TRXXXXXXXXXXXXXXXXXXXXXXXX">
+                        </div>
+                    </div>
+
+                    <!-- Havale / EFT -->
+                    <h6 class="font-weight-bold text-info mt-4"><i class="fas fa-exchange-alt mr-1"></i> Havale / EFT</h6>
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label">Banka Adı</label>
+                        <div class="col-sm-9">
+                            <input type="text" name="payment_havale_bank" class="form-control" value="{{ settings('payment_havale_bank') }}" placeholder="Örn: Ziraat Bankası">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label">Hesap Sahibi</label>
+                        <div class="col-sm-9">
+                            <input type="text" name="payment_havale_holder" class="form-control" value="{{ settings('payment_havale_holder') }}" placeholder="Örn: Gökmen Uzkul">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label">IBAN</label>
+                        <div class="col-sm-9">
+                            <input type="text" name="payment_havale_iban" class="form-control" value="{{ settings('payment_havale_iban') }}" placeholder="TRXXXXXXXXXXXXXXXXXXXXXXXX">
+                        </div>
+                    </div>
+
+                    <!-- Crypto -->
+                    <h6 class="font-weight-bold text-info mt-4"><i class="fab fa-bitcoin mr-1"></i> Kripto Yatırım</h6>
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label">Ağ / Coin</label>
+                        <div class="col-sm-9">
+                            <input type="text" name="payment_crypto_network" class="form-control" value="{{ settings('payment_crypto_network') }}" placeholder="Örn: TRC20 USDT">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label">Cüzdan Adresi</label>
+                        <div class="col-sm-9">
+                            <input type="text" name="payment_crypto_address" class="form-control" value="{{ settings('payment_crypto_address') }}" placeholder="TXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label">Not / Memo (opsiyonel)</label>
+                        <div class="col-sm-9">
+                            <input type="text" name="payment_crypto_memo" class="form-control" value="{{ settings('payment_crypto_memo') }}" placeholder="Varsa ağ notu / memo">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- XTOPAY CONFIGURATION -->
             <div class="card card-success card-outline mb-4">
                 <div class="card-header">

@@ -21,9 +21,7 @@
         @if($brandLogoPath)
             <img src="{{ asset('storage/' . $brandLogoPath) }}" alt="{{ $brandName }}" class="w-10 h-10 rounded-xl object-contain bg-primary/10 shadow-lg shadow-primary/20 flex-shrink-0">
         @else
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 via-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/30 flex-shrink-0">
-                <span class="material-symbols-outlined text-white text-2xl" style="font-variation-settings: 'FILL' 1;">park</span>
-            </div>
+            <img src="/minimal/logo.svg" alt="{{ $brandName }}" class="w-10 h-10 rounded-xl object-contain shadow-lg shadow-emerald-500/30 flex-shrink-0">
         @endif
         <a href="{{ route('frontend.game.list') }}" class="flex flex-col no-underline">
             <span class="text-base font-extrabold tracking-tight text-white leading-tight">{{ strtoupper($brandName) }}</span>
@@ -139,9 +137,11 @@
 <!-- Sleek Mobile Top Header -->
 <header class="lg:hidden h-16 px-4 flex items-center justify-between bg-[#0e121b]/95 border-b border-white/[0.08] backdrop-blur-xl w-full sticky top-0 z-40">
     <a href="{{ route('frontend.game.list') }}" class="flex items-center gap-2.5 no-underline min-w-0">
-        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center shadow-md shadow-primary/20 flex-shrink-0">
-            <span class="material-symbols-outlined text-white text-lg" style="font-variation-settings: 'FILL' 1;">park</span>
-        </div>
+        @if($brandLogoPath)
+            <img src="{{ asset('storage/' . $brandLogoPath) }}" alt="{{ $brandName }}" class="w-8 h-8 rounded-lg object-contain shadow-md shadow-primary/20 flex-shrink-0">
+        @else
+            <img src="/minimal/logo.svg" alt="{{ $brandName }}" class="w-8 h-8 rounded-lg object-contain shadow-md shadow-primary/20 flex-shrink-0">
+        @endif
         <span class="hidden min-[380px]:inline font-extrabold text-sm tracking-tight text-white truncate">{{ strtoupper($brandName) }}</span>
     </a>
     

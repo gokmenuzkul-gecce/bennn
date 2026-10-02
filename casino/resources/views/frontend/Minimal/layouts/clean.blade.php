@@ -269,9 +269,9 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            min-width: 156px;
+            min-width: 178px;
             height: 78px;
-            padding: 0 18px;
+            padding: 0 16px;
             border-radius: 18px;
             background: transparent;
             border: 1px solid transparent;
@@ -332,6 +332,77 @@
             from { transform: translateX(0); }
             to   { transform: translateX(-50%); }
         }
+
+        /* ============ DEPOSIT METHOD TILES ============ */
+        .deposit-method-tile {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 12px 8px;
+            border-radius: 16px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: var(--muted, rgba(255,255,255,0.7));
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+        .deposit-method-tile:hover {
+            background: rgba(255,255,255,0.07);
+            color: #fff;
+        }
+        .deposit-method-tile.is-active {
+            background: rgba(16,185,129,0.12);
+            border-color: rgba(16,185,129,0.4);
+            color: #34d399;
+            box-shadow: 0 10px 30px -14px rgba(16,185,129,0.6);
+        }
+        .deposit-method-tile .material-symbols-outlined { font-size: 26px; }
+        .deposit-method-tile-label { font-size: 11px; font-weight: 700; text-align: center; line-height: 1.2; }
+
+        .deposit-info-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 10px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+        .deposit-info-label {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: rgba(255,255,255,0.45);
+            flex-shrink: 0;
+            min-width: 92px;
+        }
+        .deposit-info-value {
+            flex: 1;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 600;
+            color: #fff;
+            word-break: break-all;
+        }
+        .deposit-copy-btn {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            border-radius: 9px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: rgba(255,255,255,0.6);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .deposit-copy-btn:hover { background: rgba(16,185,129,0.15); color: #34d399; }
+        .deposit-copy-btn .material-symbols-outlined { font-size: 16px; }
 
         /* ============ LIVE WINS TICKER ============ */
         .wins-bar {
