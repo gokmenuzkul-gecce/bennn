@@ -13,19 +13,21 @@
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
     @php
         // Real provider cover art for the ambient background. Read-only, no seeded data.
-        // Kept to 8 tiles: enough depth without costing the page its frame budget.
+        // Mobile gets 4 tiles instead of 6: each cover is ~250 KB, and phones are the
+        // slowest clients, so the extra depth is not worth the download.
+        $isMobileViewport = (new \Detection\MobileDetect())->isMobile();
         $bgShots = \VanguardLTE\Game::query()
             ->where('view', 1)
             ->whereNotNull('icon_url')->where('icon_url', '!=', '')
             ->whereIn('provider_key', ['pragmatic', 'pgsoft', 'amatic', 'amusnet'])
-            ->inRandomOrder()->limit(8)->get(['name', 'icon_url'])
+            ->inRandomOrder()->limit($isMobileViewport ? 4 : 6)->get(['name', 'icon_url'])
             ->map(fn($g) => game_cover($g))->all();
     @endphp
 
     <title>@yield('page-title', settings('app_name', 'Promex Gaming Suite'))</title>
 
-    <!-- Tailwind CSS CDN with Forms & Container Queries -->
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <!-- Tailwind CSS (prebuilt, see tailwind.config.js — replaces the old runtime CDN) -->
+    <link rel="stylesheet" href="/minimal/css/tailwind.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet"/>
@@ -624,51 +626,6 @@
         }
     </style>
 
-    <script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        background: "#0b0e14",
-                        surface: "#121622",
-                        "surface-card": "#161c2b",
-                        "surface-elevated": "#1c2438",
-                        "surface-border": "rgba(255, 255, 255, 0.08)",
-                        primary: {
-                            DEFAULT: "#10b981",
-                            dark: "#059669",
-                            light: "#34d399",
-                            50: "#ecfdf5",
-                            100: "#d1fae5",
-                            500: "#10b981",
-                            600: "#059669",
-                            700: "#047857"
-                        },
-                        secondary: {
-                            DEFAULT: "#06b6d4",
-                            dark: "#0891b2",
-                            light: "#22d3ee"
-                        },
-                        accent: {
-                            gold: "#f59e0b",
-                            amber: "#d97706",
-                            rose: "#f43f5e",
-                            purple: "#a855f7"
-                        },
-                        "on-surface": "#f8fafc",
-                        "on-surface-muted": "#94a3b8",
-                        "on-surface-subtle": "#64748b"
-                    },
-                    spacing: {
-                        gutter: "16px",
-                        margin: "24px",
-                        "sidebar-width": "260px"
-                    }
-                }
-            }
-        };
-    </script>
     @yield('styles')
 </head>
 <body class="text-on-surface bg-background flex flex-col lg:flex-row min-h-screen custom-scrollbar w-full overflow-x-hidden antialiased selection:bg-primary/20 selection:text-primary">

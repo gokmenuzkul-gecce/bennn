@@ -53,8 +53,8 @@ if (PHP_SAPI === 'cli-server' && isset($_SERVER['REQUEST_URI'])) {
                 'pdf' => 'application/pdf', 'webmanifest' => 'application/manifest+json',
             ];
             $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
-            $allowedDirs = ['frontend/', 'games/', 'js/', 'css/', 'img/', 'images/', 'icons/', 'assets/', 'uploads/', 'storage/'];
-            $allowedRootFiles = ['manifest.json', 'favicon.ico', 'robots.txt'];
+            $allowedDirs = ['frontend/', 'games/', 'js/', 'css/', 'img/', 'images/', 'icons/', 'assets/', 'uploads/', 'storage/', 'minimal/'];
+            $allowedRootFiles = ['manifest.json', 'favicon.ico', 'robots.txt', 'sw.js'];
             $relative = ltrim($path, '/');
             $inAllowedDir = false;
             foreach ($allowedDirs as $dir) {

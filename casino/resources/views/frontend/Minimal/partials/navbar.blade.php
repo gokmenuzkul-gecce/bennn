@@ -142,7 +142,7 @@
         <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center shadow-md shadow-primary/20 flex-shrink-0">
             <span class="material-symbols-outlined text-white text-lg" style="font-variation-settings: 'FILL' 1;">park</span>
         </div>
-        <span class="font-extrabold text-sm tracking-tight text-white truncate">{{ strtoupper($brandName) }}</span>
+        <span class="hidden min-[380px]:inline font-extrabold text-sm tracking-tight text-white truncate">{{ strtoupper($brandName) }}</span>
     </a>
     
     <div class="flex items-center gap-2 flex-shrink-0">
@@ -154,9 +154,10 @@
             <span class="material-symbols-outlined text-base">admin_panel_settings</span>
         </a>
         @endif
+        @auth
         <!-- Balance Badge -->
         <div class="flex items-center gap-1 bg-[#161c2b] border border-white/[0.08] px-2.5 py-1.5 rounded-xl">
-            <span class="font-mono-jet text-xs font-bold text-primary" id="user-coin-balance-mobile">{{ Auth::check() ? number_format(Auth::user()->balance, 0) : '0' }}</span>
+            <span class="font-mono-jet text-xs font-bold text-primary" id="user-coin-balance-mobile">{{ number_format(Auth::user()->balance, 0) }}</span>
             <span class="text-[10px] font-bold text-primary-light">₺</span>
         </div>
         <!-- Quick Refill Button -->
@@ -164,6 +165,15 @@
             <span class="material-symbols-outlined text-sm">add</span>
             <span>Doldur</span>
         </button>
+        @else
+        <!-- Guest: sign in / sign up -->
+        <button type="button" class="open-modal bg-white/[0.06] hover:bg-white/[0.12] border border-white/[0.12] text-white text-xs font-bold px-2.5 py-2 rounded-xl transition-all" data-target="modal-login">
+            Giriş Yap
+        </button>
+        <button type="button" class="open-modal bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white text-xs font-bold px-2.5 py-2 rounded-xl shadow-md shadow-emerald-500/25 transition-all whitespace-nowrap" data-target="modal-register">
+            Kayıt Ol
+        </button>
+        @endauth
     </div>
 </header>
 
