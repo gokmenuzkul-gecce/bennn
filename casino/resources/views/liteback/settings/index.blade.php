@@ -307,6 +307,7 @@
                                     <option value="brevo" {{ settings('email_delivery_provider', 'disabled') === 'brevo' ? 'selected' : '' }}>Brevo — recommended free transactional email</option>
                                     <option value="resend" {{ settings('email_delivery_provider', 'disabled') === 'resend' ? 'selected' : '' }}>Resend — developer-friendly transactional email</option>
                                     <option value="postmark" {{ settings('email_delivery_provider', 'disabled') === 'postmark' ? 'selected' : '' }}>Postmark — transactional deliverability</option>
+                                    <option value="mailtrap" {{ settings('email_delivery_provider', 'disabled') === 'mailtrap' ? 'selected' : '' }}>Mailtrap — Email API / sending domain</option>
                                     <option value="custom" {{ settings('email_delivery_provider', 'disabled') === 'custom' ? 'selected' : '' }}>Custom compatible HTTPS API</option>
                                 </select>
                                 <small id="emailProviderHint" class="text-muted">Brevo uses its transactional-email API. Verify your sender domain before sending OTP or welcome email.</small>
@@ -774,6 +775,7 @@ $(document).ready(function() {
         brevo: {token: 'Brevo API Key', hint: 'Brevo uses its transactional-email API. Verify your sender domain before sending OTP or welcome email.'},
         resend: {token: 'Resend API Key', hint: 'Resend sends from a verified domain. Its API token stays encrypted in this installation.'},
         postmark: {token: 'Postmark Server Token', hint: 'Postmark needs a confirmed sender signature and its server-level token.'},
+        mailtrap: {token: 'Mailtrap API Token', hint: 'Mailtrap sends over HTTPS to its Email API. Verify your sending domain in Mailtrap and use an address from it as the sender.'},
         custom: {token: 'Custom Bearer Token', hint: 'Your custom endpoint receives the approved transactional email payload over HTTPS.'},
         disabled: {token: 'Provider token', hint: 'Email delivery is off until you choose and configure a provider.'}
     };

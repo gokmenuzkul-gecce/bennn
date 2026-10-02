@@ -70,7 +70,7 @@ class SystemSettingsController extends Controller
             'whatsapp_api_token' => 'nullable|string|max:500',
             'whatsapp_delivery_provider' => ['required', \Illuminate\Validation\Rule::in(app()->environment('local', 'testing') ? ['promex', 'custom', 'devmode'] : ['promex', 'custom'])],
             'whatsapp_api_endpoint' => ['nullable', 'required_if:whatsapp_delivery_provider,custom', 'url', 'max:255', 'regex:/^https:\/\//i'],
-            'email_delivery_provider' => 'required|in:disabled,brevo,resend,postmark,custom',
+            'email_delivery_provider' => 'required|in:disabled,brevo,resend,postmark,mailtrap,custom',
             'email_api_token' => 'nullable|string|max:500',
             'email_api_endpoint' => ['nullable', 'required_if:email_delivery_provider,custom', 'url', 'max:255', 'regex:/^https:\/\//i'],
             'email_from_address' => 'nullable|email:rfc,dns|max:255',
@@ -191,7 +191,7 @@ class SystemSettingsController extends Controller
             && !DeliveryGatewaySettings::hasSecret('whatsapp')) {
             return redirect()->back()->withInput()->withErrors(['whatsapp_api_token' => 'Add a token for the custom WhatsApp provider.']);
         }
-        if (in_array($request->input('email_delivery_provider'), ['brevo', 'resend', 'postmark', 'custom'], true)
+        if (in_array($request->input('email_delivery_provider'), ['brevo', 'resend', 'postmark', 'mailtrap', 'custom'], true)
             && trim((string) $request->input('email_api_token', '')) === ''
             && !DeliveryGatewaySettings::hasSecret('email')) {
             return redirect()->back()->withInput()->withErrors(['email_api_token' => 'Add an API token for the selected email provider.']);

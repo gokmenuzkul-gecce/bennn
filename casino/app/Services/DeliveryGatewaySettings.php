@@ -15,7 +15,7 @@ class DeliveryGatewaySettings
         $default = $channel === 'email' ? 'disabled' : 'promex';
         $provider = strtolower(trim((string) settings($key, $default)));
         $allowed = $channel === 'email'
-            ? ['disabled', 'brevo', 'resend', 'postmark', 'custom']
+            ? ['disabled', 'brevo', 'resend', 'postmark', 'mailtrap', 'custom']
             : ['promex', 'custom', 'devmode'];
         return in_array($provider, $allowed, true) ? $provider : $default;
     }

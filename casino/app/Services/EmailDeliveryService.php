@@ -21,6 +21,7 @@ class EmailDeliveryService
             if ($provider === 'brevo') return $this->sendBrevo($payload);
             if ($provider === 'resend') return $this->sendResend($payload);
             if ($provider === 'postmark') return $this->sendPostmark($payload);
+            if ($provider === 'mailtrap') return $this->sendMailtrap($payload);
             if ($provider === 'custom') {
                 $endpoint = DeliveryGatewaySettings::customEndpoint('email');
                 $token = DeliveryGatewaySettings::secret('email');
@@ -54,6 +55,26 @@ class EmailDeliveryService
             ->post('https://api.resend.com/emails', [
                 'from' => $sender, 'to' => [$payload['to']], 'subject' => $payload['subject'],
                 'html' => $payload['html'], 'text' => $payload['text'], 'tags' => [['name' => 'type', 'value' => 'transactional']],
+            ])->successful();
+    }
+
+    private function sendMailtrap(array $payload): bool
+    {
+        $token = DeliveryGatewaySettings::secret('email');
+        if ($token === '') {
+            throw new \RuntimeException('The Mailtrap provider needs an API token.');
+        }
+
+        $sender = $this->sender();
+
+        return Http::withToken($token)->acceptJson()->asJson()->timeout(10)
+            ->post('https://send.api.mailtrap.io/api/send', [
+                'from' => ['email' => $sender['address'], 'name' => $sender['name']],
+                'to' => [['email' => $payload['to']]],
+                'subject' => $payload['subject'],
+                'html' => $payload['html'],
+                'text' => $payload['text'],
+                'category' => 'promex-transactional',
             ])->successful();
     }
 
