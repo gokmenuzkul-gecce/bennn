@@ -160,11 +160,15 @@
             <span class="font-mono-jet text-xs font-bold text-primary" id="user-coin-balance-mobile">{{ number_format(Auth::user()->balance, 0) }}</span>
             <span class="text-[10px] font-bold text-primary-light">₺</span>
         </div>
-        <!-- Quick Refill Button -->
-        <button id="btn-mobile-refill" type="button" class="btn-glow bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-xs font-bold px-2.5 py-1.5 rounded-xl uppercase tracking-wide shadow-md shadow-primary/20 flex items-center gap-1">
+        <!-- Quick Deposit Button -->
+        <button type="button" class="open-modal btn-glow bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-xs font-bold px-2.5 py-1.5 rounded-xl uppercase tracking-wide shadow-md shadow-primary/20 flex items-center gap-1" data-target="modal-deposit">
             <span class="material-symbols-outlined text-sm">add</span>
-            <span>Doldur</span>
+            <span>Yükle</span>
         </button>
+        <!-- Logout -->
+        <a href="{{ route('frontend.auth.logout') }}" class="bg-white/[0.04] hover:bg-white/[0.1] border border-white/[0.08] text-accent-rose p-2 rounded-xl flex items-center justify-center no-underline transition-all" title="Çıkış Yap" aria-label="Çıkış Yap">
+            <span class="material-symbols-outlined text-base">logout</span>
+        </a>
         @else
         <!-- Guest: sign in / sign up -->
         <button type="button" class="open-modal bg-white/[0.06] hover:bg-white/[0.12] border border-white/[0.12] text-white text-xs font-bold px-2.5 py-2 rounded-xl transition-all" data-target="modal-login">
@@ -234,8 +238,8 @@
             </div>
         </div>
         <div class="flex gap-2">
-            <button id="btn-sheet-refill" type="button" class="btn-glow bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-xs font-bold px-3 py-2 rounded-xl uppercase tracking-wider shadow-lg shadow-primary/25 transition-all">
-                + Güçlendir
+            <button type="button" class="open-modal btn-glow bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-xs font-bold px-3 py-2 rounded-xl uppercase tracking-wider shadow-lg shadow-primary/25 transition-all" data-target="{{ Auth::check() ? 'modal-deposit' : 'modal-login' }}">
+                + Yükle
             </button>
             @if(settings('enable_cashout', '1') == '1')
             <button type="button" class="bg-white/[0.06] hover:bg-white/[0.12] text-accent-gold border border-accent-gold/30 text-xs font-bold px-3 py-2 rounded-xl uppercase tracking-wider transition-all open-modal" data-target="{{ Auth::check() ? 'modal-cashout' : 'modal-login' }}">
@@ -346,7 +350,11 @@
     <!-- Quick Action Utilities -->
     <div class="flex gap-2 pt-2 border-t border-white/[0.08]">
         @if(Auth::check())
-            <a href="{{ route('frontend.auth.logout') }}" class="flex-1 py-2.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] text-center text-xs font-bold text-accent-rose no-underline border border-white/[0.06] transition-colors">
+            <button type="button" class="flex-1 py-2.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-center text-xs font-bold text-emerald-400 border border-emerald-500/20 transition-colors open-modal" data-target="modal-deposit">
+                Bakiye Yükle
+            </button>
+            <a href="{{ route('frontend.auth.logout') }}" class="flex-1 py-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-center text-xs font-bold text-rose-400 no-underline border border-rose-500/20 transition-colors flex items-center justify-center gap-1.5">
+                <span class="material-symbols-outlined text-sm">logout</span>
                 Çıkış Yap
             </a>
         @else

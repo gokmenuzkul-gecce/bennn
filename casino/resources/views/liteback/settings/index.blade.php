@@ -182,17 +182,6 @@
                                 </div>
                             </div>
 
-                            <!-- Free Refill Button -->
-                            <div class="col-md-12 mb-2">
-                                <div class="custom-control custom-switch border p-3 rounded bg-light">
-                                    <input type="hidden" name="enable_refill_coins" value="0">
-                                    <input type="checkbox" class="custom-control-input" id="switchRefill" name="enable_refill_coins" value="1" {{ settings('enable_refill_coins', '1') == '1' ? 'checked' : '' }}>
-                                    <label class="custom-control-label font-weight-bold text-dark" for="switchRefill">
-                                        Public Coin Refill Button (+50,000)
-                                    </label>
-                                    <small class="text-muted d-block mt-1">Allow guest and logged-in players to self-refill free coins from the topbar and bottom dock.</small>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -370,10 +359,6 @@
                         <div class="mb-4">
                             <h6 class="font-weight-bold text-dark"><i class="fas fa-coins mr-1 text-warning"></i> Virtual Economy & Coin Defaults</h6>
                             <div class="form-row">
-                                <div class="form-group col-md-6 mb-2">
-                                    <label class="small font-weight-bold">Single Refill Amount (Coins)</label>
-                                    <input type="number" step="100" name="default_refill_amount" class="form-control" value="{{ settings('default_refill_amount', '1000') }}">
-                                </div>
                                 <div class="form-group col-md-6 mb-2">
                                     <label class="small font-weight-bold">New Registered Player Starting Balance</label>
                                     <input type="number" step="100" name="default_starting_coins" class="form-control" value="{{ settings('default_starting_coins', '1000') }}">

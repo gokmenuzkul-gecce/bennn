@@ -723,8 +723,8 @@
                             <button type="button" class="account-menu-item open-modal w-full text-left px-4 py-2.5 flex items-center gap-3 text-on-surface-muted hover:text-white hover:bg-white/[0.07] transition-colors" data-target="modal-profile">
                                 <span class="material-symbols-outlined text-lg">person</span> Profilim
                             </button>
-                            <button type="button" id="btn-account-refill" class="account-menu-item w-full text-left px-4 py-2.5 flex items-center gap-3 text-on-surface-muted hover:text-white hover:bg-white/[0.07] transition-colors">
-                                <span class="material-symbols-outlined text-lg">add_circle</span> Bakiye Güçlendir
+                            <button type="button" class="account-menu-item open-modal w-full text-left px-4 py-2.5 flex items-center gap-3 text-on-surface-muted hover:text-white hover:bg-white/[0.07] transition-colors" data-target="modal-deposit">
+                                <span class="material-symbols-outlined text-lg">add_card</span> Bakiye Yükle
                             </button>
                             @if(settings('enable_cashout', '1') == '1')
                             <button type="button" class="account-menu-item open-modal w-full text-left px-4 py-2.5 flex items-center gap-3 text-on-surface-muted hover:text-white hover:bg-white/[0.07] transition-colors" data-target="modal-cashout">

@@ -498,6 +498,102 @@
     </div>
 </div>
 
+<!-- Deposit / Balance Top-up Modal -->
+<div id="modal-deposit" class="modal">
+    <div class="modal-content glass-panel max-w-xl border border-white/10 shadow-2xl">
+        <button type="button" class="close-modal" aria-label="Kapat">&times;</button>
+        @if(Auth::check())
+            @php
+                $u = Auth::user();
+                $depRate = (float) (function_exists('settings') ? settings('coins_per_dollar', 100) : 100);
+                if ($depRate <= 0) $depRate = 100;
+                $depCurrency = strtoupper($u->shop->currency ?? 'TRY');
+                $depMin = (float) (function_exists('settings') ? settings('minimum_payment_amount', 0) : 0);
+                if ($depMin <= 0) $depMin = 50;
+                $depMax = (float) (function_exists('settings') ? settings('maximum_payment_amount', 10000) : 10000);
+                $depPresets = [100, 250, 500, 1000];
+                $depInstructions = function_exists('settings') ? settings('payment_manual_instructions', '') : '';
+            @endphp
+            <div class="space-y-4">
+                <!-- Header -->
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h2 class="text-xl font-extrabold text-white tracking-tight flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary text-2xl">add_card</span>
+                            <span>Bakiye Yükle</span>
+                        </h2>
+                        <p class="text-xs text-on-surface-muted mt-1">Gerçek yatırım ile bakiyenizi artırın. Onay sonrası bakiyeniz otomatik güncellenir.</p>
+                    </div>
+                    <span class="text-[10px] bg-primary/10 text-primary border border-primary/20 px-2.5 py-1 rounded-full font-mono-jet font-bold">
+                        {{ number_format($depRate) }} PUAN = {{ $depCurrency }}1,00
+                    </span>
+                </div>
+
+                <!-- Balance Info Card -->
+                <div class="grid grid-cols-2 gap-2 bg-[#121622] p-3 rounded-2xl border border-white/[0.08]">
+                    <div>
+                        <span class="text-[10px] text-on-surface-muted uppercase font-bold tracking-wider block">Mevcut Bakiye</span>
+                        <div class="flex items-baseline gap-1 mt-0.5">
+                            <span class="font-mono-jet text-lg font-bold {{ (float)$u->balance > 0 ? 'text-emerald-400' : 'text-white' }}" id="deposit-modal-user-balance">{{ number_format($u->balance, 0) }}</span>
+                            <span class="text-[11px] text-primary-light font-bold">PUAN</span>
+                        </div>
+                        <span class="text-[10px] text-on-surface-subtle font-mono-jet">~{{ $depCurrency }}{{ number_format($u->balance / $depRate, 2) }}</span>
+                    </div>
+                    <div class="text-right border-l border-white/[0.06] pl-3">
+                        <span class="text-[10px] text-on-surface-muted uppercase font-bold tracking-wider block">Yatırım Aralığı</span>
+                        <div class="flex items-baseline justify-end gap-1 mt-0.5">
+                            <span class="font-mono-jet text-lg font-bold text-white">{{ number_format($depMin, 0) }}</span>
+                            <span class="text-[11px] text-on-surface-subtle font-bold">— {{ number_format($depMax, 0) }}</span>
+                        </div>
+                        <span class="text-[10px] text-on-surface-subtle font-mono-jet">{{ $depCurrency }}</span>
+                    </div>
+                </div>
+
+                @if(!empty($depInstructions))
+                <div class="bg-amber-500/[0.07] border border-amber-500/20 rounded-2xl p-3">
+                    <span class="text-[10px] font-bold text-amber-400 uppercase tracking-wider block mb-1">Ödeme Talimatları</span>
+                    <p class="text-[11px] text-on-surface-muted whitespace-pre-line leading-relaxed">{{ trim($depInstructions) }}</p>
+                </div>
+                @endif
+
+                <!-- Deposit Form -->
+                <form id="deposit-request-form" class="space-y-3.5">
+                    @csrf
+                    <input type="hidden" name="driver" value="manual">
+                    <div class="form-group">
+                        <div class="flex justify-between items-center mb-1">
+                            <label for="deposit-amount" class="text-xs font-bold text-white">Yatırım Tutarı ({{ $depCurrency }})</label>
+                            <span class="text-[10px] text-primary font-mono-jet font-bold">
+                                Alacağınız: <span id="deposit-live-points">0</span> PUAN
+                            </span>
+                        </div>
+                        <input type="number" id="deposit-amount" name="amount" min="{{ $depMin }}" max="{{ $depMax }}" step="1" placeholder="e.g. 250" required class="font-mono-jet text-sm">
+                        <div class="flex gap-1.5 mt-2">
+                            @foreach($depPresets as $preset)
+                                <button type="button" class="btn-deposit-preset text-[10px] bg-white/[0.04] hover:bg-white/[0.1] text-on-surface-muted hover:text-white px-2.5 py-1 rounded-lg font-mono-jet transition-colors" data-amount="{{ $preset }}">
+                                    {{ $depCurrency }}{{ number_format($preset, 0) }}
+                                </button>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    <button type="submit" id="btn-submit-deposit" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-extrabold py-3 rounded-xl text-xs uppercase tracking-wider transition-all shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined text-base">account_balance_wallet</span>
+                        <span>Yatırım Talebini Oluştur</span>
+                    </button>
+
+                    <div id="deposit-status-msg" class="text-xs font-bold text-center mt-2 min-h-[18px]"></div>
+                </form>
+            </div>
+        @else
+            <div class="text-center py-6">
+                <p class="text-xs text-on-surface-muted">Bakiye yüklemek için lütfen giriş yapın.</p>
+                <button type="button" class="mt-3 btn-primary open-modal" data-target="modal-login">Giriş Yap</button>
+            </div>
+        @endif
+    </div>
+</div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Global Modal Functions
@@ -991,6 +1087,74 @@ document.addEventListener('DOMContentLoaded', function() {
                 cashoutBtn.disabled = false;
                 cashoutStatus.className = "text-xs font-bold text-center mt-2 text-accent-rose";
                 cashoutStatus.innerText = "Network Error: " + err.message;
+            });
+        });
+    }
+
+    // Deposit Modal Live Calculator & Presets
+    const depositAmountInput = document.getElementById('deposit-amount');
+    const depositLivePoints = document.getElementById('deposit-live-points');
+    const depositRate = {{ (float)(function_exists('settings') ? settings('coins_per_dollar', 100) : 100) ?: 100 }};
+
+    function updateDepositLiveCalc() {
+        if (!depositAmountInput || !depositLivePoints) return;
+        const val = parseFloat(depositAmountInput.value) || 0;
+        depositLivePoints.innerText = Math.round(val * depositRate).toLocaleString();
+    }
+
+    if (depositAmountInput) {
+        depositAmountInput.addEventListener('input', updateDepositLiveCalc);
+    }
+
+    document.querySelectorAll('.btn-deposit-preset').forEach(btn => {
+        btn.addEventListener('click', function() {
+            if (depositAmountInput) {
+                depositAmountInput.value = this.getAttribute('data-amount');
+                updateDepositLiveCalc();
+            }
+        });
+    });
+
+    // Deposit Request AJAX Submission -> real topup/create endpoint
+    const depositForm = document.getElementById('deposit-request-form');
+    const depositStatus = document.getElementById('deposit-status-msg');
+    const depositBtn = document.getElementById('btn-submit-deposit');
+
+    if (depositForm) {
+        depositForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            depositStatus.className = "text-xs font-bold text-center mt-2 text-secondary";
+            depositStatus.innerText = "Yatırım talebi oluşturuluyor...";
+            depositBtn.disabled = true;
+
+            fetch('/topup/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    amount: depositAmountInput.value,
+                    driver: 'manual'
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.payment_url) {
+                    depositStatus.className = "text-xs font-bold text-center mt-2 text-primary";
+                    depositStatus.innerText = "Ödeme sayfasına yönlendiriliyorsunuz...";
+                    window.location.href = data.payment_url;
+                } else {
+                    depositBtn.disabled = false;
+                    depositStatus.className = "text-xs font-bold text-center mt-2 text-accent-rose";
+                    depositStatus.innerText = data.error || "Yatırım talebi oluşturulamadı.";
+                }
+            })
+            .catch(err => {
+                depositBtn.disabled = false;
+                depositStatus.className = "text-xs font-bold text-center mt-2 text-accent-rose";
+                depositStatus.innerText = "Bağlantı hatası: " + err.message;
             });
         });
     }

@@ -18,8 +18,7 @@ namespace VanguardLTE\Http\Middleware
             '/payment/btcpayserver/result', 
             '/sms/callback', 
             '/profile/contact',
-            '/refill-coins',
-            'refill-coins',
+
             '/sports/bet',
             'sports/bet',
             '/lotto/play',

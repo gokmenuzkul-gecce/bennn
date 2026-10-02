@@ -213,9 +213,6 @@ Route::namespace ('Frontend')->middleware(['siteisclosed', 'checker'])->group(fu
     Route::post('payment/manual/{intent}/submit', ['as' => 'payment.manual.submit', 'uses' => 'TopupController@submitManualDeposit']);
     Route::post('profile/withdraw', ['as' => 'frontend.profile.withdraw', 'uses' => 'ProfileController@withdraw']);
 
-    // Free Coin Refills
-    Route::post('/refill-coins', ['as' => 'frontend.free.refill', 'uses' => 'SocialGamingController@refillCoins']);
-
     // Lotto & Jackpot Zone
     Route::get('/jackpot-zone', ['as' => 'frontend.lotto.index', 'uses' => 'SocialGamingController@lotto']);
     Route::post('/lotto/play', ['as' => 'frontend.lotto.play', 'uses' => 'SocialGamingController@lottoPlay']);

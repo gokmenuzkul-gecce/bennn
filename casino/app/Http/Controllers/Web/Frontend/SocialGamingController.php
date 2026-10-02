@@ -194,26 +194,4 @@ class SocialGamingController extends Controller
         ]);
     }
 
-    /**
-     * Refill Free Cedar Coins for User or Guest
-     */
-    public function refillCoins(Request $request)
-    {
-        $amount = (float) (function_exists('settings') ? settings('default_refill_amount', 50000) : 50000);
-        $user = Auth::user();
-        if ($user) {
-            $user->increment('balance', $amount);
-            return response()->json([
-                'success' => true,
-                'message' => number_format($amount, 0) . ' Cedar Coins added to your account! 🎉',
-                'balance' => number_format($user->balance, 0)
-            ]);
-        }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Guest account refilled with ' . number_format($amount, 0) . ' Cedar Coins! 🎉',
-            'balance' => number_format($amount, 0)
-        ]);
-    }
 }

@@ -61,7 +61,6 @@ class SystemSettingsController extends Controller
             'enable_sportsbook' => 'required|in:0,1',
             'enable_lotto' => 'required|in:0,1',
             'enable_predictions' => 'required|in:0,1',
-            'enable_refill_coins' => 'required|in:0,1',
 
             // API keys
             'sportsbook_api_provider' => 'required|in:promex,custom',
@@ -80,7 +79,6 @@ class SystemSettingsController extends Controller
             'crypto_prices_api_endpoint' => ['nullable', 'required_if:crypto_prices_provider,custom', 'url', 'max:1000', 'regex:/^https:\/\//i'],
 
             // Economy / Coin Defaults & Cashout Controls
-            'default_refill_amount' => 'nullable|numeric|min:100|max:1000000',
             'default_starting_coins' => 'nullable|numeric|min:0|max:1000000',
             'enable_cashout' => 'required|in:0,1',
             'coins_per_dollar' => 'nullable|numeric|min:1|max:100000',
@@ -136,7 +134,6 @@ class SystemSettingsController extends Controller
             'enable_sportsbook',
             'enable_lotto',
             'enable_predictions',
-            'enable_refill_coins',
             'sportsbook_api_provider',
             'odds_api_key',
             'odds_api_region',
@@ -150,7 +147,6 @@ class SystemSettingsController extends Controller
             'polymarket_api_provider',
             'crypto_prices_provider',
             'crypto_prices_api_endpoint',
-            'default_refill_amount',
             'default_starting_coins',
             'enable_cashout',
             'coins_per_dollar',
