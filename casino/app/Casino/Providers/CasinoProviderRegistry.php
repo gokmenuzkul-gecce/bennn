@@ -76,6 +76,12 @@ class CasinoProviderRegistry
         return $base . '/webhooks/aggregator/' . $slug . '/wallet';
     }
 
+    /** Preferred embed aspect ratio for a provider ('auto' or 'w:h'). */
+    public function embedAspect(string $key): string
+    {
+        return $this->has($key) ? $this->make($key)->embedAspect() : 'auto';
+    }
+
     /** True when the provider is enabled for play. */
     public function isEnabled(string $key): bool
     {

@@ -52,6 +52,10 @@ return [
             'settings_key' => 'casino_provider_pgsoft',
             'launch_path' => '/userauth',
             'gamelist_path' => '/gamelist',
+            // The aggregator answers /userauth with the phone build regardless
+            // of caller, so the session is portrait and would render as a narrow
+            // strip in the wide desktop frame. Size the iframe to 9:16 instead.
+            'embed_aspect' => env('PGSOFT_EMBED_ASPECT', '9:16'),
         ],
 
         'amatic' => [

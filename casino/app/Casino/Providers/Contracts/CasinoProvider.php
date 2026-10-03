@@ -57,6 +57,18 @@ interface CasinoProvider
     public function launchUrl(string $userCode, string $gameId, string $lang = 'tr'): string;
 
     /**
+     * Preferred aspect ratio of the vendor's embedded player.
+     *
+     * Some aggregators hand out a phone build no matter the caller (PG Soft),
+     * which renders as a narrow vertical strip in a wide desktop frame. The
+     * lobby uses this hint to size the iframe so the game fills the player
+     * instead of leaving half the panel blank.
+     *
+     * @return string 'auto' (stretch to the frame) or 'width:height' (e.g. '9:16')
+     */
+    public function embedAspect(): string;
+
+    /**
      * Ordered field list used to build the signature for a wallet operation.
      *
      * @return array<int, string>

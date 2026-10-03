@@ -795,6 +795,7 @@ namespace VanguardLTE\Http\Controllers\Web\Frontend {
                 'form' => $launch['form'] ?? null,
                 'title' => $casinoGame->title,
                 'provider' => $launch['provider'],
+                'aspect' => $launch['aspect'] ?? 'auto',
                 'embedded' => $launchService->canEmbed((string) $casinoGame->provider_key),
             ], 200, [], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         }

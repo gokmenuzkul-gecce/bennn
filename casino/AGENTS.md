@@ -56,6 +56,12 @@ Bunun yerine:
   `config/casino_providers.php` içinde `embeddable=false` ve modalda yeni sekme önerilir; diğer üç
   sağlayıcı gömülü açılır (Amusnet önce kendi POST formunu çalıştırır, sonuç iframe'e gömülebilir).
   Agregatör olmayan (Cedar/yerel) oyunlar doğrudan `game/{name}` bağlantısını korur.
+- En-boy oranı: aggregator PG Soft için çağırandan bağımsız olarak **telefon** build'ini döndürür
+  (dikey 9:16). `CasinoProvider::embedAspect()` sağlayıcı başına tercih edilen oranı verir
+  (`config/casino_providers.php` → `embed_aspect`, PG Soft için `PGSOFT_EMBED_ASPECT=9:16`, diğerleri
+  `auto`). Lobideki `launch_json` bu değeri `aspect` olarak döndürür; oyuncu iframe'i
+  `game-player-frame-wrap` içinde orana göre ölçeklenir (`ResizeObserver`) — aksi halde oyun geniş
+  panelde yarım bir dikey şerit olarak görünür.
 - Katalog senkronizasyonu: `CasinoCatalogSyncService` + `php artisan casino:sync-catalog`
   (`--provider=`, `--link-only`). Eski `games` satırlarını normalize başlıkla eşleştirir, eksikleri
   içe aktarır; `provider_key`, `provider_game_id` (sembol), `launch_code` (sayısal id), `icon_url`
@@ -72,6 +78,7 @@ Bunun yerine:
 - `php scripts/verify_casino_wallet.php` — 15 cüzdan kontrolü (kendi verisini temizler).
 - `php tests/Casino/provider-integration-regression.php` — 19 entegrasyon kontrolü.
 - `php tests/Casino/catalog-sync-regression.php` — 16 katalog senkronizasyon kontrolü.
+- `php tests/Casino/embed-aspect-regression.php` — 10 gömülü en-boy oranı kontrolü.
 - Spor regresyonları: `tests/Sports/*.php`.
 
 ## Modern tasarım sistemi (frontend/Minimal)

@@ -80,6 +80,18 @@ abstract class AbstractCasinoProvider implements CasinoProvider
         ];
     }
 
+    /**
+     * Default: let the browser stretch the game to the frame (every landscape
+     * vendor behaves this way). Subclasses override when the aggregator returns
+     * a fixed-orientation build.
+     */
+    public function embedAspect(): string
+    {
+        $configured = (string) ($this->config()['embed_aspect'] ?? 'auto');
+
+        return $configured !== '' ? $configured : 'auto';
+    }
+
     public function signOrder(string $operation): array
     {
         return self::SIGN_ORDERS[$operation] ?? [];

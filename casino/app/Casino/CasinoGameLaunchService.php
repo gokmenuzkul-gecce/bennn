@@ -64,6 +64,7 @@ class CasinoGameLaunchService
         return array_merge($payload, [
             'provider' => $providerKey,
             'user_code' => $userCode,
+            'aspect' => $provider->embedAspect(),
         ]);
     }
 }

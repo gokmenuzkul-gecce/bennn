@@ -8,6 +8,7 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body, html { width: 100%; height: 100%; overflow: hidden; background: #0b0e17; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        #game-stage { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         #game-frame { width: 100%; height: 100%; border: none; display: block; }
         .floating-controls {
             position: fixed;
@@ -53,12 +54,39 @@
         </button>
     </div>
 
-    <iframe id="game-frame" 
-            name="game-frame"
-            src="{{ !empty($launch['form']) ? 'about:blank' : $launch['url'] }}" 
-            allow="autoplay; fullscreen; screen-wake-lock"
-            allowfullscreen>
-    </iframe>
+    @php($aspect = $launch['aspect'] ?? 'auto')
+    <div id="game-stage">
+        <iframe id="game-frame"
+                name="game-frame"
+                src="{{ !empty($launch['form']) ? 'about:blank' : $launch['url'] }}"
+                allow="autoplay; fullscreen; screen-wake-lock"
+                allowfullscreen>
+        </iframe>
+    </div>
+
+    <script>
+        // Fixed-orientation vendor builds (PG Soft's phone session) are fitted
+        // to their aspect so the game fills the viewport instead of half of it.
+        (function () {
+            var aspect = @json($aspect);
+            var frame = document.getElementById('game-frame');
+            function fit() {
+                if (!aspect || aspect === 'auto') {
+                    frame.style.width = '100%';
+                    frame.style.height = '100%';
+                    return;
+                }
+                var parts = String(aspect).split(':');
+                var w = parseFloat(parts[0]), h = parseFloat(parts[1]);
+                if (parts.length !== 2 || !w || !h) return;
+                var scale = Math.min(window.innerWidth / w, window.innerHeight / h);
+                frame.style.width = Math.floor(w * scale) + 'px';
+                frame.style.height = Math.floor(h * scale) + 'px';
+            }
+            fit();
+            window.addEventListener('resize', fit);
+        })();
+    </script>
 
     @if(!empty($launch['form']))
     <form id="vendor-form" method="POST" action="{{ $launch['form']['action'] }}" target="game-frame" style="display:none">

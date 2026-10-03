@@ -339,8 +339,10 @@
                 </button>
             </div>
         </div>
-        <div class="relative flex-1 bg-[#0b0e17]">
-            <iframe id="game-player-frame" name="game-player-frame" class="w-full h-full border-0" allow="autoplay; fullscreen; screen-wake-lock" allowfullscreen></iframe>
+        <div id="game-player-stage" class="relative flex-1 min-h-0 bg-[#0b0e17] flex items-center justify-center overflow-hidden">
+            <div id="game-player-frame-wrap" class="w-full h-full">
+                <iframe id="game-player-frame" name="game-player-frame" class="w-full h-full border-0" allow="autoplay; fullscreen; screen-wake-lock" allowfullscreen></iframe>
+            </div>
             <div id="game-player-loading" class="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-[#0b0e17]">
                 <div class="w-10 h-10 border-2 border-primary/30 border-t-primary rounded-full animate-spin"></div>
                 <p class="text-on-surface-muted text-xs font-medium">Oyun yükleniyor...</p>
@@ -374,6 +376,43 @@
     var newTabBtn = document.getElementById('game-player-newtab');
     var closeBtn = document.getElementById('game-player-close');
     var currentUrl = null;
+
+    var frameWrap = document.getElementById('game-player-frame-wrap');
+    var currentAspect = 'auto';
+
+    // Size the frame to the vendor's build. 'auto' stretches to the panel; a
+    // "w:h" aspect (e.g. PG Soft's phone build) fits the game inside the panel
+    // so it fills the height without overflowing or leaving half the frame blank.
+    function applyAspect(aspect) {
+        currentAspect = aspect || 'auto';
+        fitFrame();
+    }
+
+    function fitFrame() {
+        if (!currentAspect || currentAspect === 'auto') {
+            frame.style.width = '100%';
+            frame.style.height = '100%';
+            return;
+        }
+        var parts = String(currentAspect).split(':');
+        var w = parseFloat(parts[0]), h = parseFloat(parts[1]);
+        if (parts.length !== 2 || !w || !h) {
+            frame.style.width = '100%';
+            frame.style.height = '100%';
+            return;
+        }
+        var aw = frameWrap.clientWidth, ah = frameWrap.clientHeight;
+        if (!aw || !ah) return;
+        var scale = Math.min(aw / w, ah / h);
+        frame.style.width = Math.floor(w * scale) + 'px';
+        frame.style.height = Math.floor(h * scale) + 'px';
+    }
+
+    if (window.ResizeObserver) {
+        new ResizeObserver(fitFrame).observe(frameWrap);
+    } else {
+        window.addEventListener('resize', fitFrame);
+    }
 
     function showError(message, allowNewTab) {
         loading.classList.add('hidden');
@@ -412,6 +451,7 @@
                     return;
                 }
                 providerEl.textContent = data.provider || '';
+                applyAspect(data.aspect);
                 currentUrl = data.url;
                 if (!data.embedded) {
                     showError('Bu sağlayıcı site içinde açılamıyor; lütfen yeni sekmede açın.', true);
@@ -452,6 +492,7 @@
         player.classList.add('hidden');
         player.classList.remove('flex');
         frame.src = 'about:blank';
+        applyAspect('auto');
         currentUrl = null;
     }
 
