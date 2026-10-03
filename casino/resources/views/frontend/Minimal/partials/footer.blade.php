@@ -93,18 +93,18 @@
         </div>
 
         {{-- Three side-by-side link boxes --}}
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div class="grid grid-cols-3 gap-3 sm:gap-4">
             @foreach($fColumns as $column)
-                <div class="footer-box footer-rise p-5" style="animation-delay: {{ $loop->index * 90 }}ms">
-                    <div class="mb-3.5 flex items-center gap-2">
-                        <span class="material-symbols-outlined text-lg text-emerald-400" style="font-variation-settings: 'FILL' 1;">{{ $column['icon'] }}</span>
-                        <h4 class="text-[11px] font-extrabold uppercase tracking-widest text-white">{{ $column['heading'] }}</h4>
+                <div class="footer-box footer-rise p-3.5 sm:p-5" style="animation-delay: {{ $loop->index * 90 }}ms">
+                    <div class="mb-3 flex items-center gap-1.5 sm:gap-2">
+                        <span class="material-symbols-outlined text-base sm:text-lg text-emerald-400" style="font-variation-settings: 'FILL' 1;">{{ $column['icon'] }}</span>
+                        <h4 class="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-widest text-white">{{ $column['heading'] }}</h4>
                     </div>
                     <ul class="space-y-2.5">
                         @foreach($column['links'] as $link)
                             <li>
                                 <a href="{{ !empty($link['url']) ? $link['url'] : route($link['route']) }}"
-                                   class="footer-link group inline-flex items-center gap-2 text-[13px] font-medium text-on-surface-muted no-underline transition-colors hover:text-emerald-400">
+                                   class="footer-link group inline-flex items-center gap-1.5 text-[11px] sm:text-[13px] font-medium text-on-surface-muted no-underline transition-colors hover:text-emerald-400">
                                     <span class="h-1 w-1 rounded-full bg-white/20 transition-colors group-hover:bg-emerald-400"></span>
                                     {{ $link['label'] }}
                                 </a>

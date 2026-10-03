@@ -27,7 +27,8 @@
     <title>@yield('page-title', settings('app_name', 'Promex Gaming Suite'))</title>
 
     <!-- Tailwind CSS (prebuilt, see tailwind.config.js — replaces the old runtime CDN) -->
-    <link rel="stylesheet" href="/minimal/css/tailwind.css">
+    @php $twCss = base_path('../minimal/css/tailwind.css'); @endphp
+    <link rel="stylesheet" href="/minimal/css/tailwind.css?v={{ file_exists($twCss) ? filemtime($twCss) : '1' }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet"/>
