@@ -823,6 +823,8 @@
         </div>
     </main>
 
+    @include('frontend.Minimal.partials.footer')
+
     <!-- Global Modals (Auth, WhatsApp OTP, Profile, Wallet Refill) -->
     @include('frontend.Minimal.partials.modals')
 

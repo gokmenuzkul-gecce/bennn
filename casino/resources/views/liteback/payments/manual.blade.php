@@ -3,7 +3,24 @@
 @section('title', 'Manuel Yatırımlar Queue')
 @section('page_title', 'Manuel Yatırımlar Queue')
 
+@php
+    $methodLabels = [
+        'bank' => ['Banka Transferi', 'account_balance', 'info'],
+        'havale' => ['Havale / EFT', 'swap_horiz', 'primary'],
+        'crypto' => ['Kripto Yatırım', 'currency_bitcoin', 'warning'],
+    ];
+@endphp
+
 @section('content')
+@if(($pendingCount ?? 0) > 0)
+<div class="alert alert-warning d-flex align-items-center shadow-sm" role="alert">
+    <i class="fas fa-bell fa-lg mr-3"></i>
+    <div>
+        <strong>{{ $pendingCount }} bekleyen yatırım talebi</strong> onayınızı bekliyor.
+    </div>
+</div>
+@endif
+
 <div class="card">
     <div class="card-header">
         <h3 class="card-title">Bekleyen ve Geçmiş Manuel Banka Transferleri</h3>
@@ -16,6 +33,7 @@
                         <th>ID</th>
                         <th>Kullanıcı</th>
                         <th>Tutar</th>
+                        <th>Yöntem</th>
                         <th>Hesap Sahibi Adı</th>
                         <th>Referans / İşlem ID</th>
                         <th>Ekran Görüntüsü</th>
@@ -26,17 +44,26 @@
                 </thead>
                 <tbody>
                     @forelse($deposits as $deposit)
-                        <tr>
+                        @php
+                            $rowAmount = $deposit->amount ?? $deposit->intent_amount;
+                            $method = $methodLabels[$deposit->method] ?? ['Banka Transferi', 'payments', 'secondary'];
+                        @endphp
+                        <tr class="{{ $deposit->status == 0 ? 'table-warning' : '' }}">
                             <td>{{ $deposit->id }}</td>
                             <td>
                                 <strong>{{ $deposit->username }}</strong><br>
                                 <span class="text-muted text-sm">{{ $deposit->email }}</span>
                             </td>
                             <td>
-                                <strong class="text-success">{{ number_format($deposit->amount, 2) }} {{ $deposit->currency }}</strong>
+                                <strong class="text-success">{{ number_format($rowAmount, 2) }} {{ $deposit->currency }}</strong>
                             </td>
-                            <td>{{ $deposit->account_name }}</td>
-                            <td><code>{{ $deposit->transaction_id }}</code></td>
+                            <td>
+                                <span class="badge badge-{{ $method[2] }}">
+                                    <i class="fas fa-{{ $method[1] }} mr-1"></i>{{ $method[0] }}
+                                </span>
+                            </td>
+                            <td>{{ $deposit->account_name ?: '—' }}</td>
+                            <td><code>{{ $deposit->transaction_id ?: '—' }}</code></td>
                             <td>
                                 @if($deposit->screenshot)
                                     <button class="btn btn-xs btn-outline-primary view-screenshot-btn" 
@@ -84,7 +111,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="9" class="text-center py-4">
+                            <td colspan="10" class="text-center py-4">
                                 <span class="text-muted"><i class="fas fa-inbox fa-2x mb-2 d-block"></i> Geçmişte manuel yatırım bulunamadı.</span>
                             </td>
                         </tr>

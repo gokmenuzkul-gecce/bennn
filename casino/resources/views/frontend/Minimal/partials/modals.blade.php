@@ -508,10 +508,11 @@
                 $depRate = (float) (function_exists('settings') ? settings('coins_per_dollar', 100) : 100);
                 if ($depRate <= 0) $depRate = 100;
                 $depCurrency = strtoupper($u->shop->currency ?? 'TRY');
-                $depMin = (float) (function_exists('settings') ? settings('minimum_payment_amount', 0) : 0);
-                if ($depMin <= 0) $depMin = 50;
-                $depMax = (float) (function_exists('settings') ? settings('maximum_payment_amount', 10000) : 10000);
-                $depPresets = [100, 250, 500, 1000];
+                // The deposit screen is TL-only, so the operator's generic
+                // min/max settings do not apply; the presets define the range.
+                $depMin = 1000;
+                $depMax = 20000;
+                $depPresets = [1000, 2000, 3000, 4000, 5000, 10000, 15000, 20000];
                 $depGet = fn($k, $d = '') => function_exists('settings') ? trim((string) settings($k, $d)) : $d;
 
                 $depMethods = [
@@ -562,7 +563,7 @@
                 </div>
 
                 <!-- Balance Info Card -->
-                <div class="grid grid-cols-2 gap-2 bg-[#121622] p-3 rounded-2xl border border-white/[0.08]">
+                <div class="bg-[#121622] p-3.5 rounded-2xl border border-white/[0.08] flex items-center justify-between">
                     <div>
                         <span class="text-[10px] text-on-surface-muted uppercase font-bold tracking-wider block">Mevcut Bakiye</span>
                         <div class="flex items-baseline gap-1 mt-0.5">
@@ -571,14 +572,7 @@
                         </div>
                         <span class="text-[10px] text-on-surface-subtle font-mono-jet">~{{ $depCurrency }}{{ number_format($u->balance / $depRate, 2) }}</span>
                     </div>
-                    <div class="text-right border-l border-white/[0.06] pl-3">
-                        <span class="text-[10px] text-on-surface-muted uppercase font-bold tracking-wider block">Yatırım Aralığı</span>
-                        <div class="flex items-baseline justify-end gap-1 mt-0.5">
-                            <span class="font-mono-jet text-lg font-bold text-white">{{ number_format($depMin, 0) }}</span>
-                            <span class="text-[11px] text-on-surface-subtle font-bold">— {{ number_format($depMax, 0) }}</span>
-                        </div>
-                        <span class="text-[10px] text-on-surface-subtle font-mono-jet">{{ $depCurrency }}</span>
-                    </div>
+                    <span class="material-symbols-outlined text-3xl text-emerald-400/40" style="font-variation-settings: 'FILL' 1;">account_balance_wallet</span>
                 </div>
 
                 <!-- Investment Methods -->
@@ -631,11 +625,11 @@
                                 Alacağınız: <span id="deposit-live-points">0</span> PUAN
                             </span>
                         </div>
-                        <input type="number" id="deposit-amount" name="amount" min="{{ $depMin }}" max="{{ $depMax }}" step="1" placeholder="e.g. 250" required class="font-mono-jet text-sm">
-                        <div class="flex gap-1.5 mt-2">
+                        <input type="number" id="deposit-amount" name="amount" min="{{ $depMin }}" max="{{ $depMax }}" step="1" placeholder="Örn. 2000" required class="font-mono-jet text-sm">
+                        <div class="grid grid-cols-4 gap-1.5 mt-2">
                             @foreach($depPresets as $preset)
-                                <button type="button" class="btn-deposit-preset text-[10px] bg-white/[0.04] hover:bg-white/[0.1] text-on-surface-muted hover:text-white px-2.5 py-1 rounded-lg font-mono-jet transition-colors" data-amount="{{ $preset }}">
-                                    {{ $depCurrency }}{{ number_format($preset, 0) }}
+                                <button type="button" class="btn-deposit-preset text-[11px] bg-white/[0.04] hover:bg-white/[0.1] text-on-surface-muted hover:text-white py-1.5 rounded-lg font-mono-jet font-semibold transition-colors" data-amount="{{ $preset }}">
+                                    {{ number_format($preset, 0, ',', '.') }} TL
                                 </button>
                             @endforeach
                         </div>
@@ -1233,12 +1227,18 @@ document.addEventListener('DOMContentLoaded', function() {
     if (depositForm) {
         depositForm.addEventListener('submit', function(e) {
             e.preventDefault();
+            if (!depositMethodInput || !depositMethodInput.value) {
+                depositStatus.className = "text-xs font-bold text-center mt-2 text-accent-rose";
+                depositStatus.innerText = "Lütfen bir yatırım yöntemi seçin.";
+                return;
+            }
+
             depositStatus.className = "text-xs font-bold text-center mt-2 text-secondary";
             depositStatus.innerText = "Yatırım talebi oluşturuluyor...";
             if (depositInfo) depositInfo.classList.add('hidden');
             depositBtn.disabled = true;
 
-            fetch('/topup/create', {
+            fetch('{{ route('frontend.topup.manual-claim') }}', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1247,14 +1247,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 body: JSON.stringify({
                     amount: depositAmountInput.value,
-                    driver: 'manual',
                     method: depositMethodInput ? depositMethodInput.value : ''
                 })
             })
             .then(res => res.json())
             .then(data => {
                 depositBtn.disabled = false;
-                if (data.payment_url) {
+                if (data.ok) {
                     depositStatus.innerText = "";
                     if (depositInfo) depositInfo.classList.remove('hidden');
                 } else {

@@ -5,6 +5,8 @@
     $operatorPortalUrl = 'https://clients.377.live/operator';
     $boundDomain = $licenseStatus['domain'] ?? request()->getHost();
     $daysLeft = $licenseStatus['days_left'] ?? 0;
+    // Pending manual deposits surface as a sidebar notification badge.
+    $pendingManualDeposits = \Illuminate\Support\Facades\DB::table('manual_deposits')->where('status', 0)->count();
 @endphp
 <!doctype html>
 <html lang="en">
@@ -176,6 +178,16 @@
         </ul>
 
         <ul class="navbar-nav ml-auto align-items-center">
+            <!-- Pending manual deposit notifications -->
+            <li class="nav-item mr-2">
+                <a href="{{ route('liteback.payments.manual.index') }}" class="nav-link position-relative" title="Bekleyen yatırım talepleri">
+                    <i class="fas fa-bell fa-lg {{ $pendingManualDeposits > 0 ? 'text-warning' : 'text-muted' }}"></i>
+                    @if($pendingManualDeposits > 0)
+                        <span class="badge badge-danger navbar-badge">{{ $pendingManualDeposits }}</span>
+                    @endif
+                </a>
+            </li>
+
             <!-- Global License Status Badge & Direct Operator Portal Trigger -->
             <li class="nav-item mr-2">
                 @if($licenseState === 'active')
@@ -359,7 +371,12 @@
                             <li class="nav-item">
                                 <a href="{{ route('liteback.payments.manual.index') }}" class="nav-link">
                                     <i class="far fa-circle nav-icon"></i>
-                                    <p>Manuel Yatırımlar</p>
+                                    <p>
+                                        Manuel Yatırımlar
+                                        @if($pendingManualDeposits > 0)
+                                            <span class="right badge badge-danger">{{ $pendingManualDeposits }}</span>
+                                        @endif
+                                    </p>
                                 </a>
                             </li>
                             <li class="nav-item">

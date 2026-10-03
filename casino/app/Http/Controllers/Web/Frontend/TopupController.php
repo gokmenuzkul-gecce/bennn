@@ -16,7 +16,7 @@ class TopupController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth')->only(['create', 'showManualPayment', 'submitManualDeposit']);
+        $this->middleware('auth')->only(['create', 'claimManualDeposit', 'showManualPayment', 'submitManualDeposit']);
     }
 
     public function create(Request $request)
@@ -497,6 +497,67 @@ class TopupController extends Controller
         ]);
 
         return redirect('/')->with('success', 'Your manual deposit proof has been submitted successfully and is pending admin approval.');
+    }
+
+    /**
+     * Record a "I have paid" claim from the Bakiye Yükle screen.
+     *
+     * The player picks one of the displayed methods (bank/havale/crypto) and a
+     * TL amount; we open a manual payment intent plus a pending manual_deposit
+     * so the operator can approve or reject it from Liteback. The balance is
+     * only credited on approval, never here.
+     */
+    public function claimManualDeposit(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'amount' => 'required|numeric|min:1|max:1000000',
+            'method' => 'required|string|in:bank,havale,crypto',
+            'account_name' => 'nullable|string|max:255',
+            'transaction_id' => 'nullable|string|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()->first()], 422);
+        }
+
+        $user = auth()->user();
+        $amount = (float) $request->input('amount');
+        $method = (string) $request->input('method');
+        $currency = strtoupper($user->shop->currency ?? 'TRY');
+
+        $intentId = DB::transaction(function () use ($user, $amount, $method, $currency, $request) {
+            $intentId = DB::table('payment_intents')->insertGetId([
+                'user_id' => $user->id,
+                'driver' => 'manual',
+                'amount' => $amount,
+                'currency' => $currency,
+                'status' => 'submitted',
+                'meta' => json_encode(['method' => $method]),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            DB::table('manual_deposits')->insert([
+                'user_id' => $user->id,
+                'payment_intent_id' => $intentId,
+                'method' => $method,
+                'amount' => $amount,
+                'account_name' => $request->input('account_name'),
+                'transaction_id' => $request->input('transaction_id'),
+                'screenshot' => null,
+                'status' => 0,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            return $intentId;
+        });
+
+        return response()->json([
+            'ok' => true,
+            'intent_id' => $intentId,
+            'message' => 'Yatırım talebiniz alındı. Onay sonrası bakiyeniz otomatik güncellenecek.',
+        ]);
     }
 
     private function validateStripeSignature(string $payload, string $signature, string $secret): bool

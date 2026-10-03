@@ -121,6 +121,7 @@ Route::namespace ('Frontend')->middleware(['siteisclosed', 'checker'])->group(fu
     Route::post('profile/withdraw', ['as' => 'frontend.profile.withdraw', 'uses' => 'ProfileController@withdraw']);
 
     Route::post('topup/create', ['as' => 'frontend.topup.create', 'uses' => 'TopupController@create']);
+    Route::post('topup/manual-claim', ['as' => 'frontend.topup.manual-claim', 'uses' => 'TopupController@claimManualDeposit']);
 
     /**
      * Games routes

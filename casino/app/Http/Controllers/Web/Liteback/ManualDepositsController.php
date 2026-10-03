@@ -14,11 +14,20 @@ class ManualDepositsController extends Controller
         $deposits = DB::table('manual_deposits')
             ->join('users', 'manual_deposits.user_id', '=', 'users.id')
             ->join('payment_intents', 'manual_deposits.payment_intent_id', '=', 'payment_intents.id')
-            ->select('manual_deposits.*', 'users.username', 'users.email', 'payment_intents.amount', 'payment_intents.currency')
+            ->select(
+                'manual_deposits.*',
+                'users.username',
+                'users.email',
+                'payment_intents.amount as intent_amount',
+                'payment_intents.currency'
+            )
+            ->orderByRaw('CASE WHEN ' . DB::getTablePrefix() . 'manual_deposits.status = 0 THEN 0 ELSE 1 END')
             ->orderBy('manual_deposits.created_at', 'desc')
             ->paginate(20);
 
-        return view('liteback.payments.manual', compact('deposits'));
+        $pendingCount = DB::table('manual_deposits')->where('status', 0)->count();
+
+        return view('liteback.payments.manual', compact('deposits', 'pendingCount'));
     }
 
     public function approve($id)
@@ -42,9 +51,11 @@ class ManualDepositsController extends Controller
             return redirect()->back()->withErrors('User not found.');
         }
 
-        DB::transaction(function () use ($deposit, $intent, $user) {
+        $amount = (float) ($deposit->amount ?: $intent->amount);
+
+        DB::transaction(function () use ($deposit, $intent, $user, $amount) {
             $rate = (float) (function_exists('settings') ? settings('coins_per_dollar', 100) : 100);
-            $coinsCredited = (float) $intent->amount * $rate;
+            $coinsCredited = $amount * $rate;
             $newBalance = (float) $user->balance + $coinsCredited;
 
             DB::table('users')->where('id', $user->id)->update([
@@ -60,7 +71,7 @@ class ManualDepositsController extends Controller
                 'balance_before' => $user->balance,
                 'balance_after' => $newBalance,
                 'source' => 'manual',
-                'note' => 'Manual Deposit of $' . $intent->amount . ' (' . number_format($coinsCredited, 0) . ' coins) approved by admin ' . auth()->user()->username,
+                'note' => 'Manual Deposit of ' . number_format($amount, 2) . ' ' . $intent->currency . ' (' . number_format($coinsCredited, 0) . ' coins) approved by admin ' . auth()->user()->username,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
