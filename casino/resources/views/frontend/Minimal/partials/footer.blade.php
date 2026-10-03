@@ -60,6 +60,7 @@
         $fPayments[] = 'PayPal';
     }
     $fPayments[] = 'Papara';
+    $fPayments = array_values(array_unique($fPayments));
 @endphp
 
 <footer class="relative mt-12 border-t border-white/[0.07] bg-[#0b0e17]/80 overflow-hidden">
@@ -69,10 +70,10 @@
 
     <div class="relative mx-auto w-full max-w-7xl px-4 sm:px-6 md:px-10 lg:px-12 py-10 md:py-12">
         {{-- Brand line --}}
-        <div class="mb-8 flex flex-col items-center gap-4 text-center sm:flex-row sm:justify-between sm:text-left">
+        <div class="footer-rise mb-8 flex flex-col items-center gap-4 text-center sm:flex-row sm:justify-between sm:text-left">
             <a href="{{ route('frontend.game.list') }}" class="flex items-center gap-3 no-underline">
                 <img src="{{ settings('brand_logo_path') ? \Illuminate\Support\Facades\Storage::url(settings('brand_logo_path')) : '/minimal/logo.svg' }}"
-                     alt="{{ $fBrand }}" class="w-11 h-11 rounded-xl object-contain shadow-lg shadow-emerald-500/30 flex-shrink-0">
+                     alt="{{ $fBrand }}" class="footer-brand-glow w-11 h-11 rounded-xl object-contain flex-shrink-0">
                 <div class="leading-tight">
                     <span class="block text-base font-extrabold tracking-tight text-white">{{ strtoupper($fBrand) }}</span>
                     <span class="block text-[10px] font-bold tracking-widest text-emerald-400 uppercase">{{ $fTagline }}</span>
@@ -92,9 +93,9 @@
         </div>
 
         {{-- Three side-by-side link boxes --}}
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
             @foreach($fColumns as $column)
-                <div class="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-5 transition-colors hover:border-emerald-400/25">
+                <div class="footer-box footer-rise p-5" style="animation-delay: {{ $loop->index * 90 }}ms">
                     <div class="mb-3.5 flex items-center gap-2">
                         <span class="material-symbols-outlined text-lg text-emerald-400" style="font-variation-settings: 'FILL' 1;">{{ $column['icon'] }}</span>
                         <h4 class="text-[11px] font-extrabold uppercase tracking-widest text-white">{{ $column['heading'] }}</h4>
@@ -103,7 +104,7 @@
                         @foreach($column['links'] as $link)
                             <li>
                                 <a href="{{ !empty($link['url']) ? $link['url'] : route($link['route']) }}"
-                                   class="group inline-flex items-center gap-2 text-[13px] font-medium text-on-surface-muted no-underline transition-colors hover:text-emerald-400">
+                                   class="footer-link group inline-flex items-center gap-2 text-[13px] font-medium text-on-surface-muted no-underline transition-colors hover:text-emerald-400">
                                     <span class="h-1 w-1 rounded-full bg-white/20 transition-colors group-hover:bg-emerald-400"></span>
                                     {{ $link['label'] }}
                                 </a>
@@ -118,8 +119,10 @@
         <div class="mt-8 flex flex-col gap-4 border-t border-white/[0.07] pt-6 md:flex-row md:items-center md:justify-between">
             <div class="flex flex-wrap items-center gap-2">
                 <span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-subtle">Ödeme:</span>
-                @foreach(array_values(array_unique($fPayments)) as $pay)
-                    <span class="rounded-lg border border-white/[0.08] bg-white/[0.03] px-2.5 py-1 text-[10px] font-bold tracking-wider text-on-surface-muted">{{ $pay }}</span>
+                @foreach($fPayments as $pay)
+                    <span class="footer-pay rounded-lg border border-white/[0.08] bg-white/[0.03] px-2.5 py-1 text-[10px] font-bold tracking-wider text-on-surface-muted">
+                        <span>{{ $pay }}</span>
+                    </span>
                 @endforeach
             </div>
             <div class="flex items-center gap-3">

@@ -505,8 +505,6 @@
         @if(Auth::check())
             @php
                 $u = Auth::user();
-                $depRate = (float) (function_exists('settings') ? settings('coins_per_dollar', 100) : 100);
-                if ($depRate <= 0) $depRate = 100;
                 // The deposit screen is TL-only, so the operator's generic
                 // min/max settings do not apply; the presets define the range.
                 $depMin = 1000;
@@ -566,8 +564,8 @@
                     <div>
                         <span class="text-[10px] text-on-surface-muted uppercase font-bold tracking-wider block">Mevcut Bakiye</span>
                         <div class="flex items-baseline gap-1 mt-0.5">
-                            <span class="font-mono-jet text-lg font-bold {{ (float)$u->balance > 0 ? 'text-emerald-400' : 'text-white' }}" id="deposit-modal-user-balance">{{ number_format($u->balance / $depRate, 2, ',', '.') }}</span>
-                            <span class="text-[11px] text-primary-light font-bold">TRY</span>
+                            <span class="font-mono-jet text-lg font-bold {{ (float)$u->balance > 0 ? 'text-emerald-400' : 'text-white' }}" id="deposit-modal-user-balance">{{ number_format($u->balance, 2) }}</span>
+                            <span class="text-[11px] text-primary-light font-bold">{{ strtoupper(settings('default_currency') ?: 'TRY') }}</span>
                         </div>
                     </div>
                     <span class="material-symbols-outlined text-3xl text-emerald-400/40" style="font-variation-settings: 'FILL' 1;">account_balance_wallet</span>
