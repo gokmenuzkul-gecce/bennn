@@ -21,7 +21,7 @@
         @if($brandLogoPath)
             <img src="{{ asset('storage/' . $brandLogoPath) }}" alt="{{ $brandName }}" class="w-10 h-10 rounded-xl object-contain bg-primary/10 shadow-lg shadow-primary/20 flex-shrink-0">
         @else
-            <img src="/minimal/logo.svg" alt="{{ $brandName }}" class="w-10 h-10 rounded-xl object-contain shadow-lg shadow-emerald-500/30 flex-shrink-0">
+            <img src="/minimal/promex-emblem.png" alt="{{ $brandName }}" class="w-10 h-10 rounded-xl object-contain shadow-lg shadow-emerald-500/30 flex-shrink-0">
         @endif
         <a href="{{ route('frontend.game.list') }}" class="flex flex-col no-underline">
             <span class="text-base font-extrabold tracking-tight text-white leading-tight">{{ strtoupper($brandName) }}</span>
@@ -140,7 +140,7 @@
         @if($brandLogoPath)
             <img src="{{ asset('storage/' . $brandLogoPath) }}" alt="{{ $brandName }}" class="w-8 h-8 rounded-lg object-contain shadow-md shadow-primary/20 flex-shrink-0">
         @else
-            <img src="/minimal/logo.svg" alt="{{ $brandName }}" class="w-8 h-8 rounded-lg object-contain shadow-md shadow-primary/20 flex-shrink-0">
+            <img src="/minimal/promex-emblem.png" alt="{{ $brandName }}" class="w-8 h-8 rounded-lg object-contain shadow-md shadow-primary/20 flex-shrink-0">
         @endif
         <span class="hidden min-[380px]:inline font-extrabold text-sm tracking-tight text-white truncate">{{ strtoupper($brandName) }}</span>
     </a>

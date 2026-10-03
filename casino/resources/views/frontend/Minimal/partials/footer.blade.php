@@ -72,8 +72,13 @@
         {{-- Brand line --}}
         <div class="footer-rise mb-8 flex flex-col items-center gap-4 text-center sm:flex-row sm:justify-between sm:text-left">
             <a href="{{ route('frontend.game.list') }}" class="flex items-center gap-3 no-underline">
-                <img src="{{ settings('brand_logo_path') ? \Illuminate\Support\Facades\Storage::url(settings('brand_logo_path')) : '/minimal/logo.svg' }}"
-                     alt="{{ $fBrand }}" class="footer-brand-glow w-11 h-11 rounded-xl object-contain flex-shrink-0">
+                @if(settings('brand_logo_path'))
+                    <img src="{{ \Illuminate\Support\Facades\Storage::url(settings('brand_logo_path')) }}"
+                         alt="{{ $fBrand }}" class="footer-brand-glow w-11 h-11 rounded-xl object-contain flex-shrink-0">
+                @else
+                    <img src="/minimal/promex-emblem.png" alt="{{ $fBrand }}"
+                         class="footer-brand-glow w-11 h-11 rounded-xl object-contain flex-shrink-0">
+                @endif
                 <div class="leading-tight">
                     <span class="block text-base font-extrabold tracking-tight text-white">{{ strtoupper($fBrand) }}</span>
                     <span class="block text-[10px] font-bold tracking-widest text-emerald-400 uppercase">{{ $fTagline }}</span>
