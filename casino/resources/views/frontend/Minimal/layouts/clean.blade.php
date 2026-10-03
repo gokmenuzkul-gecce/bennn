@@ -755,6 +755,8 @@
     <!-- Navigation (Sidebar + Mobile Header + Mobile Sheet + Bottom Dock) -->
     @include('frontend.Minimal.partials.navbar')
 
+    <!-- Content + Footer column (keeps the footer under the content, not beside it) -->
+    <div class="flex-1 w-full min-w-0 flex flex-col">
     <!-- Main Content Area -->
     <main class="flex-1 w-full min-w-0 min-h-screen relative flex flex-col pb-28 lg:pb-14">
         <!-- Desktop top-right account area (transparent dropdown) -->
@@ -824,6 +826,7 @@
     </main>
 
     @include('frontend.Minimal.partials.footer')
+    </div>
 
     <!-- Global Modals (Auth, WhatsApp OTP, Profile, Wallet Refill) -->
     @include('frontend.Minimal.partials.modals')

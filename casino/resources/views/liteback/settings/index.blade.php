@@ -27,6 +27,16 @@
                                 <input type="text" name="brand_tagline" class="form-control" maxlength="80" value="{{ settings('brand_tagline', 'Social Gaming') }}">
                             </div>
                             <div class="form-group col-md-6">
+                                <label class="font-weight-bold">Version</label>
+                                <input type="text" name="app_version" class="form-control" maxlength="20" value="{{ settings('app_version', '1.0') }}">
+                                <small class="form-text text-muted">Shown in the site footer ("Sürüm ...").</small>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label class="font-weight-bold">Contact email</label>
+                                <input type="email" name="contact_email" class="form-control" maxlength="120" value="{{ settings('contact_email') }}">
+                                <small class="form-text text-muted">Optional. Surfaced in the footer support block.</small>
+                            </div>
+                            <div class="form-group col-md-6">
                                 <label class="font-weight-bold">Logo</label>
                                 <input type="file" name="brand_logo" class="form-control-file" accept="image/png,image/jpeg,image/webp">
                                 <small class="form-text text-muted">PNG, JPG, or WebP up to 2 MB. Leave blank to keep the current logo.</small>

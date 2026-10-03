@@ -507,7 +507,6 @@
                 $u = Auth::user();
                 $depRate = (float) (function_exists('settings') ? settings('coins_per_dollar', 100) : 100);
                 if ($depRate <= 0) $depRate = 100;
-                $depCurrency = strtoupper($u->shop->currency ?? 'TRY');
                 // The deposit screen is TL-only, so the operator's generic
                 // min/max settings do not apply; the presets define the range.
                 $depMin = 1000;
@@ -567,10 +566,9 @@
                     <div>
                         <span class="text-[10px] text-on-surface-muted uppercase font-bold tracking-wider block">Mevcut Bakiye</span>
                         <div class="flex items-baseline gap-1 mt-0.5">
-                            <span class="font-mono-jet text-lg font-bold {{ (float)$u->balance > 0 ? 'text-emerald-400' : 'text-white' }}" id="deposit-modal-user-balance">{{ number_format($u->balance, 0) }}</span>
-                            <span class="text-[11px] text-primary-light font-bold">PUAN</span>
+                            <span class="font-mono-jet text-lg font-bold {{ (float)$u->balance > 0 ? 'text-emerald-400' : 'text-white' }}" id="deposit-modal-user-balance">{{ number_format($u->balance / $depRate, 2, ',', '.') }}</span>
+                            <span class="text-[11px] text-primary-light font-bold">TRY</span>
                         </div>
-                        <span class="text-[10px] text-on-surface-subtle font-mono-jet">~{{ $depCurrency }}{{ number_format($u->balance / $depRate, 2) }}</span>
                     </div>
                     <span class="material-symbols-outlined text-3xl text-emerald-400/40" style="font-variation-settings: 'FILL' 1;">account_balance_wallet</span>
                 </div>
@@ -620,10 +618,7 @@
                     <input type="hidden" name="method" id="deposit-method" value="">
                     <div class="form-group">
                         <div class="flex justify-between items-center mb-1">
-                            <label for="deposit-amount" class="text-xs font-bold text-white">Yatırım Tutarı ({{ $depCurrency }})</label>
-                            <span class="text-[10px] text-primary font-mono-jet font-bold">
-                                Alacağınız: <span id="deposit-live-points">0</span> PUAN
-                            </span>
+                            <label for="deposit-amount" class="text-xs font-bold text-white">Yatırım Tutarı (TRY)</label>
                         </div>
                         <input type="number" id="deposit-amount" name="amount" min="{{ $depMin }}" max="{{ $depMax }}" step="1" placeholder="Örn. 2000" required class="font-mono-jet text-sm">
                         <div class="grid grid-cols-4 gap-1.5 mt-2">
@@ -1158,28 +1153,15 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Deposit Modal Live Calculator, Method Tiles & Presets
+    // Deposit Modal Method Tiles & Presets
     const depositAmountInput = document.getElementById('deposit-amount');
-    const depositLivePoints = document.getElementById('deposit-live-points');
     const depositMethodInput = document.getElementById('deposit-method');
     const depositMethodDetails = document.getElementById('deposit-method-details');
-    const depositRate = {{ (float)(function_exists('settings') ? settings('coins_per_dollar', 100) : 100) ?: 100 }};
-
-    function updateDepositLiveCalc() {
-        if (!depositAmountInput || !depositLivePoints) return;
-        const val = parseFloat(depositAmountInput.value) || 0;
-        depositLivePoints.innerText = Math.round(val * depositRate).toLocaleString();
-    }
-
-    if (depositAmountInput) {
-        depositAmountInput.addEventListener('input', updateDepositLiveCalc);
-    }
 
     document.querySelectorAll('.btn-deposit-preset').forEach(btn => {
         btn.addEventListener('click', function() {
             if (depositAmountInput) {
                 depositAmountInput.value = this.getAttribute('data-amount');
-                updateDepositLiveCalc();
             }
         });
     });
