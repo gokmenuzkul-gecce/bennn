@@ -137,6 +137,104 @@
     animation: footer-rise 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
+/* ---------------------------------------------------------------------------
+   Global motion layer
+   A single, dependency-free system for micro-interactions, scroll reveals and
+   staggered entrances. Content and markup are untouched: everything here is
+   progressive enhancement driven by CSS plus a tiny IntersectionObserver.
+   --------------------------------------------------------------------------- */
+@layer components {
+    /* ============ SCROLL REVEAL ============ */
+    /* Elements start shifted and transparent, then settle when they enter the
+       viewport. The JS only toggles .is-inview; all timing lives in CSS.
+       Independent translate/scale properties are used rather than transform, so
+       a card can still run its own transform-based hover lift while it reveals. */
+    .motion-reveal {
+        opacity: 0;
+        translate: 0 22px;
+        transition: opacity 0.6s cubic-bezier(0.22, 0.61, 0.36, 1),
+                    translate 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
+        transition-delay: var(--motion-delay, 0ms);
+        will-change: opacity, translate;
+    }
+    .motion-reveal.is-inview {
+        opacity: 1;
+        translate: none;
+    }
+    .motion-reveal--left { translate: -28px 0; }
+    .motion-reveal--right { translate: 28px 0; }
+    .motion-reveal--scale { scale: 0.94; }
+    .motion-reveal--left.is-inview,
+    .motion-reveal--right.is-inview { translate: none; }
+    .motion-reveal--scale.is-inview { scale: none; }
+
+    /* ============ PAGE INTRO (staggered entrance) ============ */
+    /* The page column fades up on first paint. The per-card sequence is handled
+       by the reveal transition (--motion-delay), not by an animation: a filling
+       animation would pin transform and swallow every later hover transform. */
+    .motion-intro {
+        animation: motion-fade-up 0.7s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+    }
+
+    /* ============ NAV / MENU ITEM ============ */
+    .motion-nav-item {
+        transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+                    background-color 0.25s ease, color 0.25s ease,
+                    border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+    .motion-nav-item:hover { transform: translateX(4px); }
+    .motion-nav-item:active { transform: translateX(2px) scale(0.985); }
+
+    /* ============ DROPDOWN ============ */
+    /* Serves both the account menu and any other dropdown: opens with a slide
+       down and a soft blur-in instead of snapping into place. */
+    .motion-dropdown {
+        animation: motion-drop 0.28s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+        transform-origin: top right;
+    }
+    .motion-dropdown-item {
+        opacity: 0;
+        animation: motion-fade-in 0.32s ease both;
+        transition: background-color 0.22s ease, transform 0.22s ease, color 0.22s ease;
+    }
+    .motion-dropdown-item:hover { transform: translateX(3px); }
+    .motion-dropdown-item:nth-child(1) { animation-delay: 40ms; }
+    .motion-dropdown-item:nth-child(2) { animation-delay: 80ms; }
+    .motion-dropdown-item:nth-child(3) { animation-delay: 120ms; }
+    .motion-dropdown-item:nth-child(4) { animation-delay: 160ms; }
+    .motion-dropdown-item:nth-child(5) { animation-delay: 200ms; }
+    .motion-dropdown-item:nth-child(6) { animation-delay: 240ms; }
+    .motion-dropdown-item:nth-child(n + 7) { animation-delay: 280ms; }
+
+    /* ============ GENERIC CARD LIFT ============ */
+    /* Applied by the motion runtime to interactive cards that do not already
+       ship a bespoke hover transform. */
+    .motion-card {
+        transition: transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1),
+                    box-shadow 0.35s ease, border-color 0.35s ease,
+                    background-color 0.35s ease;
+    }
+    .motion-card:hover {
+        transform: translateY(-5px);
+        border-color: rgba(16, 185, 129, 0.35);
+        box-shadow: 0 20px 44px -20px rgba(16, 185, 129, 0.45);
+    }
+    .motion-card:active { transform: translateY(-2px) scale(0.995); }
+}
+
+@keyframes motion-fade-up {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: none; }
+}
+@keyframes motion-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+@keyframes motion-drop {
+    from { opacity: 0; transform: translateY(-10px) scale(0.97); }
+    to { opacity: 1; transform: none; }
+}
+
 @media (prefers-reduced-motion: reduce) {
     .footer-box,
     .footer-box::before,
@@ -147,5 +245,26 @@
     .footer-link::after {
         animation: none !important;
         transition: none !important;
+    }
+    /* Accessibility: skip straight to the final state, no motion at all. */
+    .motion-reveal,
+    .motion-reveal--left,
+    .motion-reveal--right,
+    .motion-reveal--scale {
+        opacity: 1 !important;
+        translate: none !important;
+        scale: none !important;
+        transition: none !important;
+    }
+    .motion-intro,
+    .motion-dropdown,
+    .motion-dropdown-item {
+        animation: none !important;
+        opacity: 1 !important;
+    }
+    .motion-nav-item:hover,
+    .motion-card:hover,
+    .motion-dropdown-item:hover {
+        transform: none !important;
     }
 }

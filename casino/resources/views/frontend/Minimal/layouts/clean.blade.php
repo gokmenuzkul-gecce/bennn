@@ -606,6 +606,25 @@
         .modal.active, .modal.show {
             display: flex !important;
         }
+        /* Opening a modal fades the frosted backdrop in and floats the dialog up.
+           Because the element flips from display:none to flex, the browser restarts
+           these animations on every open without any JavaScript. */
+        .modal.show, .modal.active { animation: motion-backdrop 0.28s ease both; }
+        .modal.show .modal-content, .modal.active .modal-content {
+            animation: motion-dialog 0.36s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+        }
+        @keyframes motion-backdrop {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes motion-dialog {
+            from { opacity: 0; transform: translateY(20px) scale(0.955); }
+            to { opacity: 1; transform: none; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .modal.show, .modal.active,
+            .modal.show .modal-content, .modal.active .modal-content { animation: none !important; }
+        }
         .modal-content {
             background: #121622;
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -761,7 +780,7 @@
     <!-- Content + Footer column (keeps the footer under the content, not beside it) -->
     <div class="flex-1 w-full min-w-0 flex flex-col">
     <!-- Main Content Area -->
-    <main class="flex-1 w-full min-w-0 min-h-screen relative flex flex-col pb-28 lg:pb-14">
+    <main class="motion-intro flex-1 w-full min-w-0 min-h-screen relative flex flex-col pb-28 lg:pb-14">
         <!-- Desktop top-right account area (transparent dropdown) -->
         <div class="hidden lg:flex items-center justify-end gap-2.5 px-6 md:px-10 lg:px-12 pt-5 relative z-50">
             @guest
@@ -836,6 +855,7 @@
 
     <script src="/frontend/Default/js/jquery-3.4.1.min.js"></script>
     <script src="/minimal/js/app.js"></script>
+    <script src="/minimal/js/motion.js?v={{ @filemtime(base_path('../minimal/js/motion.js')) ?: '1' }}" defer></script>
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function() {

@@ -4,6 +4,9 @@ module.exports = {
     content: [
         './resources/views/**/*.blade.php',
         './resources/js/**/*.js',
+        // The motion runtime lives with the other static assets and adds its
+        // classes at runtime, so Tailwind has to scan it or it would purge them.
+        '../minimal/js/**/*.js',
         './app/**/*.php',
     ],
     theme: {
