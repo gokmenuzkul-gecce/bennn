@@ -62,7 +62,7 @@
     </div>
 </div>
 
-<!-- Banner art strip, reduced 60% in height -->
+<!-- Full-bleed banner art (nav bar sits above it) -->
 <div class="site-header-banner">
     <img src="/minimal/header-banner.jpg"
          alt="{{ $hBrandName }}"
