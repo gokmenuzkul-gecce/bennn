@@ -1,6 +1,6 @@
 @php
-    $fBrand = settings('app_name') ?: 'Promex Gaming Suite';
-    $fTagline = settings('brand_tagline') ?: 'Social Gaming';
+    $fBrand = settings('app_name') ?: 'Casino Gecce';
+    $fTagline = settings('brand_tagline') ?: 'Casino Gecce';
     $fYear = date('Y');
     $fVersion = settings('app_version') ?: '1.0';
 

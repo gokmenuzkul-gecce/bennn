@@ -1,10 +1,17 @@
-# AGENTS.md — Promex Gaming Suite (Laravel)
+# AGENTS.md — Casino Gecce (Laravel)
 
 ## Proje
 - Kök: `/workspace/project/casino` (Laravel, namespace `VanguardLTE\`).
 - Frontend teması: `resources/views/frontend/Minimal` (ayar `frontend`).
 - Admin paneli: `/liteback` (`resources/views/liteback`).
 - Ödeme/API servisleri: `app/Services` (OddsApiService, PolymarketService), `app/Sports/Services/SportsOddsSyncService`.
+
+## Marka
+- Görünen marka adı **Casino Gecce** (`app_name` + `brand_tagline` ayarları, varsayılanlar).
+  Eski "Promex Gaming Suite" / "Social Gaming" metinleri kaldırıldı.
+- "promex" hâlâ **teknik kimlik** olarak geçer ve DEĞİŞTİRİLMEMELİDİR: spor sağlayıcı anahtarı
+  (`PromexLicensedProvider`, `sportsbook_api_provider=promex`), `js/promex-html-game.js`,
+  `js/promex-legacy-bridge.js`, `PromexInstallationService`. Bunlar lisans/entegrasyon sözleşmesidir.
 
 ## Çalıştırma
 - Yerel sunucu: `php artisan serve --host=0.0.0.0 --port=8000` (pid dosyası yoksa `ps aux | grep artisan`).

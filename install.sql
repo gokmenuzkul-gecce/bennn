@@ -1,4 +1,4 @@
--- Promex Gaming Suite Clean Base Database
+-- Casino Gecce Clean Base Database
 -- Sanitized & Generated on 2026-09-27 08:28:10
 SET FOREIGN_KEY_CHECKS=0;
 SET SQL_MODE = 'NO_AUTO_VALUE_ON_ZERO';
@@ -3974,7 +3974,7 @@ INSERT INTO `w_settings` (`id`, `key`, `value`) VALUES
 ('13', 'payment_coinbase', '0'),
 ('14', 'payment_btcpayserver', '0'),
 ('15', 'payment_pin', '1'),
-('16', 'app_name', 'Promex Gaming Suite'),
+('16', 'app_name', 'Casino Gecce'),
 ('17', 'frontend', 'Default'),
 ('18', 'siteisclosed', '0'),
 ('19', 'contact_form_active', '0'),

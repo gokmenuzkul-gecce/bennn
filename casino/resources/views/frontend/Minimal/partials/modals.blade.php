@@ -96,7 +96,7 @@
         <button type="button" class="close-modal" aria-label="Kapat">&times;</button>
         <div class="mb-4">
             <h2 class="text-lg font-bold text-white tracking-tight">Ücretsiz Hesap Oluştur</h2>
-            <p class="text-xs text-on-surface-muted mt-1">Promex Gaming Suite'e katılın ve anında 50.000 Ücretsiz TRY kazanın!</p>
+            <p class="text-xs text-on-surface-muted mt-1">Casino Gecce'ye katılın ve anında 50.000 Ücretsiz TRY kazanın!</p>
         </div>
         <form id="register-form" action="{{ route('frontend.register.post') }}" method="POST" class="space-y-3.5">
             @csrf

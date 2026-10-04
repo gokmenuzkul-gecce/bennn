@@ -35,7 +35,7 @@ class AppServiceProvider extends ServiceProvider
         try {
             config(['app.name' => settings('app_name')]);
         } catch (\Exception $e) {
-            config(['app.name' => 'Laravel Social Gaming']);
+            config(['app.name' => 'Casino Gecce']);
         }
         \Illuminate\Database\Schema\Builder::defaultStringLength(191);
 

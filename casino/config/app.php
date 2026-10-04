@@ -15,11 +15,11 @@ return [
     |
     */
 
-    'name' => 'Betshop IO',
+    'name' => 'Casino Gecce',
 
     /*
     |--------------------------------------------------------------------------
-    | PROMEX Gaming Suite Version (core release snapshot)
+    | CASINO GECCE Version (core release snapshot)
     |--------------------------------------------------------------------------
     */
     'version' => is_file(dirname(__DIR__, 2) . '/VERSION')

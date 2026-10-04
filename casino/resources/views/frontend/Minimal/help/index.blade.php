@@ -8,7 +8,7 @@
         <div class="flex items-start gap-4">
             <div class="w-12 h-12 rounded-2xl bg-primary/15 text-primary flex items-center justify-center flex-shrink-0 border border-primary/20"><span class="material-symbols-outlined text-3xl">help</span></div>
             <div>
-                <p class="text-[11px] font-mono-jet text-primary uppercase tracking-[0.2em] mb-1">{{ $brandName ?? settings('app_name', 'Social Gaming') }}</p>
+                <p class="text-[11px] font-mono-jet text-primary uppercase tracking-[0.2em] mb-1">{{ $brandName ?? settings('app_name', 'Casino Gecce') }}</p>
                 <h1 class="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">{{ $content['title'] }}</h1>
                 <p class="text-sm sm:text-base text-on-surface-muted mt-2 max-w-3xl leading-relaxed">{{ $content['intro'] }}</p>
             </div>

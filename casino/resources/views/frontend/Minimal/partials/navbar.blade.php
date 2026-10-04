@@ -1,5 +1,5 @@
 @php
-    $brandName = settings('app_name') ?: 'Promex Gaming Suite';
+    $brandName = settings('app_name') ?: 'Casino Gecce';
     $brandTagline = settings('brand_tagline') ?: 'Sosyal Oyun';
     $brandLogoPath = settings('brand_logo_path');
     $cedarBrand = settings('cedar_display_name') ?: 'CEDAR';

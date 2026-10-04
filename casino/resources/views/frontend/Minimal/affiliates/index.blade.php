@@ -1,6 +1,6 @@
 @extends('frontend.Minimal.layouts.clean')
 
-@section('page-title', 'Ortaklık ve Referans Ödülleri - Promex Gaming Suite')
+@section('page-title', 'Ortaklık ve Referans Ödülleri - Casino Gecce')
 
 @section('content')
 <div class="space-y-6">

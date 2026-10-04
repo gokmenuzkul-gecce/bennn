@@ -1,6 +1,6 @@
 @extends('frontend.Minimal.layouts.clean')
 
-@section('page-title', 'Promex Gaming Suite - Sosyal Oyun Lobisi')
+@section('page-title', 'Casino Gecce - Sosyal Oyun Lobisi')
 
 @section('content')
 

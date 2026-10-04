@@ -1,4 +1,4 @@
-// Mock WebSocket Bridge for Laravel Social Gaming
+// Mock WebSocket Bridge for Casino Gecce
 // Replaces node.js slots-socket and lobby-socket.
 
 (function() {

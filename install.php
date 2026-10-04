@@ -1,6 +1,6 @@
 <?php
 /**
- * Promex Gaming Suite v2.0.0 - Turnkey Web Installer
+ * Casino Gecce v2.0.0 - Turnkey Web Installer
  * Easy 1-click database initialization, admin setup, and environment config.
  */
 
@@ -110,7 +110,7 @@ if ($isPost && !$isInstalled && $allRequirementsMet) {
     $dbPass = $_POST['db_pass'] ?? '';
     
     $appUrl = rtrim($_POST['app_url'] ?? (($_SERVER['HTTPS'] ?? 'off') === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'], '/');
-    $appName = trim($_POST['app_name'] ?? 'Promex Gaming Suite');
+    $appName = trim($_POST['app_name'] ?? 'Casino Gecce');
     $licenseKey = trim($_POST['license_key'] ?? '');
 
     $adminUser = 'admin';
@@ -285,7 +285,7 @@ if ($isPost && !$isInstalled && $allRequirementsMet) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Promex Gaming Suite v2.0.0 - 1-Click Installer</title>
+    <title>Casino Gecce v2.0.0 - 1-Click Installer</title>
     <style>
         :root { --bg: #0f172a; --card: #1e293b; --border: #334155; --text: #f8fafc; --muted: #94a3b8; --accent: #10b981; --primary: #0ea5e9; }
         * { box-sizing: border-box; }
@@ -320,7 +320,7 @@ if ($isPost && !$isInstalled && $allRequirementsMet) {
 <div class="card">
     <div class="logo-wrap">
         <span class="badge">Laravel 13 • Turnkey Edition</span>
-        <h1>Promex Gaming Suite v2.0.0</h1>
+        <h1>Casino Gecce v2.0.0</h1>
         <p>1-Click Turnkey Installation & Setup Wizard</p>
     </div>
 
@@ -391,7 +391,7 @@ if ($isPost && !$isInstalled && $allRequirementsMet) {
             <div class="grid-2">
                 <div class="form-group">
                     <label>Platform Name</label>
-                    <input type="text" name="app_name" value="<?= htmlspecialchars($_POST['app_name'] ?? 'Promex Gaming Suite') ?>" required>
+                    <input type="text" name="app_name" value="<?= htmlspecialchars($_POST['app_name'] ?? 'Casino Gecce') ?>" required>
                 </div>
                 <div class="form-group">
                     <label>App URL</label>

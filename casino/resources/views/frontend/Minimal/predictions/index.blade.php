@@ -1,6 +1,6 @@
 @extends('frontend.Minimal.layouts.clean')
 
-@section('page-title', 'Gelecek Oyu Tahmin Piyasaları - Promex Gaming Suite')
+@section('page-title', 'Gelecek Oyu Tahmin Piyasaları - Casino Gecce')
 
 @section('content')
 

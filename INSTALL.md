@@ -1,4 +1,4 @@
-# Install PROMEX Gaming Suite 2.0.0
+# Install CASINO GECCE 2.0.0
 
 ## Requirements
 
@@ -39,8 +39,8 @@ GitHub source ZIPs and Git clones are not dependency-bundled prepacks. Developer
 install dependencies before using the same fresh-database installer:
 
 ```sh
-git clone https://github.com/promexdotme/laravel-social-gaming.git
-cd laravel-social-gaming/casino
+git clone https://github.com/promexdotme/casino-gecce.git
+cd casino-gecce/casino
 composer install --no-dev --optimize-autoloader
 ```
 

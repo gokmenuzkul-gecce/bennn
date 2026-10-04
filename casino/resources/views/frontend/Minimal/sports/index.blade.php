@@ -1,6 +1,6 @@
 @extends('frontend.Minimal.layouts.clean')
 
-@section('page-title', 'Battle Odds Spor Bahisleri - Promex Gaming Suite')
+@section('page-title', 'Battle Odds Spor Bahisleri - Casino Gecce')
 
 @section('content')
 

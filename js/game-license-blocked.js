@@ -61,7 +61,7 @@
     addAction('Return to lobby', root.dataset.lobbyUrl, !isAdmin, false);
     if (isAdmin) {
         addAction('Manage license', root.dataset.manageUrl, true, false);
-        addAction('Official Promex Gaming Suite', root.dataset.officialUrl, false, true);
+        addAction('Official Casino Gecce', root.dataset.officialUrl, false, true);
     }
 
     const note = document.createElement('p');

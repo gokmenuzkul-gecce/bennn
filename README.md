@@ -1,4 +1,4 @@
-# PROMEX Gaming Suite
+# CASINO GECCE
 
 ### Your brand. Your platform. A growing world of social games.
 
@@ -9,7 +9,7 @@ and an optional licensed CEDAR ecosystem.
 **V2.0.0 · Laravel 13 · PHP 8.3 minimum · Source available for own use**
 
 [Product and licensing](https://promex.me/platforms/promex-gaming-suite/) ·
-[GitHub releases](https://github.com/promexdotme/laravel-social-gaming/releases) ·
+[GitHub releases](https://github.com/promexdotme/casino-gecce/releases) ·
 [Backup and updates](PATCHES.md) · [Source-use terms](LICENSE)
 
 > Features can require configuration, provider accounts or licensed
@@ -186,4 +186,4 @@ production certification is implied.
 
 Built by [PROMEX](https://promex.me) ·
 [Product and licensing](https://promex.me/platforms/promex-gaming-suite/) ·
-[Project source](https://github.com/promexdotme/laravel-social-gaming)
+[Project source](https://github.com/promexdotme/casino-gecce)

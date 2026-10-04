@@ -31,7 +31,7 @@ The customer app uses one PROMEX endpoint. The Hub handles the separate upstream
 
 Laravel runs `sports:sync-odds` every 30 minutes and imports the newest dataset available from the selected provider. The licensed PROMEX dataset itself currently refreshes once per day to keep shared upstream usage within the 500-credit monthly plan. Repeated customer imports do not force additional upstream refreshes.
 
-This slower schedule is intentional for pre-match social gaming. Do not describe it as live odds, and do not use it where second-by-second price movement is required.
+This slower schedule is intentional for pre-match Casino Gecce. Do not describe it as live odds, and do not use it where second-by-second price movement is required.
 
 ## Results and settlement
 

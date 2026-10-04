@@ -10,7 +10,7 @@
     <meta name="theme-color" content="#0b0e14">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="{{ settings('app_name', 'Promex Gaming Suite') }}">
+    <meta name="apple-mobile-web-app-title" content="{{ settings('app_name', 'Casino Gecce') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
     @php
@@ -26,7 +26,7 @@
             ->map(fn($g) => game_cover($g))->all();
     @endphp
 
-    <title>@yield('page-title', settings('app_name', 'Promex Gaming Suite'))</title>
+    <title>@yield('page-title', settings('app_name', 'Casino Gecce'))</title>
 
     <!-- Tailwind CSS (prebuilt, see tailwind.config.js — replaces the old runtime CDN) -->
     @php $twCss = base_path('../minimal/css/tailwind.css'); @endphp

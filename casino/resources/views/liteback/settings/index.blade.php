@@ -20,11 +20,11 @@
                         <div class="form-row">
                             <div class="form-group col-md-6">
                                 <label class="font-weight-bold">Brand name</label>
-                                <input type="text" name="app_name" class="form-control" maxlength="60" value="{{ settings('app_name', 'Promex Gaming Suite') }}" required>
+                                <input type="text" name="app_name" class="form-control" maxlength="60" value="{{ settings('app_name', 'Casino Gecce') }}" required>
                             </div>
                             <div class="form-group col-md-6">
                                 <label class="font-weight-bold">Tagline</label>
-                                <input type="text" name="brand_tagline" class="form-control" maxlength="80" value="{{ settings('brand_tagline', 'Social Gaming') }}">
+                                <input type="text" name="brand_tagline" class="form-control" maxlength="80" value="{{ settings('brand_tagline', 'Casino Gecce') }}">
                             </div>
                             <div class="form-group col-md-6">
                                 <label class="font-weight-bold">Version</label>
