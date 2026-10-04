@@ -56,7 +56,7 @@
                                 <span class="text-muted text-sm">{{ $deposit->email }}</span>
                             </td>
                             <td>
-                                <strong class="text-success">{{ number_format($rowAmount, 2) }} {{ $deposit->currency }}</strong>
+                                <strong class="text-success">{{ number_format($rowAmount, 2) }} {{ $displayCurrency ?? ($deposit->currency ?: "TRY") }}</strong>
                             </td>
                             <td>
                                 <span class="badge badge-{{ $method[2] }}">
@@ -83,7 +83,7 @@
                                     <button class="btn btn-xs btn-outline-primary view-screenshot-btn"
                                             data-src="{{ asset($deposit->screenshot) }}"
                                             data-pdf="{{ $isPdf ? '1' : '0' }}"
-                                            data-title="Dekont — {{ $deposit->username }} ({{ number_format($rowAmount, 2) }} {{ $deposit->currency }})"
+                                            data-title="Dekont — {{ $deposit->username }} ({{ number_format($rowAmount, 2) }} {{ $displayCurrency ?? ($deposit->currency ?: "TRY") }})"
                                             data-toggle="modal"
                                             data-target="#screenshotModal">
                                         <i class="fas fa-{{ $isPdf ? 'file-pdf' : 'image' }} mr-1"></i> Dekontu Gör

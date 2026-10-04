@@ -61,7 +61,12 @@ if (!$player || !$admin) {
     exit(1);
 }
 
-$currency = strtoupper($player->shop->currency ?? 'TRY');
+// Manual (bank/havale/kripto) deposits settle in TL regardless of the shop's
+// internal accounting currency.
+$currency = strtoupper((string) (function_exists('settings') ? settings('default_currency', 'TRY') : 'TRY'));
+if ($currency === '') {
+    $currency = 'TRY';
+}
 $rate = (float) (function_exists('settings') ? settings('coins_per_dollar', 100) : 100);
 if ($rate <= 0) {
     $rate = 100;
@@ -94,7 +99,7 @@ try {
     check('manual_deposit records the amount (2000)', $deposit && abs((float) $deposit->amount - 2000.0) < 0.001, $failures, $checks);
     check('manual_deposit starts pending (status 0)', $deposit && (int) $deposit->status === 0, $failures, $checks);
     check('intent marked submitted', $intent && $intent->status === 'submitted', $failures, $checks);
-    check('intent carries the shop currency', $intent && strtoupper((string) $intent->currency) === $currency, $failures, $checks);
+    check('intent carries the TL deposit currency', $intent && strtoupper((string) $intent->currency) === $currency, $failures, $checks);
 
     // 3) The admin queue surfaces the pending claim with its method + amount.
     auth()->setUser($admin);
@@ -107,16 +112,16 @@ try {
     check('queue row shows the method', $listed && $listed->method === 'bank', $failures, $checks);
     check('queue row shows the amount', $listed && abs((float) ($listed->amount ?? 0) - 2000.0) < 0.001, $failures, $checks);
 
-    // 4) Approval credits the wallet by amount * rate and settles the intent.
+    // 4) Approval credits the TL wallet 1:1 and settles the intent.
     app(ManualDepositsController::class)->approve($deposit->id);
     $player->refresh();
     $approvedDeposit = DB::table('manual_deposits')->where('id', $deposit->id)->first();
     $approvedIntent = DB::table('payment_intents')->where('id', $intentId)->first();
-    $expectedCredit = 2000.0 * $rate;
+    $expectedCredit = 2000.0;
 
     check('approval marks the deposit approved (status 1)', (int) $approvedDeposit->status === 1, $failures, $checks);
     check('approval settles the intent as paid', $approvedIntent->status === 'paid', $failures, $checks);
-    check('approval credits amount * rate to the wallet', abs(((float) $player->balance - $startBalance) - $expectedCredit) < 0.01, $failures, $checks);
+    check('approval credits the TL amount 1:1 to the wallet', abs(((float) $player->balance - $startBalance) - $expectedCredit) < 0.01, $failures, $checks);
     check('approval records a ledger transaction', DB::table('transactions')->where('user_id', $player->id)->where('note', 'like', '%approved by admin%')->where('amount', $expectedCredit)->exists(), $failures, $checks);
 
     // 5) A rejected claim must leave the balance untouched.

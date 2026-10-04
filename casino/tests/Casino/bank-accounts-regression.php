@@ -139,6 +139,9 @@ try {
     $depositId = $deposit->id ?? null;
 
     check('manual_deposits row persisted', $deposit !== null, $failures, $checks);
+
+    $intentRow = $intentId ? DB::table('payment_intents')->where('id', $intentId)->first() : null;
+    check('deposit is recorded in TRY, not the shop currency', $intentRow && strtoupper((string) $intentRow->currency) === 'TRY', $failures, $checks);
     check('deposit records the account the player paid into', $deposit && (int) $deposit->bank_account_id === (int) $chosenId, $failures, $checks);
     check('receipt uploaded and stored on the deposit', $deposit && !empty($deposit->screenshot), $failures, $checks);
     check('receipt file exists on disk', $deposit && $deposit->screenshot && file_exists(public_path($deposit->screenshot)), $failures, $checks);
@@ -158,8 +161,8 @@ try {
     app(ManualDepositsController::class)->approve($depositId);
     $player->refresh();
     $credited = (float) $player->balance - $balanceBefore;
-    $rate = (float) (function_exists('settings') ? settings('coins_per_dollar', 100) : 100);
-    check('approval credited the wallet', abs($credited - (250 * $rate)) < 0.01, $failures, $checks);
+    // TL wallet: a 250 TL transfer credits 250 TL, 1:1.
+    check('approval credited the wallet 1:1 (250 TL)', abs($credited - 250) < 0.01, $failures, $checks);
 
     $after = DB::table('manual_deposits')->where('id', $depositId)->value('status');
     check('deposit marked approved', (int) $after === 1, $failures, $checks);

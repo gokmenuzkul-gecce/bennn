@@ -43,7 +43,9 @@ class TopupController extends Controller
             'user_id' => $user->id,
             'driver' => $driverKey,
             'amount' => $amount,
-            'currency' => $user->shop->currency ?? config('payments.default_currency', 'USD'),
+            'currency' => $driverKey === 'manual'
+                ? $this->depositCurrency()
+                : ($user->shop->currency ?? config('payments.default_currency', 'USD')),
             'status' => 'pending',
             'meta' => json_encode([]),
             'created_at' => now(),
@@ -53,7 +55,9 @@ class TopupController extends Controller
         $meta = [
             'intent_id' => $intentId,
             'return_url' => $driverKey === 'paypal' ? route('payment.paypal.return') : url('/'),
-            'currency' => $user->shop->currency ?? config('payments.default_currency', 'USD'),
+            'currency' => $driverKey === 'manual'
+                ? $this->depositCurrency()
+                : ($user->shop->currency ?? config('payments.default_currency', 'USD')),
         ];
 
         try {
@@ -424,9 +428,8 @@ class TopupController extends Controller
                 ]);
             });
 
-            $rate = (float) (function_exists('settings') ? settings('coins_per_dollar', 100) : 100);
-            $coinsTotal = (float) $intent->amount * $rate;
-            return redirect('/')->with('success', 'Deposit of $' . $intent->amount . ' (' . number_format($coinsTotal, 0) . ' coins) credited successfully.');
+            $coinsTotal = $this->calculateCoinsForDeposit((float) $intent->amount);
+            return redirect('/')->with('success', 'Deposit of ' . number_format((float) $intent->amount, 2) . ' ' . $this->depositCurrency() . ' (' . number_format($coinsTotal, 2) . ' balance) credited successfully.');
 
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::error('PayPal Capture Error: ' . $e->getMessage());
@@ -447,7 +450,10 @@ class TopupController extends Controller
 
         $instructions = settings('payment_manual_instructions', config('payments.drivers.manual.instructions'));
 
-        return view('frontend.Minimal.payment.manual', compact('intent', 'instructions'));
+        // Manual deposits always settle in TL; show it even on legacy USD rows.
+        $displayCurrency = $this->depositCurrency();
+
+        return view('frontend.Minimal.payment.manual', compact('intent', 'instructions', 'displayCurrency'));
     }
 
     public function submitManualDeposit(Request $request, $intentId)
@@ -526,7 +532,10 @@ class TopupController extends Controller
         $user = auth()->user();
         $amount = (float) $request->input('amount');
         $method = (string) $request->input('method');
-        $currency = strtoupper($user->shop->currency ?? 'TRY');
+        // Bank/havale/kripto yatırımları TL ekranından yapılır; bu yüzden
+        // operatörün görüntüleme para birimini kullanırız, mağazanın USD
+        // muhasebe birimini değil.
+        $currency = $this->depositCurrency();
         $accountId = $this->resolveAccountId($request->input('bank_account_id'), $method);
 
         $receiptPath = null;
@@ -571,6 +580,19 @@ class TopupController extends Controller
             'intent_id' => $intentId,
             'message' => 'Yatırım talebiniz alındı. Onay sonrası bakiyeniz otomatik güncellenecek.',
         ]);
+    }
+
+    /**
+     * Currency the manual (bank/havale/kripto) deposit screen settles in.
+     *
+     * The player enters TL, so the stored intent has to say TRY. The shop's own
+     * currency is the internal accounting unit and must not leak into the queue.
+     */
+    private function depositCurrency(): string
+    {
+        $currency = function_exists('settings') ? settings('default_currency', 'TRY') : 'TRY';
+
+        return strtoupper((string) ($currency ?: 'TRY'));
     }
 
     /**
@@ -747,11 +769,15 @@ class TopupController extends Controller
     }
 
     /**
-     * Convert fiat USD amount to virtual coins according to platform exchange rate
+     * Convert a fiat deposit amount to site coins.
+     *
+     * The site wallet is TL (`CASINO_WALLET_CURRENCY=TRY`) and the casino
+     * providers settle bets and wins against it 1:1, so a 2.000 TL transfer has
+     * to credit 2.000 TL. The legacy `coins_per_dollar` rate (100 coins = $1)
+     * belongs to the Cedar points model and must not scale TL deposits.
      */
     protected function calculateCoinsForDeposit(float $fiatAmount): float
     {
-        $rate = (float) (function_exists('settings') ? settings('coins_per_dollar', 100) : 100);
-        return round($fiatAmount * ($rate > 0 ? $rate : 100), 2);
+        return round($fiatAmount, 2);
     }
 }

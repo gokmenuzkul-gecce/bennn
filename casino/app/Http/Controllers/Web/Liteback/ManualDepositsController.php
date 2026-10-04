@@ -9,6 +9,19 @@ use VanguardLTE\User;
 
 class ManualDepositsController extends Controller
 {
+    /**
+     * Currency the manual (bank/havale/kripto) deposit queue settles in.
+     *
+     * The player enters TL, so the queue always reports TRY. Older rows may have
+     * been stored with the shop's USD accounting currency and must render as TL.
+     */
+    private function depositCurrency(): string
+    {
+        $currency = function_exists('settings') ? settings('default_currency', 'TRY') : 'TRY';
+
+        return strtoupper((string) ($currency ?: 'TRY'));
+    }
+
     public function index()
     {
         $deposits = DB::table('manual_deposits')
@@ -33,7 +46,11 @@ class ManualDepositsController extends Controller
 
         $pendingCount = DB::table('manual_deposits')->where('status', 0)->count();
 
-        return view('liteback.payments.manual', compact('deposits', 'pendingCount'));
+        // The manual deposit screen is TL-only, so the queue must always report
+        // TRY even for intents stored before the currency fix.
+        $displayCurrency = $this->depositCurrency();
+
+        return view('liteback.payments.manual', compact('deposits', 'pendingCount', 'displayCurrency'));
     }
 
     public function approve($id)
@@ -60,8 +77,9 @@ class ManualDepositsController extends Controller
         $amount = (float) ($deposit->amount ?: $intent->amount);
 
         DB::transaction(function () use ($deposit, $intent, $user, $amount) {
-            $rate = (float) (function_exists('settings') ? settings('coins_per_dollar', 100) : 100);
-            $coinsCredited = $amount * $rate;
+            // TL deposit: the player transferred `amount` TL and the site wallet
+            // is TL, so it is credited 1:1 (no legacy points multiplier).
+            $coinsCredited = round($amount, 2);
             $newBalance = (float) $user->balance + $coinsCredited;
 
             DB::table('users')->where('id', $user->id)->update([
@@ -77,7 +95,7 @@ class ManualDepositsController extends Controller
                 'balance_before' => $user->balance,
                 'balance_after' => $newBalance,
                 'source' => 'manual',
-                'note' => 'Manual Deposit of ' . number_format($amount, 2) . ' ' . $intent->currency . ' (' . number_format($coinsCredited, 0) . ' coins) approved by admin ' . auth()->user()->username,
+                'note' => 'Manual Deposit of ' . number_format($amount, 2) . ' ' . $this->depositCurrency() . ' approved by admin ' . auth()->user()->username,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);

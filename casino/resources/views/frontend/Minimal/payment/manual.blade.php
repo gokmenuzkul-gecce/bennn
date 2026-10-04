@@ -172,7 +172,7 @@
             <h2>Manuel Transfer Kanıtı</h2>
             <p class="text-muted">Para yatırma işleminizi tamamlamak için aşağıdaki talimatları izleyin.</p>
             <div class="payment-amount-badge">
-                {{ number_format($intent->amount, 2) }} {{ $intent->currency }}
+                {{ number_format($intent->amount, 2) }} {{ $displayCurrency ?? ($intent->currency ?: 'TRY') }}
             </div>
         </div>
 

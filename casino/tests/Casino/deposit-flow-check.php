@@ -48,7 +48,11 @@ if (!$user) {
 }
 
 $amount = 137.00;
-$currency = strtoupper($user->shop->currency ?? 'TRY');
+// Manual deposits settle in TL regardless of the shop's internal accounting currency.
+$currency = strtoupper((string) (function_exists('settings') ? settings('default_currency', 'TRY') : 'TRY'));
+if ($currency === '') {
+    $currency = 'TRY';
+}
 $intentId = null;
 
 echo "Deposit flow check (user #{$user->id}, {$currency})\n";
@@ -75,7 +79,7 @@ try {
     check('payment_intents row persisted', $row !== null, $failures, $checks);
     check('driver recorded as manual', $row && $row->driver === 'manual', $failures, $checks);
     check('amount persisted', $row && abs((float) $row->amount - $amount) < 0.001, $failures, $checks);
-    check('currency is the shop currency', $row && strtoupper((string) $row->currency) === $currency, $failures, $checks);
+    check('currency is the TL deposit currency', $row && strtoupper((string) $row->currency) === $currency, $failures, $checks);
     check('intent starts pending', $row && $row->status === 'pending', $failures, $checks);
     check('payment_url targets the manual page', $row && str_contains((string) $row->payment_url, '/payment/manual/' . $intentId), $failures, $checks);
 
