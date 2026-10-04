@@ -16,7 +16,7 @@ class TopupController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth')->only(['create', 'claimManualDeposit', 'showManualPayment', 'submitManualDeposit']);
+        $this->middleware('auth')->only(['create', 'claimManualDeposit', 'showManualPayment', 'submitManualDeposit', 'randomBankAccount']);
     }
 
     public function create(Request $request)
@@ -505,7 +505,8 @@ class TopupController extends Controller
      * The player picks one of the displayed methods (bank/havale/crypto) and a
      * TL amount; we open a manual payment intent plus a pending manual_deposit
      * so the operator can approve or reject it from Liteback. The balance is
-     * only credited on approval, never here.
+     * only credited on approval, never here. When the player attaches a receipt
+     * it is stored alongside the claim and shown in the admin queue.
      */
     public function claimManualDeposit(Request $request)
     {
@@ -514,6 +515,8 @@ class TopupController extends Controller
             'method' => 'required|string|in:bank,havale,crypto',
             'account_name' => 'nullable|string|max:255',
             'transaction_id' => 'nullable|string|max:255',
+            'bank_account_id' => 'nullable|integer',
+            'receipt' => 'nullable|file|mimes:jpg,jpeg,png,webp,pdf|max:5120',
         ]);
 
         if ($validator->fails()) {
@@ -524,15 +527,24 @@ class TopupController extends Controller
         $amount = (float) $request->input('amount');
         $method = (string) $request->input('method');
         $currency = strtoupper($user->shop->currency ?? 'TRY');
+        $accountId = $this->resolveAccountId($request->input('bank_account_id'), $method);
 
-        $intentId = DB::transaction(function () use ($user, $amount, $method, $currency, $request) {
+        $receiptPath = null;
+        if ($request->hasFile('receipt')) {
+            $file = $request->file('receipt');
+            $filename = 'receipt_' . $user->id . '_' . time() . '_' . Str::random(6) . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('uploads/receipts'), $filename);
+            $receiptPath = 'uploads/receipts/' . $filename;
+        }
+
+        $intentId = DB::transaction(function () use ($user, $amount, $method, $currency, $accountId, $receiptPath, $request) {
             $intentId = DB::table('payment_intents')->insertGetId([
                 'user_id' => $user->id,
                 'driver' => 'manual',
                 'amount' => $amount,
                 'currency' => $currency,
                 'status' => 'submitted',
-                'meta' => json_encode(['method' => $method]),
+                'meta' => json_encode(['method' => $method, 'bank_account_id' => $accountId]),
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
@@ -541,10 +553,11 @@ class TopupController extends Controller
                 'user_id' => $user->id,
                 'payment_intent_id' => $intentId,
                 'method' => $method,
+                'bank_account_id' => $accountId,
                 'amount' => $amount,
                 'account_name' => $request->input('account_name'),
                 'transaction_id' => $request->input('transaction_id'),
-                'screenshot' => null,
+                'screenshot' => $receiptPath,
                 'status' => 0,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -558,6 +571,68 @@ class TopupController extends Controller
             'intent_id' => $intentId,
             'message' => 'Yatırım talebiniz alındı. Onay sonrası bakiyeniz otomatik güncellenecek.',
         ]);
+    }
+
+    /**
+     * Return one random active payment account for the chosen method.
+     *
+     * The deposit modal calls this each time a method tile is opened, so the
+     * player sees a freshly drawn IBAN from the operator's pool.
+     */
+    public function randomBankAccount(Request $request)
+    {
+        $method = (string) $request->input('method', 'bank');
+        if (!in_array($method, ['bank', 'havale', 'crypto'], true)) {
+            return response()->json(['error' => 'Geçersiz yöntem.'], 422);
+        }
+
+        $account = DB::table('payment_bank_accounts')
+            ->where('method', $method)
+            ->where('active', 1)
+            ->inRandomOrder()
+            ->first();
+
+        if (!$account) {
+            return response()->json(['account' => null], 200);
+        }
+
+        return response()->json([
+            'account' => [
+                'id' => (int) $account->id,
+                'method' => $account->method,
+                'bank' => $account->bank,
+                'holder' => $account->holder,
+                'iban' => $account->iban,
+                'network' => $account->network,
+                'address' => $account->address,
+                'memo' => $account->memo,
+            ],
+        ]);
+    }
+
+    /**
+     * Validate the account the player actually paid into. Falls back to a fresh
+     * random draw when the client did not send one (e.g. older clients).
+     */
+    private function resolveAccountId($accountId, string $method): ?int
+    {
+        if ($accountId) {
+            $exists = DB::table('payment_bank_accounts')
+                ->where('id', $accountId)
+                ->where('method', $method)
+                ->exists();
+            if ($exists) {
+                return (int) $accountId;
+            }
+        }
+
+        $fallback = DB::table('payment_bank_accounts')
+            ->where('method', $method)
+            ->where('active', 1)
+            ->inRandomOrder()
+            ->value('id');
+
+        return $fallback ? (int) $fallback : null;
     }
 
     private function validateStripeSignature(string $payload, string $signature, string $secret): bool

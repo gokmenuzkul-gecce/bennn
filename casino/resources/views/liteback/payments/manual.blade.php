@@ -34,9 +34,10 @@
                         <th>Kullanıcı</th>
                         <th>Tutar</th>
                         <th>Yöntem</th>
+                        <th>Yatırım Yapılan Hesap (IBAN)</th>
                         <th>Hesap Sahibi Adı</th>
                         <th>Referans / İşlem ID</th>
-                        <th>Ekran Görüntüsü</th>
+                        <th>Dekont</th>
                         <th>Durum</th>
                         <th>Gönderim Tarihi</th>
                         <th>İşlem / Yönetici Notu</th>
@@ -62,19 +63,33 @@
                                     <i class="fas fa-{{ $method[1] }} mr-1"></i>{{ $method[0] }}
                                 </span>
                             </td>
+                            <td>
+                                @php($accValue = $deposit->account_iban ?: $deposit->account_address)
+                                @if($accValue)
+                                    <strong>{{ $deposit->account_bank ?: ($deposit->account_network ?: '—') }}</strong><br>
+                                    <code>{{ $accValue }}</code>
+                                    @if($deposit->account_holder)
+                                        <br><span class="text-muted text-sm">{{ $deposit->account_holder }}</span>
+                                    @endif
+                                @else
+                                    <span class="text-muted">—</span>
+                                @endif
+                            </td>
                             <td>{{ $deposit->account_name ?: '—' }}</td>
                             <td><code>{{ $deposit->transaction_id ?: '—' }}</code></td>
                             <td>
                                 @if($deposit->screenshot)
-                                    <button class="btn btn-xs btn-outline-primary view-screenshot-btn" 
-                                            data-src="{{ asset($deposit->screenshot) }}" 
-                                            data-title="Receipt from {{ $deposit->account_name }} ({{ number_format($deposit->amount, 2) }} {{ $deposit->currency }})"
-                                            data-toggle="modal" 
+                                    @php($isPdf = \Illuminate\Support\Str::endsWith(strtolower($deposit->screenshot), '.pdf'))
+                                    <button class="btn btn-xs btn-outline-primary view-screenshot-btn"
+                                            data-src="{{ asset($deposit->screenshot) }}"
+                                            data-pdf="{{ $isPdf ? '1' : '0' }}"
+                                            data-title="Dekont — {{ $deposit->username }} ({{ number_format($rowAmount, 2) }} {{ $deposit->currency }})"
+                                            data-toggle="modal"
                                             data-target="#screenshotModal">
-                                        <i class="fas fa-image mr-1"></i> Makbuzu Gör
+                                        <i class="fas fa-{{ $isPdf ? 'file-pdf' : 'image' }} mr-1"></i> Dekontu Gör
                                     </button>
                                 @else
-                                    <span class="text-muted">Makbuz dosyası yok</span>
+                                    <span class="text-muted">Dekont yok</span>
                                 @endif
                             </td>
                             <td>
@@ -138,7 +153,8 @@
                 </button>
             </div>
             <div class="modal-body text-center bg-dark">
-                <img id="modalScreenshotImg" src="" class="img-fluid" style="max-height: 70vh;" alt="Makbuz Ekran Görüntüsü">
+                <img id="modalScreenshotImg" src="" class="img-fluid" style="max-height: 70vh;" alt="Dekont">
+                <iframe id="modalScreenshotPdf" src="" style="display:none;width:100%;height:70vh;border:0;background:#fff;" title="Dekont PDF"></iframe>
             </div>
             <div class="modal-footer">
                 <a id="modalScreenshotDownload" href="" download class="btn btn-primary" target="_blank"><i class="fas fa-download mr-1"></i> Orijinali İndir</a>
@@ -179,11 +195,18 @@
 @section('scripts')
 <script>
     $(document).ready(function() {
-        // Handle viewing screenshots
+        // Handle viewing receipts (image or PDF)
         $('.view-screenshot-btn').on('click', function() {
             var src = $(this).data('src');
+            var isPdf = String($(this).data('pdf')) === '1';
             var title = $(this).data('title');
-            $('#modalScreenshotImg').attr('src', src);
+            if (isPdf) {
+                $('#modalScreenshotImg').hide().attr('src', '');
+                $('#modalScreenshotPdf').show().attr('src', src);
+            } else {
+                $('#modalScreenshotPdf').hide().attr('src', '');
+                $('#modalScreenshotImg').show().attr('src', src);
+            }
             $('#modalScreenshotDownload').attr('href', src);
             $('#screenshotModalTitle').text(title);
         });

@@ -380,6 +380,12 @@
                                 </a>
                             </li>
                             <li class="nav-item">
+                                <a href="{{ route('liteback.payments.bank-accounts.index') }}" class="nav-link">
+                                    <i class="far fa-circle nav-icon text-info"></i>
+                                    <p>Ödeme Hesapları (IBAN)</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
                                 <a href="{{ route('liteback.withdrawals.index') }}" class="nav-link">
                                     <i class="far fa-circle nav-icon text-warning"></i>
                                     <p>Para Çekme / Çekimler</p>

@@ -510,42 +510,27 @@
                 $depMin = 1000;
                 $depMax = 20000;
                 $depPresets = [1000, 2000, 3000, 4000, 5000, 10000, 15000, 20000];
-                $depGet = fn($k, $d = '') => function_exists('settings') ? trim((string) settings($k, $d)) : $d;
 
-                $depMethods = [
-                    'bank' => [
-                        'label' => 'Banka Transferi',
-                        'icon'  => 'account_balance',
-                        'rows'  => [
-                            'Banka'          => $depGet('payment_bank_transfer_bank'),
-                            'Hesap Sahibi'   => $depGet('payment_bank_transfer_holder'),
-                            'IBAN'           => $depGet('payment_bank_transfer_iban'),
-                        ],
-                    ],
-                    'havale' => [
-                        'label' => 'Havale / EFT',
-                        'icon'  => 'swap_horiz',
-                        'rows'  => [
-                            'Banka'          => $depGet('payment_havale_bank'),
-                            'Hesap Sahibi'   => $depGet('payment_havale_holder'),
-                            'IBAN'           => $depGet('payment_havale_iban'),
-                        ],
-                    ],
-                    'crypto' => [
-                        'label' => 'Kripto Yatırım',
-                        'icon'  => 'currency_bitcoin',
-                        'rows'  => [
-                            'Ağ / Coin'      => $depGet('payment_crypto_network'),
-                            'Cüzdan Adresi'  => $depGet('payment_crypto_address'),
-                            'Not / Memo'     => $depGet('payment_crypto_memo'),
-                        ],
-                    ],
+                // Which methods actually have an active account in the operator's
+                // IBAN pool; the modal draws a random account per method on click.
+                $depMethodMeta = [
+                    'bank' => ['label' => 'Banka Transferi', 'icon' => 'account_balance'],
+                    'havale' => ['label' => 'Havale / EFT', 'icon' => 'swap_horiz'],
+                    'crypto' => ['label' => 'Kripto Yatırım', 'icon' => 'currency_bitcoin'],
                 ];
+                $depActiveCounts = [];
+                if (Schema::hasTable('payment_bank_accounts')) {
+                    $depActiveCounts = DB::table('payment_bank_accounts')
+                        ->where('active', 1)
+                        ->select('method', DB::raw('COUNT(*) as total'))
+                        ->groupBy('method')
+                        ->pluck('total', 'method')
+                        ->all();
+                }
                 $depAvailable = [];
-                foreach ($depMethods as $key => $method) {
-                    $method['rows'] = array_filter($method['rows'], fn($v) => $v !== '');
-                    if (!empty($method['rows'])) {
-                        $depAvailable[$key] = $method;
+                foreach ($depMethodMeta as $key => $meta) {
+                    if (($depActiveCounts[$key] ?? 0) > 0) {
+                        $depAvailable[$key] = $meta;
                     }
                 }
             @endphp
@@ -592,28 +577,37 @@
 
                 <!-- Method Details -->
                 <div id="deposit-method-details" class="hidden space-y-2">
-                    @foreach($depAvailable as $key => $method)
-                        <div class="deposit-method-panel hidden" data-panel="{{ $key }}">
-                            <div class="bg-[#121622] border border-white/[0.08] rounded-2xl p-3 space-y-2">
-                                @foreach($method['rows'] as $rowLabel => $rowValue)
-                                    <div class="deposit-info-row" data-copy="{{ $rowValue }}">
-                                        <span class="deposit-info-label">{{ $rowLabel }}</span>
-                                        <span class="deposit-info-value">{{ $rowValue }}</span>
-                                        <button type="button" class="deposit-copy-btn" title="Kopyala" aria-label="Kopyala">
-                                            <span class="material-symbols-outlined">content_copy</span>
-                                        </button>
-                                    </div>
-                                @endforeach
-                            </div>
+                    <div class="bg-[#121622] border border-white/[0.08] rounded-2xl p-3 space-y-2">
+                        <div class="deposit-info-row" data-copy="">
+                            <span class="deposit-info-label">Banka</span>
+                            <span class="deposit-info-value" id="dep-acc-bank">—</span>
+                            <button type="button" class="deposit-copy-btn" title="Kopyala" aria-label="Kopyala">
+                                <span class="material-symbols-outlined">content_copy</span>
+                            </button>
                         </div>
-                    @endforeach
+                        <div class="deposit-info-row" data-copy="">
+                            <span class="deposit-info-label">Hesap Sahibi</span>
+                            <span class="deposit-info-value" id="dep-acc-holder">—</span>
+                            <button type="button" class="deposit-copy-btn" title="Kopyala" aria-label="Kopyala">
+                                <span class="material-symbols-outlined">content_copy</span>
+                            </button>
+                        </div>
+                        <div class="deposit-info-row" data-copy="">
+                            <span class="deposit-info-label">IBAN</span>
+                            <span class="deposit-info-value" id="dep-acc-iban">—</span>
+                            <button type="button" class="deposit-copy-btn" title="Kopyala" aria-label="Kopyala">
+                                <span class="material-symbols-outlined">content_copy</span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Deposit Form -->
-                <form id="deposit-request-form" class="space-y-3.5">
+                <form id="deposit-request-form" class="space-y-3.5" enctype="multipart/form-data">
                     @csrf
                     <input type="hidden" name="driver" value="manual">
                     <input type="hidden" name="method" id="deposit-method" value="">
+                    <input type="hidden" name="bank_account_id" id="deposit-bank-account-id" value="">
                     <div class="form-group">
                         <div class="flex justify-between items-center mb-1">
                             <label for="deposit-amount" class="text-xs font-bold text-white">Yatırım Tutarı (TRY)</label>
@@ -625,6 +619,25 @@
                                     {{ number_format($preset, 0, ',', '.') }} TL
                                 </button>
                             @endforeach
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-2.5">
+                        <div class="form-group">
+                            <label for="deposit-account-name" class="text-xs font-bold text-white block mb-1">Gönderen Hesap Adı / Hesap Sahibi</label>
+                            <input type="text" id="deposit-account-name" name="account_name" maxlength="255" placeholder="Örn. Gökmen Uzkul" class="text-sm">
+                        </div>
+                        <div class="form-group">
+                            <label for="deposit-transaction-id" class="text-xs font-bold text-white block mb-1">İşlem Referans No / Makbuz No</label>
+                            <input type="text" id="deposit-transaction-id" name="transaction_id" maxlength="255" placeholder="Örn. TXN987654321" class="text-sm">
+                        </div>
+                        <div class="form-group">
+                            <label class="text-xs font-bold text-white block mb-1">Dekont / Ödeme Kanıtı</label>
+                            <label for="deposit-receipt" class="flex items-center justify-center gap-2 w-full border-2 border-dashed border-white/[0.12] hover:border-primary/50 rounded-2xl py-3 px-3 cursor-pointer transition-colors bg-white/[0.02]">
+                                <span class="material-symbols-outlined text-on-surface-muted text-xl">upload_file</span>
+                                <span id="deposit-receipt-label" class="text-[11px] text-on-surface-muted">Dekont yükle (JPG, PNG, WEBP, PDF · maks 5MB)</span>
+                                <input type="file" id="deposit-receipt" name="receipt" accept="image/*,.pdf" class="hidden">
+                            </label>
                         </div>
                     </div>
 
@@ -1154,6 +1167,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Deposit Modal Method Tiles & Presets
     const depositAmountInput = document.getElementById('deposit-amount');
     const depositMethodInput = document.getElementById('deposit-method');
+    const depositBankAccountId = document.getElementById('deposit-bank-account-id');
     const depositMethodDetails = document.getElementById('deposit-method-details');
 
     document.querySelectorAll('.btn-deposit-preset').forEach(btn => {
@@ -1164,18 +1178,72 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Selecting an investment method reveals the matching bank/transfer/crypto details.
+    // Selecting an investment method reveals the details and draws a fresh
+    // random account (IBAN/wallet) from the operator's active pool.
     document.querySelectorAll('.deposit-method-tile').forEach(tile => {
         tile.addEventListener('click', function() {
             const method = this.getAttribute('data-method');
             document.querySelectorAll('.deposit-method-tile').forEach(t => t.classList.toggle('is-active', t === this));
             if (depositMethodInput) depositMethodInput.value = method;
             if (depositMethodDetails) depositMethodDetails.classList.remove('hidden');
-            document.querySelectorAll('.deposit-method-panel').forEach(panel => {
-                panel.classList.toggle('hidden', panel.getAttribute('data-panel') !== method);
-            });
+            loadRandomBankAccount(method);
         });
     });
+
+    function setDepositRow(labelEl, valueEl, value) {
+        const row = labelEl ? labelEl.closest('.deposit-info-row') : null;
+        if (row) row.setAttribute('data-copy', value || '');
+        if (valueEl) valueEl.innerText = value || '—';
+    }
+
+    function loadRandomBankAccount(method) {
+        if (!method) return;
+        if (depositBankAccountId) depositBankAccountId.value = '';
+        setDepositRow(document.getElementById('dep-acc-bank'), document.getElementById('dep-acc-bank'), 'Yükleniyor...');
+        fetch('{{ route('frontend.topup.random-bank-account') }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ method: method })
+        })
+        .then(res => res.json())
+        .then(data => {
+            const acc = data.account || null;
+            const bankEl = document.getElementById('dep-acc-bank');
+            const holderEl = document.getElementById('dep-acc-holder');
+            const ibanEl = document.getElementById('dep-acc-iban');
+            if (!acc) {
+                setDepositRow(bankEl, bankEl, '—');
+                setDepositRow(holderEl, holderEl, '—');
+                setDepositRow(ibanEl, ibanEl, 'Şu anda aktif hesap yok');
+                return;
+            }
+            const bankName = acc.bank || acc.network || '—';
+            const iban = acc.iban || acc.address || '—';
+            setDepositRow(bankEl, bankEl, bankName);
+            setDepositRow(holderEl, holderEl, acc.holder || acc.memo || '—');
+            setDepositRow(ibanEl, ibanEl, iban);
+            if (depositBankAccountId) depositBankAccountId.value = acc.id;
+        })
+        .catch(() => {
+            const bankEl = document.getElementById('dep-acc-bank');
+            setDepositRow(bankEl, bankEl, 'Hesap yüklenemedi');
+        });
+    }
+
+    // Receipt file label feedback
+    const receiptInput = document.getElementById('deposit-receipt');
+    if (receiptInput) {
+        receiptInput.addEventListener('change', function() {
+            const label = document.getElementById('deposit-receipt-label');
+            if (!label) return;
+            label.innerText = this.files[0] ? this.files[0].name : 'Dekont yükle (JPG, PNG, WEBP, PDF · maks 5MB)';
+            label.classList.toggle('text-emerald-300', !!this.files[0]);
+        });
+    }
 
     // Copy buttons for account/IBAN/wallet fields.
     document.querySelectorAll('.deposit-copy-btn').forEach(btn => {
@@ -1218,17 +1286,23 @@ document.addEventListener('DOMContentLoaded', function() {
             if (depositInfo) depositInfo.classList.add('hidden');
             depositBtn.disabled = true;
 
+            const fd = new FormData();
+            fd.append('amount', depositAmountInput.value);
+            fd.append('method', depositMethodInput ? depositMethodInput.value : '');
+            fd.append('bank_account_id', depositBankAccountId ? depositBankAccountId.value : '');
+            const accNameEl = document.getElementById('deposit-account-name');
+            const txIdEl = document.getElementById('deposit-transaction-id');
+            if (accNameEl) fd.append('account_name', accNameEl.value);
+            if (txIdEl) fd.append('transaction_id', txIdEl.value);
+            if (receiptInput && receiptInput.files[0]) fd.append('receipt', receiptInput.files[0]);
+
             fetch('{{ route('frontend.topup.manual-claim') }}', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
                     'Accept': 'application/json',
                     'X-CSRF-TOKEN': '{{ csrf_token() }}'
                 },
-                body: JSON.stringify({
-                    amount: depositAmountInput.value,
-                    method: depositMethodInput ? depositMethodInput.value : ''
-                })
+                body: fd
             })
             .then(res => res.json())
             .then(data => {

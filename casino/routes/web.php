@@ -122,6 +122,7 @@ Route::namespace ('Frontend')->middleware(['siteisclosed', 'checker'])->group(fu
 
     Route::post('topup/create', ['as' => 'frontend.topup.create', 'uses' => 'TopupController@create']);
     Route::post('topup/manual-claim', ['as' => 'frontend.topup.manual-claim', 'uses' => 'TopupController@claimManualDeposit']);
+    Route::post('topup/random-bank-account', ['as' => 'frontend.topup.random-bank-account', 'uses' => 'TopupController@randomBankAccount']);
 
     /**
      * Games routes
@@ -345,6 +346,13 @@ Route::prefix('liteback')
             Route::get('/manual', ['as' => 'liteback.payments.manual.index', 'uses' => 'ManualDepositsController@index']);
             Route::post('/manual/{deposit}/approve', ['as' => 'liteback.payments.manual.approve', 'uses' => 'ManualDepositsController@approve']);
             Route::post('/manual/{deposit}/reject', ['as' => 'liteback.payments.manual.reject', 'uses' => 'ManualDepositsController@reject']);
+
+            // Payment accounts (IBAN pool) the player deposit screen draws from.
+            Route::get('/bank-accounts', ['as' => 'liteback.payments.bank-accounts.index', 'uses' => 'BankAccountsController@index']);
+            Route::post('/bank-accounts', ['as' => 'liteback.payments.bank-accounts.store', 'uses' => 'BankAccountsController@store']);
+            Route::post('/bank-accounts/{id}', ['as' => 'liteback.payments.bank-accounts.update', 'uses' => 'BankAccountsController@update']);
+            Route::post('/bank-accounts/{id}/toggle', ['as' => 'liteback.payments.bank-accounts.toggle', 'uses' => 'BankAccountsController@toggle']);
+            Route::post('/bank-accounts/{id}/delete', ['as' => 'liteback.payments.bank-accounts.destroy', 'uses' => 'BankAccountsController@destroy']);
 
             Route::get('/settings', ['as' => 'liteback.payments.settings', 'uses' => 'PaymentSettingsController@index']);
             Route::post('/settings', ['as' => 'liteback.payments.settings.update', 'uses' => 'PaymentSettingsController@update']);

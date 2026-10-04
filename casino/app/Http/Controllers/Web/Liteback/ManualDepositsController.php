@@ -14,12 +14,18 @@ class ManualDepositsController extends Controller
         $deposits = DB::table('manual_deposits')
             ->join('users', 'manual_deposits.user_id', '=', 'users.id')
             ->join('payment_intents', 'manual_deposits.payment_intent_id', '=', 'payment_intents.id')
+            ->leftJoin('payment_bank_accounts', 'manual_deposits.bank_account_id', '=', 'payment_bank_accounts.id')
             ->select(
                 'manual_deposits.*',
                 'users.username',
                 'users.email',
                 'payment_intents.amount as intent_amount',
-                'payment_intents.currency'
+                'payment_intents.currency',
+                'payment_bank_accounts.bank as account_bank',
+                'payment_bank_accounts.holder as account_holder',
+                'payment_bank_accounts.iban as account_iban',
+                'payment_bank_accounts.network as account_network',
+                'payment_bank_accounts.address as account_address'
             )
             ->orderByRaw('CASE WHEN ' . DB::getTablePrefix() . 'manual_deposits.status = 0 THEN 0 ELSE 1 END')
             ->orderBy('manual_deposits.created_at', 'desc')
