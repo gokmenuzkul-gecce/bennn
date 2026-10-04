@@ -717,6 +717,26 @@
         .pb-safe {
             padding-bottom: calc(env(safe-area-inset-bottom, 16px) + 64px);
         }
+        /* Full-bleed brand header banner */
+        .site-header-banner {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+            background: #0b0503;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .site-header-banner img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            /* Cover keeps the strip crisp on wide screens (crops instead of
+               upscaling) while still spanning edge to edge. */
+            object-fit: cover;
+            object-position: center center;
+        }
+        @media (max-width: 640px) {
+            .site-header-banner img { object-position: 60% center; }
+        }
     </style>
 
     @yield('styles')
@@ -779,6 +799,12 @@
 
     <!-- Content + Footer column (keeps the footer under the content, not beside it) -->
     <div class="flex-1 w-full min-w-0 flex flex-col">
+    <!-- Full-bleed brand header banner (edge to edge, right to left) -->
+    <div class="site-header-banner h-[clamp(120px,22vw,240px)]">
+        <img src="/minimal/header-banner.jpg"
+             alt="{{ settings('app_name') ?: 'Casino Gecce' }}"
+             decoding="async" fetchpriority="high">
+    </div>
     <!-- Main Content Area -->
     <main class="motion-intro flex-1 w-full min-w-0 min-h-screen relative flex flex-col pb-28 lg:pb-14">
         <!-- Desktop top-right account area (transparent dropdown) -->
