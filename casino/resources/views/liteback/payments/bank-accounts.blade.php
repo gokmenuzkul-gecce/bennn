@@ -39,7 +39,7 @@
                         </div>
                         <div class="form-group">
                             <label>Hesap Sahibi</label>
-                            <input type="text" name="holder" class="form-control" placeholder="Örn: Gökmen Uzkul">
+                            <input type="text" name="holder" class="form-control" placeholder="Örn: Veli Yılmaz">
                         </div>
                         <div class="form-group">
                             <label>IBAN <span class="text-danger">*</span></label>

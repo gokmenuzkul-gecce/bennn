@@ -625,7 +625,7 @@
                     <div class="grid grid-cols-1 gap-2.5">
                         <div class="form-group">
                             <label for="deposit-account-name" class="text-xs font-bold text-white block mb-1">Gönderen Hesap Adı / Hesap Sahibi</label>
-                            <input type="text" id="deposit-account-name" name="account_name" maxlength="255" placeholder="Örn. Gökmen Uzkul" class="text-sm">
+                            <input type="text" id="deposit-account-name" name="account_name" maxlength="255" placeholder="Örn. Veli Yılmaz" class="text-sm">
                         </div>
                         <div class="form-group">
                             <label for="deposit-transaction-id" class="text-xs font-bold text-white block mb-1">İşlem Referans No / Makbuz No</label>

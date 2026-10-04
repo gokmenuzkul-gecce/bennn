@@ -171,7 +171,7 @@
                     <div class="form-group row">
                         <label class="col-sm-3 col-form-label">Hesap Sahibi</label>
                         <div class="col-sm-9">
-                            <input type="text" name="payment_bank_transfer_holder" class="form-control" value="{{ settings('payment_bank_transfer_holder') }}" placeholder="Örn: Gökmen Uzkul">
+                            <input type="text" name="payment_bank_transfer_holder" class="form-control" value="{{ settings('payment_bank_transfer_holder') }}" placeholder="Örn: Veli Yılmaz">
                         </div>
                     </div>
                     <div class="form-group row">
@@ -192,7 +192,7 @@
                     <div class="form-group row">
                         <label class="col-sm-3 col-form-label">Hesap Sahibi</label>
                         <div class="col-sm-9">
-                            <input type="text" name="payment_havale_holder" class="form-control" value="{{ settings('payment_havale_holder') }}" placeholder="Örn: Gökmen Uzkul">
+                            <input type="text" name="payment_havale_holder" class="form-control" value="{{ settings('payment_havale_holder') }}" placeholder="Örn: Veli Yılmaz">
                         </div>
                     </div>
                     <div class="form-group row">
