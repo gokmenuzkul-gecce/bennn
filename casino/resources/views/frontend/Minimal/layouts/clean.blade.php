@@ -717,25 +717,168 @@
         .pb-safe {
             padding-bottom: calc(env(safe-area-inset-bottom, 16px) + 64px);
         }
-        /* Full-bleed brand header banner */
+        /* Top navigation bar: sits above the banner so it never covers the art */
+        .site-header-nav {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            gap: 1rem;
+            padding: 0 clamp(12px, 2vw, 28px);
+            min-height: 56px;
+            background: rgba(9, 11, 18, 0.92);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+        }
+        .site-nav-left {
+            display: flex;
+            align-items: center;
+            gap: clamp(2px, .7vw, 14px);
+            min-width: 0;
+            justify-content: flex-start;
+        }
+        .site-nav-right {
+            display: none;
+            align-items: center;
+            gap: clamp(2px, .7vw, 14px);
+            min-width: 0;
+            justify-content: flex-end;
+        }
+        /* On phones the horizontal links collapse into the hamburger drawer. */
+        .site-nav-left .site-nav-link { display: none; }
+        .site-nav-link {
+            position: relative;
+            padding: 8px 10px;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: .01em;
+            color: rgba(255,255,255,.82);
+            text-decoration: none;
+            white-space: nowrap;
+            transition: color .18s ease;
+        }
+        .site-nav-link:hover { color: #fff; }
+        .site-nav-link.is-active { color: #34d399; }
+        .site-nav-link.is-active::after,
+        .site-nav-link:hover::after {
+            content: "";
+            position: absolute;
+            left: 10px; right: 10px; bottom: 2px;
+            height: 2px;
+            border-radius: 2px;
+            background: currentColor;
+            opacity: .9;
+        }
+        .site-brand-center {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            min-width: 0;
+        }
+        .site-brand-center img {
+            height: clamp(30px, 4.4vw, 52px);
+            width: auto;
+            object-fit: contain;
+            filter: drop-shadow(0 2px 10px rgba(0,0,0,.55));
+        }
+        .site-brand-wordmark {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            line-height: 1;
+        }
+        .site-brand-wordmark .w1 {
+            font-size: clamp(15px, 2.4vw, 26px);
+            font-weight: 900;
+            letter-spacing: .06em;
+            color: #fff;
+            text-shadow: 0 2px 10px rgba(0,0,0,.6);
+            text-transform: uppercase;
+        }
+        .site-brand-wordmark .w2 {
+            font-size: clamp(7px, .95vw, 10px);
+            font-weight: 700;
+            letter-spacing: .34em;
+            color: #34d399;
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+        /* Hamburger button, top-left of the nav bar */
+        .site-burger {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 42px; height: 42px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,.16);
+            background: rgba(255,255,255,.06);
+            color: #fff;
+            cursor: pointer;
+            transition: background .18s ease, border-color .18s ease;
+        }
+        .site-burger:hover { background: rgba(16,185,129,.22); border-color: rgba(16,185,129,.55); }
+        .site-burger .material-symbols-outlined { font-size: 24px; }
+        /* Banner art strip: large hero header, framed on the model */
         .site-header-banner {
             position: relative;
             width: 100%;
             overflow: hidden;
             background: #0b0503;
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            height: clamp(150px, 24vw, 280px);
         }
-        .site-header-banner img {
+        .site-header-banner > img {
             display: block;
             width: 100%;
             height: 100%;
-            /* Cover keeps the strip crisp on wide screens (crops instead of
-               upscaling) while still spanning edge to edge. */
+            /* Cover spans edge to edge; the vertical focal point sits on the
+               model's face (upper-middle of the art) so she stays in frame. */
             object-fit: cover;
-            object-position: center center;
+            object-position: center 30%;
         }
         @media (max-width: 640px) {
-            .site-header-banner img { object-position: 60% center; }
+            .site-header-banner { height: clamp(120px, 34vw, 200px); }
+            .site-header-banner > img { object-position: center 32%; }
+        }
+        @media (min-width: 1024px) {
+            .site-nav-left .site-nav-link { display: inline-block; }
+            .site-nav-right { display: flex; }
+        }
+        /* Slide-in drawer opened from the hamburger (all viewports) */
+        .site-drawer-overlay {
+            position: fixed; inset: 0; z-index: 119;
+            background: rgba(0,0,0,.72);
+            backdrop-filter: blur(3px);
+            opacity: 0; visibility: hidden;
+            transition: opacity .28s ease, visibility .28s ease;
+        }
+        .site-drawer-overlay.is-open { opacity: 1; visibility: visible; }
+        .site-drawer {
+            position: fixed; top: 0; left: 0; bottom: 0; z-index: 120;
+            width: min(340px, 88vw);
+            background: #0d1119;
+            border-right: 1px solid rgba(255,255,255,.08);
+            box-shadow: 0 0 60px rgba(0,0,0,.6);
+            transform: translateX(-100%);
+            transition: transform .3s cubic-bezier(.4,0,.2,1);
+            display: flex; flex-direction: column;
+            overflow-y: auto;
+        }
+        .site-drawer.is-open { transform: translateX(0); }
+        .site-drawer-link {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px 16px; border-radius: 12px;
+            font-size: 14px; font-weight: 600;
+            color: rgba(255,255,255,.78);
+            text-decoration: none;
+            transition: background .15s ease, color .15s ease;
+        }
+        .site-drawer-link:hover { background: rgba(255,255,255,.05); color: #fff; }
+        .site-drawer-link .material-symbols-outlined { font-size: 20px; color: rgba(255,255,255,.55); }
+        .site-drawer-heading {
+            font-size: 10px; font-weight: 800; letter-spacing: .14em;
+            text-transform: uppercase; color: rgba(255,255,255,.38);
+            padding: 14px 16px 6px;
         }
     </style>
 
@@ -794,17 +937,13 @@
         </div>
     </div>
 
-    <!-- Navigation (Sidebar + Mobile Header + Mobile Sheet + Bottom Dock) -->
+    <!-- Navigation (Mobile Header + Mobile Sheet + Bottom Dock + Hamburger Drawer) -->
     @include('frontend.Minimal.partials.navbar')
 
     <!-- Content + Footer column (keeps the footer under the content, not beside it) -->
     <div class="flex-1 w-full min-w-0 flex flex-col">
-    <!-- Full-bleed brand header banner (edge to edge, right to left) -->
-    <div class="site-header-banner h-[clamp(120px,22vw,240px)]">
-        <img src="/minimal/header-banner.jpg"
-             alt="{{ settings('app_name') ?: 'Casino Gecce' }}"
-             decoding="async" fetchpriority="high">
-    </div>
+    <!-- Full-bleed brand header: banner art + top navigation (edge to edge) -->
+    @include('frontend.Minimal.partials.site-header')
     <!-- Main Content Area -->
     <main class="motion-intro flex-1 w-full min-w-0 min-h-screen relative flex flex-col pb-28 lg:pb-14">
         <!-- Desktop top-right account area (transparent dropdown) -->

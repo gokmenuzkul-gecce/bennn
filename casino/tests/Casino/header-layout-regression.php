@@ -1,0 +1,62 @@
+<?php
+
+declare(strict_types=1);
+
+/**
+ * Guards the Minimal header layout.
+ *
+ * The primary navigation must sit in its own bar above the brand banner, not
+ * overlaid across the middle of the artwork, and the banner must be tall
+ * enough (and framed on the model) that she stays in frame instead of being
+ * cropped out by a short strip.
+ */
+
+if (PHP_SAPI !== 'cli') {
+    http_response_code(404);
+    exit;
+}
+
+$root = dirname(__DIR__, 2);
+$read = static function (string $path) use ($root): string {
+    $value = file_get_contents($root . '/' . $path);
+    if (!is_string($value)) {
+        throw new RuntimeException('Unable to read ' . $path);
+    }
+    return $value;
+};
+
+$blade = $read('resources/views/frontend/Minimal/layouts/clean.blade.php');
+$header = $read('resources/views/frontend/Minimal/partials/site-header.blade.php');
+
+$checks = [
+    'header partial renders a dedicated nav bar' => str_contains($header, 'class="site-header-nav"'),
+
+    'nav bar is emitted before the banner art' => strpos($header, 'site-header-nav') !== false
+        && strpos($header, 'site-header-nav') < strpos($header, 'class="site-header-banner"'),
+
+    'hamburger sits inside the top nav bar' => str_contains($header, 'id="btn-open-site-drawer"')
+        && strpos($header, 'site-header-nav') < strpos($header, 'id="btn-open-site-drawer"')
+        && strpos($header, 'id="btn-open-site-drawer"') < strpos($header, 'class="site-header-banner"'),
+
+    'nav bar is a flex row with the brand centred' => str_contains($blade, '.site-header-nav {')
+        && str_contains($blade, 'grid-template-columns: 1fr auto 1fr;'),
+
+    'banner is tall enough for a hero header' => str_contains($blade, 'height: clamp(150px, 24vw, 280px);'),
+
+    'banner frames the model instead of the vertical centre' => str_contains($blade, 'object-position: center 30%;'),
+
+    'mobile keeps a shorter strip without losing the model' => str_contains($blade, 'height: clamp(120px, 34vw, 200px);')
+        && str_contains($blade, 'object-position: center 32%;'),
+
+    'desktop reveals the horizontal link rows' => str_contains($blade, '.site-nav-left .site-nav-link { display: inline-block; }')
+        && str_contains($blade, '.site-nav-right { display: flex; }'),
+];
+
+foreach ($checks as $name => $passed) {
+    if (!$passed) {
+        throw new RuntimeException('FAIL: ' . $name);
+    }
+    echo 'PASS: ' . $name . PHP_EOL;
+}
+
+echo 'PASS: ' . count($checks) . ' minimal header layout checks' . PHP_EOL;

@@ -265,4 +265,33 @@ $(document).ready(function () {
         closeMobileSheet();
     });
 
+    // Header hamburger drawer (works on every viewport)
+    const $siteDrawer = $('#site-drawer');
+    const $siteDrawerOverlay = $('#site-drawer-overlay');
+
+    function openSiteDrawer() {
+        $siteDrawerOverlay.addClass('is-open');
+        $siteDrawer.addClass('is-open').attr('aria-hidden', 'false');
+    }
+
+    function closeSiteDrawer() {
+        $siteDrawer.removeClass('is-open').attr('aria-hidden', 'true');
+        $siteDrawerOverlay.removeClass('is-open');
+    }
+
+    $(document).on('click', '#btn-open-site-drawer', function(e) {
+        e.preventDefault();
+        openSiteDrawer();
+    });
+
+    $(document).on('click', '#btn-close-site-drawer, #site-drawer-overlay', function(e) {
+        closeSiteDrawer();
+    });
+
+    $(document).on('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeSiteDrawer();
+        }
+    });
+
 });

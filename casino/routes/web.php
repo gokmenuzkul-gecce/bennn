@@ -135,6 +135,11 @@ Route::namespace ('Frontend')->middleware(['siteisclosed', 'checker'])->group(fu
     Route::get('/bonuses', ['as' => 'frontend.bonuses', 'uses' => 'GamesController@bonuses', ]);
     Route::get('/bonus-conditions', ['as' => 'frontend.bonus.conditions', 'uses' => 'GamesController@bonus_conditions', ]);
     Route::get('/progress', ['as' => 'frontend.progress', 'uses' => 'GamesController@progress', ]);
+
+    // Community surfaces (public): real winners feed and player reviews.
+    Route::get('/kazananlar', ['as' => 'frontend.winners', 'uses' => 'CommunityController@winners']);
+    Route::get('/yorumlar', ['as' => 'frontend.reviews', 'uses' => 'CommunityController@reviews']);
+
     Route::get('/search', ['as' => 'frontend.game.search', 'uses' => 'GamesController@search']);
     Route::get('/search.json', ['as' => 'frontend.search.json', 'uses' => 'GamesController@search_json']);
     Route::post('balance', ['as' => 'frontend.balance.post', 'uses' => 'GamesController@balanceAdd']);
