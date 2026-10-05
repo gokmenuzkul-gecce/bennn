@@ -907,33 +907,6 @@
         }
         .site-burger:hover { background: rgba(16,185,129,.22); border-color: rgba(16,185,129,.55); }
         .site-burger .material-symbols-outlined { font-size: 24px; }
-        /* Banner art strip: large hero header, framed on the model */
-        .site-header-banner {
-            position: relative;
-            width: 100%;
-            overflow: hidden;
-            background: #0b0503;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-            /* Full-bleed width; the height follows the artwork's own aspect
-               ratio so it scales with the site width, capped so it never
-               dominates very wide viewports. */
-            aspect-ratio: 1345 / 458;
-            max-height: 360px;
-        }
-        .site-header-banner > img {
-            display: block;
-            width: 100%;
-            height: 100%;
-            /* Cover keeps the art edge to edge; the focal point sits a little
-               above centre so the subject stays in frame when cropped. */
-            object-fit: cover;
-            object-position: center 38%;
-        }
-        @media (max-width: 640px) {
-            /* Narrow screens get a taller crop so the strip stays readable. */
-            .site-header-banner { aspect-ratio: 16 / 9; max-height: none; }
-            .site-header-banner > img { object-position: center 42%; }
-        }
         @media (min-width: 1024px) {
             .site-nav-left .site-nav-link { display: inline-block; }
             .site-nav-right { display: flex; }

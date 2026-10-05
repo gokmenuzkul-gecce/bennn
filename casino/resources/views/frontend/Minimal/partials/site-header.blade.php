@@ -105,13 +105,6 @@
     </div>
 </div>
 
-<!-- Full-bleed banner art (nav bar sits above it) -->
-<div class="site-header-banner">
-    <img src="/minimal/header-banner.jpg?v={{ @filemtime(base_path('../minimal/header-banner.jpg')) ?: '1' }}"
-         alt="{{ $hBrandName }}"
-         decoding="async" fetchpriority="high">
-</div>
-
 <!-- Hamburger drawer (opened from the header corner) -->
 <div class="site-drawer-overlay" id="site-drawer-overlay"></div>
 <aside class="site-drawer" id="site-drawer" aria-hidden="true">

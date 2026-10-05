@@ -5,10 +5,9 @@ declare(strict_types=1);
 /**
  * Guards the Minimal header layout.
  *
- * The primary navigation must sit in its own bar above the brand banner, not
- * overlaid across the middle of the artwork, and the banner must be tall
- * enough (and framed on the model) that she stays in frame instead of being
- * cropped out by a short strip.
+ * The primary navigation lives in its own full-width bar; the decorative
+ * banner art that used to sit underneath it was removed, so the bar must be
+ * the header's only band and the drawer must follow it.
  */
 
 if (PHP_SAPI !== 'cli') {
@@ -32,44 +31,33 @@ $modals = $read('resources/views/frontend/Minimal/partials/modals.blade.php');
 $checks = [
     'header partial renders a dedicated nav bar' => str_contains($header, 'class="site-header-nav"'),
 
-    'nav bar is emitted before the banner art' => strpos($header, 'site-header-nav') !== false
-        && strpos($header, 'site-header-nav') < strpos($header, 'class="site-header-banner"'),
+    'the decorative banner art has been removed from the header' => !str_contains($header, 'site-header-banner')
+        && !str_contains($header, 'header-banner.jpg'),
+
+    'banner CSS is gone from the layout' => !str_contains($blade, '.site-header-banner'),
 
     'hamburger sits inside the top nav bar' => str_contains($header, 'id="btn-open-site-drawer"')
         && strpos($header, 'site-header-nav') < strpos($header, 'id="btn-open-site-drawer"')
-        && strpos($header, 'id="btn-open-site-drawer"') < strpos($header, 'class="site-header-banner"'),
+        && strpos($header, 'id="btn-open-site-drawer"') < strpos($header, 'id="site-drawer"'),
 
     'nav bar is a flex row with the brand centred' => str_contains($blade, '.site-header-nav {')
         && str_contains($blade, 'grid-template-columns: 1fr auto 1fr;'),
-
-    'banner spans the full width and scales with the site width' => str_contains($blade, 'aspect-ratio: 1345 / 458;')
-        && str_contains($blade, 'max-height: 360px;'),
-
-    'banner crops around the subject rather than the vertical centre' => str_contains($blade, 'object-position: center 38%;'),
-
-    'banner asset is cache-busted so a new artwork actually shows' => str_contains($header, "/minimal/header-banner.jpg?v=")
-        && str_contains($header, "filemtime(base_path('../minimal/header-banner.jpg'))"),
-
-    'mobile keeps a readable strip without losing the subject' => str_contains($blade, 'aspect-ratio: 16 / 9;')
-        && str_contains($blade, 'object-position: center 42%;'),
 
     'desktop reveals the horizontal link rows' => str_contains($blade, '.site-nav-left .site-nav-link { display: inline-block; }')
         && str_contains($blade, '.site-nav-right { display: flex; }'),
 
     'auth buttons live in the top-right nav cluster' => str_contains($header, 'site-nav-cta site-nav-cta--ghost open-modal" data-target="modal-login"')
         && str_contains($header, 'site-nav-cta site-nav-cta--primary open-modal" data-target="modal-register"')
-        && strpos($header, 'site-nav-right') < strpos($header, 'data-target="modal-login"')
-        && strpos($header, 'data-target="modal-login"') < strpos($header, 'class="site-header-banner"'),
+        && strpos($header, 'site-nav-right') < strpos($header, 'data-target="modal-login"'),
 
     'register CTA reads "Kayıt Ol", not the old "Ücretsiz Kayıt Ol"' => str_contains($header, '>Kayıt Ol</button>')
         && !str_contains($header, 'Ücretsiz Kayıt Ol'),
 
-    'no duplicate account row is emitted below the banner' => !str_contains($blade, 'Desktop top-right account area')
+    'no duplicate account row is emitted below the header' => !str_contains($blade, 'Desktop top-right account area')
         && substr_count($blade, 'id="account-menu-toggle"') === 0,
 
     'guest nav offers a top-right admin login button' => str_contains($header, 'site-nav-cta--admin open-modal" data-target="modal-admin-login"')
-        && strpos($header, 'site-nav-right') < strpos($header, 'data-target="modal-admin-login"')
-        && strpos($header, 'data-target="modal-admin-login"') < strpos($header, 'class="site-header-banner"'),
+        && strpos($header, 'site-nav-right') < strpos($header, 'data-target="modal-admin-login"'),
 
     'admin login modal exists with its own form' => str_contains($modals, 'id="modal-admin-login"')
         && str_contains($modals, 'id="admin-login-form"')
