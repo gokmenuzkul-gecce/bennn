@@ -64,10 +64,84 @@
             z-index: -1;
             overflow: hidden;
             background:
-                radial-gradient(ellipse 80% 55% at 15% -5%, rgba(16, 185, 129, 0.16) 0%, transparent 60%),
-                radial-gradient(ellipse 70% 50% at 90% 5%, rgba(6, 182, 212, 0.13) 0%, transparent 60%),
-                radial-gradient(ellipse 90% 60% at 50% 105%, rgba(168, 85, 247, 0.10) 0%, transparent 65%),
-                linear-gradient(180deg, #07090f 0%, #0a0d15 45%, #07090f 100%);
+                radial-gradient(ellipse 80% 55% at 12% -8%, rgba(16, 185, 129, 0.20) 0%, transparent 60%),
+                radial-gradient(ellipse 70% 50% at 92% 4%, rgba(245, 158, 11, 0.14) 0%, transparent 60%),
+                radial-gradient(ellipse 90% 60% at 50% 108%, rgba(120, 53, 15, 0.24) 0%, transparent 65%),
+                linear-gradient(180deg, #04120d 0%, #051a13 42%, #030c09 100%);
+        }
+        /* Layer 0 — real casino baize: green felt with a woven texture and a soft
+           radial vignette, so the floor reads as a table rather than a flat panel. */
+        .bg-felt {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 70% 60% at 50% 38%, rgba(6, 95, 70, 0.40), rgba(3, 26, 20, 0.88) 78%);
+        }
+        .bg-felt::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-image:
+                repeating-linear-gradient(0deg, rgba(255,255,255,0.016) 0 2px, transparent 2px 4px),
+                repeating-linear-gradient(90deg, rgba(0,0,0,0.05) 0 2px, transparent 2px 5px);
+            opacity: 0.85;
+            mix-blend-mode: overlay;
+        }
+        /* Layer 0b — the wooden table rail framing the felt, plus a warm vignette */
+        .bg-rail {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            box-shadow:
+                inset 0 0 0 1px rgba(212, 160, 74, 0.10),
+                inset 0 0 120px 30px rgba(28, 12, 4, 0.60);
+        }
+        .bg-rail::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(180deg, rgba(120, 53, 15, 0.42), transparent 12%),
+                linear-gradient(0deg, rgba(120, 53, 15, 0.32), transparent 10%);
+        }
+        /* Layer 0c — a roulette wheel rim, slowly turning in the corner */
+        .bg-wheel {
+            position: absolute;
+            top: -17%;
+            right: -15%;
+            width: min(660px, 64vw);
+            aspect-ratio: 1;
+            border-radius: 50%;
+            opacity: 0.16;
+            background: repeating-conic-gradient(from 0deg,
+                #0b3b2e 0deg 4.5deg, #0a0f14 4.5deg 9deg,
+                #7f1d1d 9deg 13.5deg, #0a0f14 13.5deg 18deg);
+            -webkit-mask-image: radial-gradient(circle, transparent 56%, #000 57%, #000 76%, transparent 77%);
+                    mask-image: radial-gradient(circle, transparent 56%, #000 57%, #000 76%, transparent 77%);
+            animation: wheelSpin 120s linear infinite;
+            filter: blur(0.4px) saturate(1.1);
+            will-change: transform;
+        }
+        @keyframes wheelSpin { to { transform: rotate(360deg); } }
+        /* Layer 0d — a fanned hand of playing cards resting on the felt */
+        .bg-cards { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+        .bg-card {
+            position: absolute;
+            width: 78px; height: 110px;
+            border-radius: 9px;
+            padding: 8px;
+            background: linear-gradient(155deg, #fbfdff, #dbe3ee);
+            color: #0b1220;
+            font-weight: 800; font-size: 17px; line-height: 1;
+            box-shadow: 0 18px 40px -14px rgba(0,0,0,0.85), inset 0 0 0 1px rgba(255,255,255,0.6);
+            opacity: 0.10;
+            transform: rotate(var(--cr, 0deg));
+            animation: cardFloat var(--cdur, 28s) ease-in-out infinite alternate;
+        }
+        .bg-card i { display: block; margin-top: 30px; font-style: normal; font-size: 30px; text-align: center; }
+        .bg-card.is-red { color: #b91c1c; }
+        @keyframes cardFloat {
+            0%   { transform: translate3d(0, 0, 0) rotate(var(--cr, 0deg)); }
+            100% { transform: translate3d(0, -16px, 0) rotate(var(--cr, 0deg)); }
         }
         /* Layer 1 — real game cover art, lightly blurred so text stays legible.
            Kept deliberately cheap: few tiles, modest blur, paint containment. */
@@ -79,13 +153,14 @@
             grid-auto-rows: 30vh;
             gap: 30px;
             transform: translate3d(0, var(--sp, 0px), 0);
-            filter: blur(11px) saturate(1.12) brightness(1.18);
-            opacity: 0.3;
+            filter: blur(12px) saturate(1.12) brightness(1.12);
+            opacity: 0.22;
             transition: opacity 0.8s ease;
             will-change: transform;
             contain: strict;
+            mix-blend-mode: screen;
         }
-        .casino-bg.is-scrolled .bg-shots { opacity: 0.42; }
+        .casino-bg.is-scrolled .bg-shots { opacity: 0.32; }
         .bg-shot {
             position: relative;
             border-radius: 26px;
@@ -108,13 +183,13 @@
             0%,100% { transform: translate3d(0, 0, 0) scale(1.04); }
             50%     { transform: translate3d(0, -26px, 0) scale(1.1); }
         }
-        /* Layer 2 — depth scrim keeps the UI readable over the artwork */
+        /* Layer 2 — depth scrim keeps the UI readable over the felt and artwork */
         .bg-scrim {
             position: absolute;
             inset: 0;
             background:
-                radial-gradient(ellipse 78% 62% at 50% 28%, rgba(7,9,15,0.12), rgba(7,9,15,0.62) 78%),
-                linear-gradient(180deg, rgba(7,9,15,0.44), rgba(7,9,15,0.26) 42%, rgba(7,9,15,0.66));
+                radial-gradient(ellipse 78% 62% at 50% 26%, rgba(3,10,8,0.10), rgba(3,10,8,0.60) 80%),
+                linear-gradient(180deg, rgba(3,10,8,0.40), rgba(3,10,8,0.22) 44%, rgba(3,10,8,0.62));
         }
         /* Layer 2b — fine diamond lattice, faded toward the centre so it reads as
            an engraved table surface rather than a visible grid. */
@@ -233,13 +308,15 @@
         .casino-bg.is-paused .burst,
         .casino-bg.is-paused .bg-ticker span { animation-play-state: paused !important; }
         @media (prefers-reduced-motion: reduce) {
-            .bg-shot, .bg-wash, .burst, .bg-ticker span, .bg-suits span { animation: none !important; }
+            .bg-shot, .bg-wash, .burst, .bg-ticker span, .bg-suits span, .bg-wheel, .bg-card { animation: none !important; }
             .bg-shots { transform: none !important; }
         }
         @media (max-width: 767px) {
-            .bg-shots { grid-template-columns: repeat(2, 1fr); gap: 22px; opacity: 0.26; filter: blur(16px) brightness(1.14); }
+            .bg-shots { grid-template-columns: repeat(2, 1fr); gap: 22px; opacity: 0.18; filter: blur(16px) brightness(1.1); }
             .bg-ticker { display: none; }
             .bg-suits span:nth-child(3), .bg-suits span:nth-child(4) { display: none; }
+            .bg-cards .bg-card:nth-child(3) { display: none; }
+            .bg-wheel { width: 78vw; opacity: 0.12; }
             .burst-chip, .burst-coin { --sz: 30px; }
         }
 
@@ -1188,6 +1265,14 @@
 
     <!-- Ambient Casino Background -->
     <div class="casino-bg" aria-hidden="true">
+        <div class="bg-felt"></div>
+        <div class="bg-wheel"></div>
+        <div class="bg-cards" aria-hidden="true">
+            <span class="bg-card" style="top:20%;left:6%;--cr:-14deg;--cdur:30s;">A<i>&#9824;</i></span>
+            <span class="bg-card is-red" style="top:64%;left:12%;--cr:9deg;--cdur:26s;">K<i>&#9829;</i></span>
+            <span class="bg-card is-red" style="top:38%;left:88%;--cr:13deg;--cdur:34s;">Q<i>&#9830;</i></span>
+        </div>
+        <div class="bg-rail"></div>
         @if(!empty($bgShots))
         <div class="bg-shots">
             @foreach($bgShots as $shot)

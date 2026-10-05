@@ -102,16 +102,42 @@ $checks = [
         && str_contains($css, 'class="bg-pattern"')
         && str_contains($css, 'class="bg-spot"')
         && str_contains($css, 'class="bg-suits"')
-        && substr_count($css, '&#98') === 4,
+        && substr_count($css, '&#98') === 7,
 
     'decorative background layers sit above the scrim' => strpos($css, 'class="bg-scrim"') < strpos($css, 'class="bg-pattern"')
         && strpos($css, 'class="bg-scrim"') < strpos($css, 'class="bg-suits"'),
 
-    'background art is legible but still subdued' => str_contains($css, 'opacity: 0.3;')
-        && str_contains($css, '.casino-bg.is-scrolled .bg-shots { opacity: 0.42; }')
+    'casino theme adds felt, wheel, cards and table rail' => str_contains($css, '.bg-felt')
+        && str_contains($css, '.bg-wheel')
+        && str_contains($css, '@keyframes wheelSpin')
+        && str_contains($css, '.bg-cards')
+        && str_contains($css, '.bg-card')
+        && str_contains($css, '.bg-rail')
+        && str_contains($css, 'class="bg-felt"')
+        && str_contains($css, 'class="bg-wheel"')
+        && str_contains($css, 'class="bg-cards"')
+        && str_contains($css, 'class="bg-rail"'),
+
+    'roulette wheel is a masked rim that turns slowly' => str_contains($css, 'repeating-conic-gradient')
+        && str_contains($css, 'wheelSpin 120s linear infinite')
+        && str_contains($css, 'mask-image: radial-gradient(circle, transparent 56%'),
+
+    'felt floor and wooden rail read as a real table' => str_contains($css, 'repeating-linear-gradient(0deg, rgba(255,255,255,0.016)')
+        && str_contains($css, 'inset 0 0 120px 30px rgba(28, 12, 4, 0.60)')
+        && str_contains($css, 'linear-gradient(180deg, rgba(120, 53, 15, 0.42)'),
+
+    'a three-card hand rests on the felt' => substr_count($css, 'class="bg-card"') === 1
+        && substr_count($css, 'class="bg-card is-red"') === 2
+        && str_contains($css, '&#9824;')
+        && str_contains($css, '&#9829;')
+        && str_contains($css, '&#9830;'),
+
+    'background art stays subtle over the felt' => str_contains($css, 'opacity: 0.22;')
+        && str_contains($css, '.casino-bg.is-scrolled .bg-shots { opacity: 0.32; }')
+        && str_contains($css, 'mix-blend-mode: screen;')
         && str_contains($css, '.bg-suits span:nth-child(3), .bg-suits span:nth-child(4) { display: none; }'),
 
-    'background motion collapses under reduced motion' => str_contains($css, '.bg-shot, .bg-wash, .burst, .bg-ticker span, .bg-suits span { animation: none !important; }'),
+    'background motion collapses under reduced motion' => str_contains($css, '.bg-shot, .bg-wash, .burst, .bg-ticker span, .bg-suits span, .bg-wheel, .bg-card { animation: none !important; }'),
 ];
 
 foreach ($checks as $name => $passed) {
