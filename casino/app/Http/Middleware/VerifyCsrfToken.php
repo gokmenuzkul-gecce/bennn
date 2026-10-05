@@ -27,6 +27,8 @@ namespace VanguardLTE\Http\Middleware
             'liteback/*',
             'webhooks/aggregator/*',
             '/webhooks/aggregator/*',
+            'webhooks/smplcore/*',
+            '/webhooks/smplcore/*',
             'register'
         ];
     }

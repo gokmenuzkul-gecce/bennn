@@ -267,6 +267,13 @@ Route::post('webhooks/aggregator/{slug}/wallet/{operation?}', [
 ])->where('operation', 'GetBalance|Withdraw|Deposit|BetWin|RollbackTransaction')
     ->name('webhooks.casino.wallet');
 
+// smpl core seamless-wallet callback (new aggregator). One URL receives every
+// action (balance/bet/win/refund/rollback) with the action in the form body.
+// Registered with smpl core as <APP_URL>/webhooks/smplcore/callbacks.
+Route::post('webhooks/smplcore/callbacks', [
+    \VanguardLTE\Http\Controllers\Web\Webhooks\SmplCoreWebhookController::class, 'handle',
+])->name('webhooks.smplcore.callbacks');
+
 
 /**
  *

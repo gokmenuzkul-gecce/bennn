@@ -28,6 +28,27 @@ return [
     // Prefix used when deriving the vendor-facing userID from our user id.
     'user_prefix' => env('CASINO_WALLET_USER_PREFIX', 'u'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | smpl core aggregator (new API)
+    |--------------------------------------------------------------------------
+    |
+    | smpl core replaces the legacy loginxgames aggregator. It speaks a
+    | different protocol: HMAC-SHA1 header auth on our outbound calls and a
+    | single webhook endpoint the aggregator posts balance/bet/win/refund/
+    | rollback actions to. Credentials (Merchant ID + Merchant Key) are issued
+    | by the smpl core integration manager.
+    |
+    */
+    'smplcore' => [
+        'base_url' => env('SMPL_BASE_URL', 'https://staging.smplcore.net/api/index.php/v1'),
+        'merchant_id' => env('SMPL_MERCHANT_ID', ''),
+        'merchant_key' => env('SMPL_MERCHANT_KEY', ''),
+        'callback_path' => env('SMPL_CALLBACK_PATH', '/webhooks/smplcore/callbacks'),
+        'currency' => env('SMPL_CURRENCY', env('CASINO_WALLET_CURRENCY', 'TRY')),
+        'settings_key' => 'casino_provider_smplcore',
+    ],
+
     'providers' => [
 
         'pragmatic' => [
