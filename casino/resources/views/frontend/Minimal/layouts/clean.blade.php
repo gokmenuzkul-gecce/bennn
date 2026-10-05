@@ -143,6 +143,29 @@
             0%   { transform: translate3d(0, 0, 0) rotate(var(--cr, 0deg)); }
             100% { transform: translate3d(0, -16px, 0) rotate(var(--cr, 0deg)); }
         }
+        /* Layer 0e — real casino photography (CC0/public-domain) blended onto the
+           felt as luminosity so it reads as printed table art, not a photo wall. */
+        .bg-photos { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+        .bg-photo {
+            position: absolute;
+            border-radius: 24px;
+            overflow: hidden;
+            opacity: 0.16;
+            filter: grayscale(0.35) contrast(1.06) brightness(0.92) blur(1.2px);
+            mix-blend-mode: luminosity;
+            -webkit-mask-image: radial-gradient(ellipse 78% 78% at 50% 50%, #000 38%, transparent 80%);
+                    mask-image: radial-gradient(ellipse 78% 78% at 50% 50%, #000 38%, transparent 80%);
+            animation: photoDrift var(--pdur, 44s) ease-in-out infinite alternate;
+            will-change: transform;
+        }
+        .bg-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .bg-photo.p-blackjack { top: 3%;  left: -7%;  width: 47vw; height: 42vh; --pdur: 48s; }
+        .bg-photo.p-chips    { top: 54%; right: -9%; width: 43vw; height: 40vh; --pdur: 54s; }
+        .bg-photo.p-roulette { top: 27%; left: 33%;  width: 42vw; height: 44vh; --pdur: 60s; opacity: 0.12; }
+        @keyframes photoDrift {
+            0%   { transform: translate3d(0, 0, 0) scale(1); }
+            100% { transform: translate3d(0, -20px, 0) scale(1.05); }
+        }
         /* Layer 1 — real game cover art, lightly blurred so text stays legible.
            Kept deliberately cheap: few tiles, modest blur, paint containment. */
         .bg-shots {
@@ -308,7 +331,7 @@
         .casino-bg.is-paused .burst,
         .casino-bg.is-paused .bg-ticker span { animation-play-state: paused !important; }
         @media (prefers-reduced-motion: reduce) {
-            .bg-shot, .bg-wash, .burst, .bg-ticker span, .bg-suits span, .bg-wheel, .bg-card { animation: none !important; }
+            .bg-shot, .bg-wash, .burst, .bg-ticker span, .bg-suits span, .bg-wheel, .bg-card, .bg-photo { animation: none !important; }
             .bg-shots { transform: none !important; }
         }
         @media (max-width: 767px) {
@@ -317,6 +340,8 @@
             .bg-suits span:nth-child(3), .bg-suits span:nth-child(4) { display: none; }
             .bg-cards .bg-card:nth-child(3) { display: none; }
             .bg-wheel { width: 78vw; opacity: 0.12; }
+            .bg-photo.p-roulette { display: none; }
+            .bg-photo { opacity: 0.12; }
             .burst-chip, .burst-coin { --sz: 30px; }
         }
 
@@ -1273,6 +1298,11 @@
             <span class="bg-card is-red" style="top:38%;left:88%;--cr:13deg;--cdur:34s;">Q<i>&#9830;</i></span>
         </div>
         <div class="bg-rail"></div>
+        <div class="bg-photos" aria-hidden="true">
+            <div class="bg-photo p-blackjack"><img src="/frontend/Default/theme/casino-blackjack.jpg" alt="" loading="lazy" decoding="async"></div>
+            <div class="bg-photo p-chips"><img src="/frontend/Default/theme/casino-chips.jpg" alt="" loading="lazy" decoding="async"></div>
+            <div class="bg-photo p-roulette"><img src="/frontend/Default/theme/casino-roulette.jpg" alt="" loading="lazy" decoding="async"></div>
+        </div>
         @if(!empty($bgShots))
         <div class="bg-shots">
             @foreach($bgShots as $shot)

@@ -20,6 +20,7 @@ if (PHP_SAPI !== 'cli') {
  */
 
 $root = dirname(__DIR__, 2);
+$repoRoot = dirname($root);
 $read = static function (string $path) use ($root): string {
     $value = file_get_contents($root . '/' . $path);
     if (!is_string($value)) {
@@ -132,12 +133,30 @@ $checks = [
         && str_contains($css, '&#9829;')
         && str_contains($css, '&#9830;'),
 
+    'real casino photos blend onto the felt' => str_contains($css, '.bg-photos')
+        && str_contains($css, '.bg-photo')
+        && str_contains($css, 'mix-blend-mode: luminosity;')
+        && str_contains($css, '@keyframes photoDrift')
+        && str_contains($css, 'class="bg-photos"')
+        && str_contains($css, 'p-blackjack')
+        && str_contains($css, 'p-chips')
+        && str_contains($css, 'p-roulette'),
+
+    'casino photos are local, credited and correctly licensed' => is_file($repoRoot . '/frontend/Default/theme/casino-blackjack.jpg')
+        && is_file($repoRoot . '/frontend/Default/theme/casino-chips.jpg')
+        && is_file($repoRoot . '/frontend/Default/theme/casino-roulette.jpg')
+        && is_file($repoRoot . '/frontend/Default/theme/CREDITS.md')
+        && str_contains(file_get_contents($repoRoot . '/frontend/Default/theme/CREDITS.md'), 'CC0')
+        && str_contains($css, '/frontend/Default/theme/casino-blackjack.jpg'),
+
+    'photo layer drops the third tile on mobile' => str_contains($css, '.bg-photo.p-roulette { display: none; }'),
+
     'background art stays subtle over the felt' => str_contains($css, 'opacity: 0.22;')
         && str_contains($css, '.casino-bg.is-scrolled .bg-shots { opacity: 0.32; }')
         && str_contains($css, 'mix-blend-mode: screen;')
         && str_contains($css, '.bg-suits span:nth-child(3), .bg-suits span:nth-child(4) { display: none; }'),
 
-    'background motion collapses under reduced motion' => str_contains($css, '.bg-shot, .bg-wash, .burst, .bg-ticker span, .bg-suits span, .bg-wheel, .bg-card { animation: none !important; }'),
+    'background motion collapses under reduced motion' => str_contains($css, '.bg-shot, .bg-wash, .burst, .bg-ticker span, .bg-suits span, .bg-wheel, .bg-card, .bg-photo { animation: none !important; }'),
 ];
 
 foreach ($checks as $name => $passed) {
