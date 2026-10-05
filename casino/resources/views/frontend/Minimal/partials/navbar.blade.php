@@ -195,7 +195,7 @@
                 Giriş Yap
             </button>
             <button type="button" class="flex-1 py-2.5 rounded-xl bg-primary text-white text-center text-xs font-bold shadow-md shadow-primary/20 transition-colors open-modal" data-target="modal-register">
-                Ücretsiz Kayıt Ol
+                Kayıt Ol
             </button>
         @endif
     </div>

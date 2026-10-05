@@ -3967,7 +3967,7 @@ INSERT INTO `w_settings` (`id`, `key`, `value`) VALUES
 ('6', 'throttle_lockout_time', '1'),
 ('7', 'throttle_enabled', '0'),
 ('8', 'forgot_password', '1'),
-('9', 'default_currency', 'USD'),
+('9', 'default_currency', 'TRY'),
 ('10', 'minimum_payment_amount', '0'),
 ('11', 'maximum_payment_amount', '10000'),
 ('12', 'payment_interkassa', '0'),

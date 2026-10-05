@@ -83,7 +83,7 @@
                 <div id="login-status-msg" class="text-xs font-bold text-center mt-2 min-h-[18px]"></div>
             </form>
             <p class="text-xs text-on-surface-muted text-center pt-2">
-                Hesabınız yok mu? <a href="#" class="text-primary open-modal font-bold hover:underline" data-target="modal-register">Ücretsiz Kayıt Ol</a>
+                Hesabınız yok mu? <a href="#" class="text-primary open-modal font-bold hover:underline" data-target="modal-register">Kayıt Ol</a>
             </p>
         </div>
         @endif

@@ -719,6 +719,8 @@
         }
         /* Top navigation bar: sits above the banner so it never covers the art */
         .site-header-nav {
+            position: relative;
+            z-index: 60;
             display: grid;
             grid-template-columns: 1fr auto 1fr;
             align-items: center;
@@ -768,6 +770,82 @@
             background: currentColor;
             opacity: .9;
         }
+        /* Auth / account cluster at the right edge of the nav bar */
+        .site-nav-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: .02em;
+            text-decoration: none;
+            white-space: nowrap;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: background .18s ease, border-color .18s ease, color .18s ease, filter .18s ease;
+        }
+        .site-nav-cta--ghost {
+            color: #fff;
+            background: rgba(255,255,255,.06);
+            border-color: rgba(255,255,255,.14);
+        }
+        .site-nav-cta--ghost:hover { background: rgba(255,255,255,.13); }
+        .site-nav-cta--primary {
+            color: #fff;
+            background: linear-gradient(90deg, #10b981, #14b8a6);
+            box-shadow: 0 4px 14px rgba(16,185,129,.28);
+        }
+        .site-nav-cta--primary:hover { filter: brightness(1.07); }
+        .site-nav-account { position: relative; }
+        .site-nav-avatar {
+            width: 22px; height: 22px;
+            border-radius: 7px;
+            display: inline-flex; align-items: center; justify-content: center;
+            font-size: 11px; font-weight: 800;
+            background: linear-gradient(135deg, #34d399, #0d9488);
+            color: #06231b;
+        }
+        .site-nav-username { max-width: 120px; overflow: hidden; text-overflow: ellipsis; }
+        .site-nav-caret { font-size: 18px; color: rgba(255,255,255,.6); }
+        .site-nav-menu {
+            position: absolute;
+            right: 0;
+            top: calc(100% + 8px);
+            width: 248px;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,.10);
+            background: rgba(18,22,34,.97);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 24px 60px rgba(0,0,0,.55);
+            z-index: 200;
+        }
+        .site-nav-menu-head { padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,.08); }
+        .site-nav-menu-eyebrow { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; font-weight: 800; color: rgba(255,255,255,.45); }
+        .site-nav-menu-name { font-size: 13px; font-weight: 700; color: #fff; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; }
+        .site-nav-menu-balance { display: flex; align-items: baseline; gap: 6px; margin-top: 6px; }
+        .site-nav-menu-balance .font-mono-jet { font-size: 18px; font-weight: 800; color: #34d399; }
+        .site-nav-menu-currency { font-size: 10px; font-weight: 800; color: #6ee7b7; }
+        .site-nav-menu-list { padding: 6px 0; }
+        .account-menu-item {
+            display: flex; align-items: center; gap: 12px;
+            width: 100%;
+            padding: 10px 16px;
+            font-size: 13px; font-weight: 600;
+            text-align: left;
+            color: rgba(255,255,255,.72);
+            background: transparent;
+            border: 0;
+            cursor: pointer;
+            transition: background .15s ease, color .15s ease;
+        }
+        .account-menu-item:hover { color: #fff; background: rgba(255,255,255,.07); }
+        .account-menu-item .material-symbols-outlined { font-size: 18px; }
+        .account-menu-item--danger { color: #fb7185; }
+        .account-menu-item--danger:hover { color: #fda4af; }
+        .site-nav-menu-divider { margin: 4px 0; border-top: 1px solid rgba(255,255,255,.08); }
         .site-brand-center {
             display: flex;
             align-items: center;
@@ -946,67 +1024,6 @@
     @include('frontend.Minimal.partials.site-header')
     <!-- Main Content Area -->
     <main class="motion-intro flex-1 w-full min-w-0 min-h-screen relative flex flex-col pb-28 lg:pb-14">
-        <!-- Desktop top-right account area (transparent dropdown) -->
-        <div class="hidden lg:flex items-center justify-end gap-2.5 px-6 md:px-10 lg:px-12 pt-5 relative z-50">
-            @guest
-                <button type="button" class="open-modal text-xs font-bold uppercase tracking-wider text-white bg-white/[0.06] hover:bg-white/[0.12] border border-white/[0.10] px-4 py-2.5 rounded-xl transition-all" data-target="modal-login">
-                    Giriş Yap
-                </button>
-                <button type="button" class="open-modal text-xs font-bold uppercase tracking-wider text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 px-4 py-2.5 rounded-xl shadow-md shadow-emerald-500/25 transition-all" data-target="modal-register">
-                    Ücretsiz Kayıt Ol
-                </button>
-            @else
-                <div class="flex items-center gap-2 bg-white/[0.05] border border-white/[0.09] px-3 py-2 rounded-xl backdrop-blur-md">
-                    <span class="material-symbols-outlined text-primary text-base">account_balance_wallet</span>
-                    <span class="font-mono-jet text-xs font-bold text-primary" id="topbar-balance">{{ number_format(Auth::user()->balance, 2) }}</span>
-                    <span class="text-[10px] font-bold text-primary-light">{{ strtoupper(settings('default_currency') ?: 'TRY') }}</span>
-                </div>
-
-                <div class="relative" id="account-menu-wrap">
-                    <button type="button" id="account-menu-toggle" aria-haspopup="true" aria-expanded="false"
-                            class="flex items-center gap-2 text-xs font-bold text-white bg-white/[0.05] hover:bg-white/[0.12] border border-white/[0.10] px-3 py-2 rounded-xl transition-all backdrop-blur-md">
-                        <span class="w-6 h-6 rounded-lg bg-gradient-to-tr from-emerald-400 to-teal-600 flex items-center justify-center text-[11px] font-extrabold">{{ strtoupper(substr(Auth::user()->username ?? 'U', 0, 1)) }}</span>
-                        <span class="max-w-[130px] truncate">{{ Auth::user()->username ?? Auth::user()->email }}</span>
-                        <span class="material-symbols-outlined text-base text-on-surface-muted">expand_more</span>
-                    </button>
-
-                    <div id="account-menu" class="hidden absolute right-0 mt-2 w-60 rounded-2xl overflow-hidden border border-white/[0.10] bg-white/[0.06] backdrop-blur-2xl shadow-2xl shadow-black/50">
-                        <div class="px-4 py-3 border-b border-white/[0.08]">
-                            <p class="text-[10px] uppercase tracking-wider text-on-surface-subtle font-bold">Hesap</p>
-                            <p class="text-sm font-bold text-white truncate">{{ Auth::user()->username ?? Auth::user()->email }}</p>
-                            <div class="mt-1.5 flex items-baseline gap-1.5">
-                                <span class="font-mono-jet text-lg font-bold text-primary" id="account-menu-balance">{{ number_format(Auth::user()->balance, 2) }}</span>
-                                <span class="text-[10px] font-bold text-primary-light">{{ strtoupper(settings('default_currency') ?: 'TRY') }}</span>
-                            </div>
-                        </div>
-                        <nav class="py-1.5 text-sm">
-                            <button type="button" class="account-menu-item open-modal w-full text-left px-4 py-2.5 flex items-center gap-3 text-on-surface-muted hover:text-white hover:bg-white/[0.07] transition-colors" data-target="modal-profile">
-                                <span class="material-symbols-outlined text-lg">person</span> Profilim
-                            </button>
-                            <button type="button" class="account-menu-item open-modal w-full text-left px-4 py-2.5 flex items-center gap-3 text-on-surface-muted hover:text-white hover:bg-white/[0.07] transition-colors" data-target="modal-deposit">
-                                <span class="material-symbols-outlined text-lg">add_card</span> Bakiye Yükle
-                            </button>
-                            @if(settings('enable_cashout', '1') == '1')
-                            <button type="button" class="account-menu-item open-modal w-full text-left px-4 py-2.5 flex items-center gap-3 text-on-surface-muted hover:text-white hover:bg-white/[0.07] transition-colors" data-target="modal-cashout">
-                                <span class="material-symbols-outlined text-lg">payments</span> Para Çekme
-                            </button>
-                            @endif
-                            <a href="{{ route('frontend.vip.index') }}" class="account-menu-item w-full text-left px-4 py-2.5 flex items-center gap-3 text-on-surface-muted hover:text-white hover:bg-white/[0.07] transition-colors no-underline">
-                                <span class="material-symbols-outlined text-lg">workspace_premium</span> VIP Kulübü
-                            </a>
-                            <a href="{{ route('frontend.affiliates.index') }}" class="account-menu-item w-full text-left px-4 py-2.5 flex items-center gap-3 text-on-surface-muted hover:text-white hover:bg-white/[0.07] transition-colors no-underline">
-                                <span class="material-symbols-outlined text-lg">groups</span> Ortaklık
-                            </a>
-                            <div class="my-1 border-t border-white/[0.08]"></div>
-                            <a href="{{ route('frontend.auth.logout') }}" class="account-menu-item w-full text-left px-4 py-2.5 flex items-center gap-3 text-rose-400 hover:text-rose-300 hover:bg-white/[0.07] transition-colors no-underline">
-                                <span class="material-symbols-outlined text-lg">logout</span> Çıkış Yap
-                            </a>
-                        </nav>
-                    </div>
-                </div>
-            @endguest
-        </div>
-
         <div class="px-3.5 sm:px-6 md:px-10 lg:px-12 py-5 sm:py-8 md:py-10 space-y-6 sm:space-y-8 md:space-y-10 max-w-7xl w-full min-w-0 mx-auto">
             @yield('content')
         </div>

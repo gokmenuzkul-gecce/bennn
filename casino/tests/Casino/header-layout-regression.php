@@ -50,6 +50,17 @@ $checks = [
 
     'desktop reveals the horizontal link rows' => str_contains($blade, '.site-nav-left .site-nav-link { display: inline-block; }')
         && str_contains($blade, '.site-nav-right { display: flex; }'),
+
+    'auth buttons live in the top-right nav cluster' => str_contains($header, 'site-nav-cta site-nav-cta--ghost open-modal" data-target="modal-login"')
+        && str_contains($header, 'site-nav-cta site-nav-cta--primary open-modal" data-target="modal-register"')
+        && strpos($header, 'site-nav-right') < strpos($header, 'data-target="modal-login"')
+        && strpos($header, 'data-target="modal-login"') < strpos($header, 'class="site-header-banner"'),
+
+    'register CTA reads "Kayıt Ol", not the old "Ücretsiz Kayıt Ol"' => str_contains($header, '>Kayıt Ol</button>')
+        && !str_contains($header, 'Ücretsiz Kayıt Ol'),
+
+    'no duplicate account row is emitted below the banner' => !str_contains($blade, 'Desktop top-right account area')
+        && substr_count($blade, 'id="account-menu-toggle"') === 0,
 ];
 
 foreach ($checks as $name => $passed) {

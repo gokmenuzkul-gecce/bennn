@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'default_currency' => env('APP_CURRENCY', 'USD'),
+    'default_currency' => env('APP_CURRENCY', 'TRY'),
 
     'drivers' => [
         'btcpay' => [

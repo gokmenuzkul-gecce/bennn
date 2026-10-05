@@ -54,11 +54,44 @@
         @endif
     </a>
 
-    <!-- Right: engagement links -->
+    <!-- Right: engagement links + auth / account cluster -->
     <div class="site-nav-right">
         @foreach($hRight as $item)
             <a href="{{ $item['url'] }}" class="site-nav-link {{ $item['active'] ? 'is-active' : '' }}">{{ $item['label'] }}</a>
         @endforeach
+        @guest
+            <button type="button" class="site-nav-cta site-nav-cta--ghost open-modal" data-target="modal-login">Giriş Yap</button>
+            <button type="button" class="site-nav-cta site-nav-cta--primary open-modal" data-target="modal-register">Kayıt Ol</button>
+        @else
+            <div class="site-nav-account" id="account-menu-wrap">
+                <button type="button" id="account-menu-toggle" aria-haspopup="true" aria-expanded="false" class="site-nav-cta site-nav-cta--ghost">
+                    <span class="site-nav-avatar">{{ strtoupper(substr(Auth::user()->username ?? 'U', 0, 1)) }}</span>
+                    <span class="site-nav-username">{{ Auth::user()->username ?? Auth::user()->email }}</span>
+                    <span class="material-symbols-outlined site-nav-caret">expand_more</span>
+                </button>
+                <div id="account-menu" class="hidden site-nav-menu">
+                    <div class="site-nav-menu-head">
+                        <p class="site-nav-menu-eyebrow">Hesap</p>
+                        <p class="site-nav-menu-name">{{ Auth::user()->username ?? Auth::user()->email }}</p>
+                        <div class="site-nav-menu-balance">
+                            <span class="font-mono-jet" id="account-menu-balance">{{ number_format(Auth::user()->balance, 2) }}</span>
+                            <span class="site-nav-menu-currency">{{ strtoupper(settings('default_currency') ?: 'TRY') }}</span>
+                        </div>
+                    </div>
+                    <nav class="site-nav-menu-list">
+                        <button type="button" class="account-menu-item open-modal" data-target="modal-profile"><span class="material-symbols-outlined">person</span> Profilim</button>
+                        <button type="button" class="account-menu-item open-modal" data-target="modal-deposit"><span class="material-symbols-outlined">add_card</span> Bakiye Yükle</button>
+                        @if(settings('enable_cashout', '1') == '1')
+                        <button type="button" class="account-menu-item open-modal" data-target="modal-cashout"><span class="material-symbols-outlined">payments</span> Para Çekme</button>
+                        @endif
+                        <a href="{{ route('frontend.vip.index') }}" class="account-menu-item no-underline"><span class="material-symbols-outlined">workspace_premium</span> VIP Kulübü</a>
+                        <a href="{{ route('frontend.affiliates.index') }}" class="account-menu-item no-underline"><span class="material-symbols-outlined">groups</span> Ortaklık</a>
+                        <div class="site-nav-menu-divider"></div>
+                        <a href="{{ route('frontend.auth.logout') }}" class="account-menu-item account-menu-item--danger no-underline"><span class="material-symbols-outlined">logout</span> Çıkış Yap</a>
+                    </nav>
+                </div>
+            </div>
+        @endguest
     </div>
 </div>
 
@@ -130,7 +163,7 @@
                 Giriş Yap
             </button>
             <button type="button" class="open-modal w-full py-2.5 rounded-xl bg-primary text-white text-center text-xs font-bold shadow-md shadow-primary/20 transition-colors" data-target="modal-register">
-                Ücretsiz Kayıt Ol
+                Kayıt Ol
             </button>
         @endauth
     </div>
