@@ -858,42 +858,88 @@
         .account-menu-item--danger:hover { color: #fda4af; }
         .site-nav-menu-divider { margin: 4px 0; border-top: 1px solid rgba(255,255,255,.08); }
         .site-brand-center {
+            position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
             text-decoration: none;
             min-width: 0;
+            isolation: isolate;
+        }
+        /* Warm halo that breathes behind the crest. */
+        .site-brand-halo {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: clamp(48px, 5.2vw, 64px);
+            height: clamp(48px, 5.2vw, 64px);
+            transform: translate(-50%, -50%);
+            border-radius: 999px;
+            background: radial-gradient(circle,
+                rgba(250, 162, 30, .55) 0%,
+                rgba(250, 162, 30, .22) 42%,
+                rgba(250, 162, 30, 0) 70%);
+            filter: blur(7px);
+            opacity: .5;
+            z-index: -1;
+            pointer-events: none;
+            animation: brandHalo 6s ease-in-out infinite;
         }
         .site-brand-center img {
+            position: relative;
+            z-index: 1;
             height: clamp(30px, 3.6vw, 42px);
             width: auto;
             object-fit: contain;
             filter: drop-shadow(0 2px 10px rgba(0,0,0,.55));
             transform-origin: 50% 55%;
-            animation: brandFloat 5.5s ease-in-out infinite, brandGlow 5.5s ease-in-out infinite;
-            transition: transform .35s ease;
+            will-change: transform, filter;
+            animation:
+                brandIntro .9s cubic-bezier(.22,.72,.28,1.08) both,
+                brandFloat 6s ease-in-out 1s infinite,
+                brandGlow 6s ease-in-out 1s infinite;
+            transition: transform .35s ease, filter .35s ease;
         }
         .site-brand-center:hover img,
         .site-brand-center:focus-visible img {
-            animation: brandSpin 1.1s linear infinite;
-            transform: scale(1.07);
+            animation: brandSpin 1.4s linear infinite;
+            transform: scale(1.1);
         }
+        .site-brand-center:hover .site-brand-halo,
+        .site-brand-center:focus-visible .site-brand-halo {
+            animation: brandHalo 1.4s ease-in-out infinite;
+            opacity: .85;
+        }
+        /* One-time entrance: rises and settles into the bar. */
+        @keyframes brandIntro {
+            0%   { opacity: 0; transform: translateY(9px) scale(.82); }
+            60%  { opacity: 1; }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        /* Idle: a slow float with a barely-there sway. */
         @keyframes brandFloat {
-            0%, 100% { transform: translateY(0); }
-            50%      { transform: translateY(-3px); }
+            0%, 100% { transform: translateY(0) rotate(-.5deg); }
+            50%      { transform: translateY(-4px) rotate(.5deg); }
         }
         @keyframes brandGlow {
             0%, 100% { filter: drop-shadow(0 2px 10px rgba(0,0,0,.55)) drop-shadow(0 0 0 rgba(250,162,30,0)); }
-            50%      { filter: drop-shadow(0 2px 10px rgba(0,0,0,.55)) drop-shadow(0 0 10px rgba(250,162,30,.55)); }
+            50%      { filter: drop-shadow(0 3px 12px rgba(0,0,0,.5)) drop-shadow(0 0 12px rgba(250,162,30,.6)); }
+        }
+        @keyframes brandHalo {
+            0%, 100% { transform: translate(-50%, -50%) scale(.85); opacity: .4; }
+            50%      { transform: translate(-50%, -50%) scale(1.12); opacity: .7; }
         }
         @keyframes brandSpin {
-            from { transform: rotate(0deg) scale(1.07); }
-            to   { transform: rotate(360deg) scale(1.07); }
+            from { transform: rotate(0deg) scale(1.1); }
+            to   { transform: rotate(360deg) scale(1.1); }
         }
         @media (prefers-reduced-motion: reduce) {
             .site-brand-center img { animation: none; }
+            .site-brand-center .site-brand-halo { animation: none; opacity: .45; }
             .site-brand-center:hover img,
             .site-brand-center:focus-visible img { animation: none; transform: none; }
+            .site-brand-center:hover .site-brand-halo,
+            .site-brand-center:focus-visible .site-brand-halo { animation: none; }
         }
         /* Hamburger button, top-left of the nav bar */
         .site-burger {

@@ -43,12 +43,19 @@ $checks = [
 
     'brand logo carries a subtle animation with reduced-motion fallback' => str_contains($blade, '@keyframes brandFloat')
         && str_contains($blade, '@keyframes brandGlow')
-        && str_contains($blade, 'animation: brandFloat 5.5s ease-in-out infinite, brandGlow')
+        && str_contains($blade, 'animation:')
+        && str_contains($blade, 'brandFloat 6s ease-in-out 1s infinite')
         && str_contains($blade, 'prefers-reduced-motion: reduce'),
 
+    'brand logo has a one-time intro and a breathing halo' => str_contains($blade, '@keyframes brandIntro')
+        && str_contains($blade, 'brandIntro .9s cubic-bezier')
+        && str_contains($blade, '@keyframes brandHalo')
+        && str_contains($blade, '.site-brand-halo')
+        && str_contains($header, 'site-brand-halo'),
+
     'brand logo spins on hover/focus' => str_contains($blade, '@keyframes brandSpin')
-        && str_contains($blade, 'rotate(360deg) scale(1.07)')
-        && str_contains($blade, 'animation: brandSpin 1.1s linear infinite'),
+        && str_contains($blade, 'rotate(360deg) scale(1.1)')
+        && str_contains($blade, 'animation: brandSpin 1.4s linear infinite'),
 
     'brand logo asset is present and cache-busted' => is_file($root . '/../minimal/brand-logo.png')
         && str_contains($header, 'brand-logo.png?v='),
