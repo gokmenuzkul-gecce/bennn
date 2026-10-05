@@ -875,7 +875,7 @@
         }
         .site-brand-center:hover img,
         .site-brand-center:focus-visible img {
-            animation-play-state: paused;
+            animation: brandSpin 1.1s linear infinite;
             transform: scale(1.07);
         }
         @keyframes brandFloat {
@@ -886,8 +886,14 @@
             0%, 100% { filter: drop-shadow(0 2px 10px rgba(0,0,0,.55)) drop-shadow(0 0 0 rgba(250,162,30,0)); }
             50%      { filter: drop-shadow(0 2px 10px rgba(0,0,0,.55)) drop-shadow(0 0 10px rgba(250,162,30,.55)); }
         }
+        @keyframes brandSpin {
+            from { transform: rotate(0deg) scale(1.07); }
+            to   { transform: rotate(360deg) scale(1.07); }
+        }
         @media (prefers-reduced-motion: reduce) {
             .site-brand-center img { animation: none; }
+            .site-brand-center:hover img,
+            .site-brand-center:focus-visible img { animation: none; transform: none; }
         }
         /* Hamburger button, top-left of the nav bar */
         .site-burger {

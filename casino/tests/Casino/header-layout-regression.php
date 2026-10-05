@@ -46,6 +46,10 @@ $checks = [
         && str_contains($blade, 'animation: brandFloat 5.5s ease-in-out infinite, brandGlow')
         && str_contains($blade, 'prefers-reduced-motion: reduce'),
 
+    'brand logo spins on hover/focus' => str_contains($blade, '@keyframes brandSpin')
+        && str_contains($blade, 'rotate(360deg) scale(1.07)')
+        && str_contains($blade, 'animation: brandSpin 1.1s linear infinite'),
+
     'brand logo asset is present and cache-busted' => is_file($root . '/../minimal/brand-logo.png')
         && str_contains($header, 'brand-logo.png?v='),
 
