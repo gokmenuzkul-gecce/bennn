@@ -47,6 +47,9 @@ $checks = [
 
     'banner crops around the subject rather than the vertical centre' => str_contains($blade, 'object-position: center 38%;'),
 
+    'banner asset is cache-busted so a new artwork actually shows' => str_contains($header, "/minimal/header-banner.jpg?v=")
+        && str_contains($header, "filemtime(base_path('../minimal/header-banner.jpg'))"),
+
     'mobile keeps a readable strip without losing the subject' => str_contains($blade, 'aspect-ratio: 16 / 9;')
         && str_contains($blade, 'object-position: center 42%;'),
 
