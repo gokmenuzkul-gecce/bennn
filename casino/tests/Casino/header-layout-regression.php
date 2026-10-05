@@ -42,12 +42,13 @@ $checks = [
     'nav bar is a flex row with the brand centred' => str_contains($blade, '.site-header-nav {')
         && str_contains($blade, 'grid-template-columns: 1fr auto 1fr;'),
 
-    'banner is tall enough for a hero header' => str_contains($blade, 'height: clamp(150px, 24vw, 280px);'),
+    'banner spans the full width and scales with the site width' => str_contains($blade, 'aspect-ratio: 1345 / 458;')
+        && str_contains($blade, 'max-height: 360px;'),
 
-    'banner frames the model instead of the vertical centre' => str_contains($blade, 'object-position: center 30%;'),
+    'banner crops around the subject rather than the vertical centre' => str_contains($blade, 'object-position: center 38%;'),
 
-    'mobile keeps a shorter strip without losing the model' => str_contains($blade, 'height: clamp(120px, 34vw, 200px);')
-        && str_contains($blade, 'object-position: center 32%;'),
+    'mobile keeps a readable strip without losing the subject' => str_contains($blade, 'aspect-ratio: 16 / 9;')
+        && str_contains($blade, 'object-position: center 42%;'),
 
     'desktop reveals the horizontal link rows' => str_contains($blade, '.site-nav-left .site-nav-link { display: inline-block; }')
         && str_contains($blade, '.site-nav-right { display: flex; }'),

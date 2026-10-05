@@ -914,20 +914,25 @@
             overflow: hidden;
             background: #0b0503;
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-            height: clamp(150px, 24vw, 280px);
+            /* Full-bleed width; the height follows the artwork's own aspect
+               ratio so it scales with the site width, capped so it never
+               dominates very wide viewports. */
+            aspect-ratio: 1345 / 458;
+            max-height: 360px;
         }
         .site-header-banner > img {
             display: block;
             width: 100%;
             height: 100%;
-            /* Cover spans edge to edge; the vertical focal point sits on the
-               model's face (upper-middle of the art) so she stays in frame. */
+            /* Cover keeps the art edge to edge; the focal point sits a little
+               above centre so the subject stays in frame when cropped. */
             object-fit: cover;
-            object-position: center 30%;
+            object-position: center 38%;
         }
         @media (max-width: 640px) {
-            .site-header-banner { height: clamp(120px, 34vw, 200px); }
-            .site-header-banner > img { object-position: center 32%; }
+            /* Narrow screens get a taller crop so the strip stays readable. */
+            .site-header-banner { aspect-ratio: 16 / 9; max-height: none; }
+            .site-header-banner > img { object-position: center 42%; }
         }
         @media (min-width: 1024px) {
             .site-nav-left .site-nav-link { display: inline-block; }
