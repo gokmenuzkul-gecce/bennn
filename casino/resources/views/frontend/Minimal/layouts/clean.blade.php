@@ -265,6 +265,150 @@
         .hero-nav.prev { left: 16px; }
         .hero-nav.next { right: 16px; }
 
+        /* Ambient aurora drifting behind the hero copy (sits above the slide art,
+           below the z-10 content) and tinted per slide via --ha1/--ha2. */
+        .hero-aurora {
+            position: absolute;
+            inset: -45% -12% auto -12%;
+            height: 82%;
+            pointer-events: none;
+            z-index: 1;
+            opacity: .85;
+            filter: blur(34px);
+            background:
+                radial-gradient(ellipse 46% 62% at 18% 34%, var(--ha1, rgba(16,185,129,.42)), transparent 62%),
+                radial-gradient(ellipse 46% 62% at 82% 22%, var(--ha2, rgba(6,182,212,.36)), transparent 62%),
+                radial-gradient(ellipse 58% 58% at 52% 6%, rgba(168,85,247,.22), transparent 66%);
+            animation: heroAurora 15s ease-in-out infinite alternate;
+        }
+        @keyframes heroAurora {
+            0%   { transform: translate3d(-2.5%, 0, 0) scale(1); }
+            100% { transform: translate3d(3%, 2.5%, 0) scale(1.09); }
+        }
+        /* Thin animated light line along the top edge */
+        .hero-slider::before {
+            content: "";
+            position: absolute;
+            inset: 0 0 auto 0;
+            height: 2px;
+            z-index: 6;
+            background: linear-gradient(90deg, transparent, rgba(52,211,153,.95), rgba(34,211,238,.95), transparent);
+            background-size: 200% 100%;
+            animation: heroTopLine 6.5s linear infinite;
+            pointer-events: none;
+        }
+        @keyframes heroTopLine { to { background-position: 200% 0; } }
+        /* Soft breathing glow around the whole panel */
+        .hero-slider { animation: heroPanelGlow 9s ease-in-out infinite; }
+        @keyframes heroPanelGlow {
+            0%, 100% { box-shadow: 0 30px 80px -30px rgba(0,0,0,.85), 0 0 0 rgba(16,185,129,0), inset 0 1px 0 rgba(255,255,255,.06); }
+            50%      { box-shadow: 0 34px 90px -30px rgba(0,0,0,.9), 0 0 46px -6px rgba(16,185,129,.28), inset 0 1px 0 rgba(255,255,255,.08); }
+        }
+
+        /* ============ QUICK ACCESS TILES ============ */
+        .quick-tiles {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+        @media (min-width: 640px) { .quick-tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+        @media (min-width: 1024px) { .quick-tiles { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
+        .quick-tile {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding: 15px 14px;
+            border-radius: 18px;
+            text-decoration: none;
+            overflow: hidden;
+            background: linear-gradient(160deg, rgba(255,255,255,.06), rgba(255,255,255,.018));
+            border: 1px solid rgba(255,255,255,.08);
+            transition: transform .32s cubic-bezier(.34,1.56,.64,1), border-color .3s, box-shadow .3s;
+        }
+        .quick-tile::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 82% -10%, var(--qc, #10b981), transparent 62%);
+            opacity: 0;
+            transition: opacity .35s;
+            pointer-events: none;
+        }
+        .quick-tile:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255,255,255,.18);
+            box-shadow: 0 20px 40px -20px var(--qc, #10b981);
+        }
+        .quick-tile:hover::before { opacity: .22; }
+        .quick-tile-icon {
+            position: relative;
+            z-index: 1;
+            width: 40px; height: 40px;
+            display: grid; place-items: center;
+            border-radius: 12px;
+            color: #fff;
+            background: linear-gradient(135deg, var(--qc, #10b981), rgba(255,255,255,.08));
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.28), 0 10px 22px -12px var(--qc, #10b981);
+        }
+        .quick-tile-icon .material-symbols-outlined { font-size: 22px; }
+        .quick-tile-title { position: relative; z-index: 1; font-size: 12.5px; font-weight: 800; color: #e8eef7; letter-spacing: -.01em; }
+        .quick-tile-sub { position: relative; z-index: 1; font-size: 10.5px; font-weight: 500; color: #7f8ea3; }
+
+        /* ============ LIVE STATS STRIP ============ */
+        .stat-strip {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+        @media (min-width: 768px) { .stat-strip { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+        .stat-card {
+            position: relative;
+            padding: 16px 18px;
+            border-radius: 18px;
+            overflow: hidden;
+            background: rgba(18,22,32,.72);
+            border: 1px solid rgba(255,255,255,.07);
+            transition: border-color .3s, transform .3s;
+        }
+        .stat-card:hover { border-color: rgba(255,255,255,.16); transform: translateY(-3px); }
+        .stat-card::after {
+            content: "";
+            position: absolute;
+            right: -34px; top: -34px;
+            width: 96px; height: 96px;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--sc, #10b981), transparent 70%);
+            opacity: .2;
+            pointer-events: none;
+        }
+        .stat-value {
+            position: relative; z-index: 1;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 24px; font-weight: 800; color: #fff;
+            letter-spacing: -.02em;
+            line-height: 1.1;
+        }
+        .stat-label {
+            position: relative; z-index: 1;
+            margin-top: 3px;
+            font-size: 10.5px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: .12em;
+            color: #7f8ea3;
+        }
+
+        /* Scroll-reveal for homepage sections */
+        .reveal {
+            opacity: 0;
+            transform: translateY(22px);
+            transition: opacity .7s cubic-bezier(.22,1,.36,1), transform .7s cubic-bezier(.22,1,.36,1);
+        }
+        .reveal.is-in { opacity: 1; transform: none; }
+        @media (prefers-reduced-motion: reduce) {
+            .reveal { opacity: 1; transform: none; transition: none; }
+            .hero-aurora, .hero-slider, .hero-slider::before { animation: none !important; }
+        }
+
         /* ============ PROVIDER TILES ============ */
         .provider-tile {
             position: relative;

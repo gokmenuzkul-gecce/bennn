@@ -4,12 +4,31 @@
 
 @section('content')
 
+<noscript><style>.reveal { opacity: 1 !important; transform: none !important; }</style></noscript>
+
 @php
     $cedarBrand = settings('cedar_display_name', 'CEDAR');
     $coinLabel = settings('coin_display_name', 'TRY');
     $navCedarGames = settings('nav_label_cedar_games', 'CEDAR Games');
     $navSports = settings('nav_label_sportsbook', 'Battle Odds');
     $navPredictions = settings('nav_label_predictions', 'Gelecek Oyu');
+
+    // Provider brands we have cover art for, independent of the games currently
+    // loaded, so both the stats strip and the marquee are always complete.
+    $providerColors = ['#10b981','#06b6d4','#f59e0b','#a855f7','#f43f5e','#3b82f6','#22c55e','#eab308'];
+    $logoDir = public_path('frontend/Default/provider-logos');
+    $providerList = \VanguardLTE\Category::where('parent', 0)
+        ->orderBy('position', 'ASC')
+        ->get()
+        ->reject(fn($c) => in_array($c->href, ['cedar_games','cedar_cards','cedar_remakes','slots'], true))
+        ->filter(fn($c) => is_file($logoDir . '/' . $c->href . '.svg'))
+        ->values();
+    if ($providerList->isEmpty() && is_iterable($categories)) {
+        $providerList = collect($categories)
+            ->reject(fn($c) => in_array($c->href, ['cedar_games','cedar_cards','cedar_remakes','slots'], true))
+            ->filter(fn($c) => is_file($logoDir . '/' . $c->href . '.svg'))
+            ->values();
+    }
 @endphp
 
 <!-- ===== MODERN HERO SLIDER ===== -->
@@ -17,7 +36,8 @@
     <div class="hero-track">
 
         <!-- Slide 1: Crash / Slots -->
-        <div class="hero-slide is-active" style="background:linear-gradient(120deg,#0c3b2c 0%,#11304f 55%,#141b28 100%);">
+        <div class="hero-slide is-active" style="background:linear-gradient(120deg,#0c3b2c 0%,#11304f 55%,#141b28 100%);--ha1:rgba(16,185,129,.5);--ha2:rgba(6,182,212,.4);">
+            <div class="hero-aurora" aria-hidden="true"></div>
             <div class="absolute inset-0 pointer-events-none" style="background:radial-gradient(circle at 82% 40%,rgba(16,185,129,0.35),transparent 55%);"></div>
             <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 w-full">
                 <div class="space-y-3 max-w-xl">
@@ -51,7 +71,8 @@
         </div>
 
         <!-- Slide 2: Sportsbook -->
-        <div class="hero-slide" style="background:linear-gradient(120deg,#073a4c 0%,#0d3d5e 55%,#141b28 100%);">
+        <div class="hero-slide" style="background:linear-gradient(120deg,#073a4c 0%,#0d3d5e 55%,#141b28 100%);--ha1:rgba(6,182,212,.5);--ha2:rgba(56,189,248,.4);">
+            <div class="hero-aurora" aria-hidden="true"></div>
             <div class="absolute inset-0 pointer-events-none" style="background:radial-gradient(circle at 80% 45%,rgba(6,182,212,0.38),transparent 55%);"></div>
             <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 w-full">
                 <div class="space-y-3 max-w-xl">
@@ -87,7 +108,8 @@
         </div>
 
         <!-- Slide 3: Jackpot / VIP -->
-        <div class="hero-slide" style="background:linear-gradient(120deg,#3d2109 0%,#2f1b4f 55%,#141b28 100%);">
+        <div class="hero-slide" style="background:linear-gradient(120deg,#3d2109 0%,#2f1b4f 55%,#141b28 100%);--ha1:rgba(245,158,11,.5);--ha2:rgba(168,85,247,.4);">
+            <div class="hero-aurora" aria-hidden="true"></div>
             <div class="absolute inset-0 pointer-events-none" style="background:radial-gradient(circle at 80% 45%,rgba(245,158,11,0.35),transparent 55%);"></div>
             <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 w-full">
                 <div class="space-y-3 max-w-xl">
@@ -170,28 +192,68 @@
     </div>
 </div>
 
+<!-- ===== QUICK ACCESS ===== -->
+<section class="reveal">
+    <div class="quick-tiles">
+        <a href="{{ route('frontend.sports.index') }}" class="quick-tile" style="--qc:#06b6d4;">
+            <span class="quick-tile-icon"><span class="material-symbols-outlined">sports_soccer</span></span>
+            <span class="quick-tile-title">Spor Bahisleri</span>
+            <span class="quick-tile-sub">Canlı oranlar</span>
+        </a>
+        <a href="{{ route('frontend.lotto.index') }}" class="quick-tile" style="--qc:#f59e0b;">
+            <span class="quick-tile-icon"><span class="material-symbols-outlined">auto_awesome</span></span>
+            <span class="quick-tile-title">Jackpot Bölgesi</span>
+            <span class="quick-tile-sub">Saatlik çekiliş</span>
+        </a>
+        <a href="{{ route('frontend.predictions.index') }}" class="quick-tile" style="--qc:#a855f7;">
+            <span class="quick-tile-icon"><span class="material-symbols-outlined">query_stats</span></span>
+            <span class="quick-tile-title">Tahmin Piyasaları</span>
+            <span class="quick-tile-sub">Gelecek oyu</span>
+        </a>
+        <a href="{{ route('frontend.vip.index') }}" class="quick-tile" style="--qc:#eab308;">
+            <span class="quick-tile-icon"><span class="material-symbols-outlined">workspace_premium</span></span>
+            <span class="quick-tile-title">VIP Kulübü</span>
+            <span class="quick-tile-sub">6 kademe ayrıcalık</span>
+        </a>
+        <a href="{{ route('frontend.bonuses') }}" class="quick-tile" style="--qc:#10b981;">
+            <span class="quick-tile-icon"><span class="material-symbols-outlined">card_giftcard</span></span>
+            <span class="quick-tile-title">Bonuslar</span>
+            <span class="quick-tile-sub">Kampanyalar</span>
+        </a>
+        <a href="{{ route('frontend.affiliates.index') }}" class="quick-tile" style="--qc:#f43f5e;">
+            <span class="quick-tile-icon"><span class="material-symbols-outlined">groups</span></span>
+            <span class="quick-tile-title">Ortaklık</span>
+            <span class="quick-tile-sub">Gelir paylaşımı</span>
+        </a>
+    </div>
+</section>
+
+<!-- ===== LIVE STATS STRIP ===== -->
+<section class="reveal">
+    <div class="stat-strip">
+        <div class="stat-card" style="--sc:#10b981;">
+            <div class="stat-value">{{ number_format(count($games), 0, ',', '.') }}+</div>
+            <div class="stat-label">Oyun</div>
+        </div>
+        <div class="stat-card" style="--sc:#06b6d4;">
+            <div class="stat-value">{{ $providerList->count() }}+</div>
+            <div class="stat-label">Sağlayıcı</div>
+        </div>
+        <div class="stat-card" style="--sc:#f59e0b;">
+            <div class="stat-value">7/24</div>
+            <div class="stat-label">Canlı Destek</div>
+        </div>
+        <div class="stat-card" style="--sc:#a855f7;">
+            <div class="stat-value">Anında</div>
+            <div class="stat-label">{{ $coinLabel }} Ödeme</div>
+        </div>
+    </div>
+</section>
+
 <!-- ===== PROVIDERS / OYUN SAĞLAYICILARI ===== -->
-<section class="space-y-4">
+<section class="space-y-4 reveal">
     <div class="marquee-mask overflow-hidden">
         <div class="marquee-track">
-            @php
-                $providerColors = ['#10b981','#06b6d4','#f59e0b','#a855f7','#f43f5e','#3b82f6','#22c55e','#eab308'];
-                $logoDir = public_path('frontend/Default/provider-logos');
-                // Surface every licensed brand we have cover art for, independent of the
-                // games currently loaded, so the marquee is always complete.
-                $providerList = \VanguardLTE\Category::where('parent', 0)
-                    ->orderBy('position', 'ASC')
-                    ->get()
-                    ->reject(fn($c) => in_array($c->href, ['cedar_games','cedar_cards','cedar_remakes','slots'], true))
-                    ->filter(fn($c) => is_file($logoDir . '/' . $c->href . '.svg'))
-                    ->values();
-                if ($providerList->isEmpty() && is_iterable($categories)) {
-                    $providerList = collect($categories)
-                        ->reject(fn($c) => in_array($c->href, ['cedar_games','cedar_cards','cedar_remakes','slots'], true))
-                        ->filter(fn($c) => is_file($logoDir . '/' . $c->href . '.svg'))
-                        ->values();
-                }
-            @endphp
             @foreach($providerList as $i => $cat)
                 @php($logo = '/frontend/Default/provider-logos/' . $cat->href . '.svg')
                 <a href="{{ route('frontend.game.list.category', $cat->href) }}" class="provider-tile" style="--pc: {{ $providerColors[$i % count($providerColors)] }};" title="{{ $cat->title }}">
@@ -209,7 +271,7 @@
 </section>
 
 <!-- Games Grid Section -->
-<section class="space-y-5">
+<section class="space-y-5 reveal">
     <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div class="flex items-center gap-3">
             <span id="games-count-label" class="font-mono-jet text-xs text-primary font-bold bg-primary/10 border border-primary/20 px-3 py-1 rounded-lg">
@@ -536,6 +598,30 @@
     }, { passive: true });
 
     restart();
+})();
+</script>
+
+<!-- ===== HOMEPAGE SCROLL REVEAL ===== -->
+<script>
+(function () {
+    var nodes = document.querySelectorAll('.reveal');
+    if (!nodes.length) return;
+    if (!('IntersectionObserver' in window)) {
+        nodes.forEach(function (n) { n.classList.add('is-in'); });
+        return;
+    }
+    var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('is-in');
+                io.unobserve(entry.target);
+            }
+        });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.06 });
+    nodes.forEach(function (n, i) {
+        n.style.transitionDelay = Math.min(i * 70, 280) + 'ms';
+        io.observe(n);
+    });
 })();
 </script>
 
