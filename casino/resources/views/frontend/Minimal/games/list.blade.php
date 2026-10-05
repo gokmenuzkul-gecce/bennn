@@ -220,14 +220,6 @@
 <!-- Games Grid Section -->
 <section class="space-y-5">
     <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-        <div>
-            <div class="flex items-center gap-2">
-                <span class="material-symbols-outlined text-primary text-2xl" style="font-variation-settings: 'FILL' 1;">grid_view</span>
-                <h2 class="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-white uppercase">Oyun Arenası</h2>
-            </div>
-            <p class="text-on-surface-muted text-xs sm:text-sm mt-1">1.400'den fazla gerçek slot oyunu — bakiyenle anında oyna.</p>
-        </div>
-
         <div class="flex items-center gap-3">
             <span id="games-count-label" class="font-mono-jet text-xs text-primary font-bold bg-primary/10 border border-primary/20 px-3 py-1 rounded-lg">
                 {{ count($games) }} OYUN ÇEVRİMİÇİ
