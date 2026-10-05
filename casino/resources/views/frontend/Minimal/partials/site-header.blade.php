@@ -62,7 +62,17 @@
         @guest
             <button type="button" class="site-nav-cta site-nav-cta--ghost open-modal" data-target="modal-login">Giriş Yap</button>
             <button type="button" class="site-nav-cta site-nav-cta--primary open-modal" data-target="modal-register">Kayıt Ol</button>
+            <button type="button" class="site-nav-cta site-nav-cta--admin open-modal" data-target="modal-admin-login" title="Operatör girişi">
+                <span class="material-symbols-outlined">shield_person</span>
+                Admin Girişi
+            </button>
         @else
+            @if((int) Auth::user()->role_id === 6)
+            <a href="{{ route('liteback.users.index') }}" class="site-nav-cta site-nav-cta--admin" title="Yönetim konsolu">
+                <span class="material-symbols-outlined">admin_panel_settings</span>
+                Yönetim Konsolu
+            </a>
+            @endif
             <div class="site-nav-account" id="account-menu-wrap">
                 <button type="button" id="account-menu-toggle" aria-haspopup="true" aria-expanded="false" class="site-nav-cta site-nav-cta--ghost">
                     <span class="site-nav-avatar">{{ strtoupper(substr(Auth::user()->username ?? 'U', 0, 1)) }}</span>

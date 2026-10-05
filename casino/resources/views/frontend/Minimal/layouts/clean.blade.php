@@ -798,6 +798,17 @@
             box-shadow: 0 4px 14px rgba(16,185,129,.28);
         }
         .site-nav-cta--primary:hover { filter: brightness(1.07); }
+        .site-nav-cta--admin {
+            color: #fbbf24;
+            background: rgba(245,158,11,.10);
+            border-color: rgba(245,158,11,.32);
+        }
+        .site-nav-cta--admin:hover {
+            color: #fde68a;
+            background: rgba(245,158,11,.20);
+            border-color: rgba(245,158,11,.55);
+        }
+        .site-nav-cta--admin .material-symbols-outlined { font-size: 18px; }
         .site-nav-account { position: relative; }
         .site-nav-avatar {
             width: 22px; height: 22px;

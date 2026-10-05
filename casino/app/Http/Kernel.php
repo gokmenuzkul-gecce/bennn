@@ -48,7 +48,8 @@ namespace VanguardLTE\Http
             'shop_not_zero' => 'VanguardLTE\Http\Middleware\ShopNotZero', 
             'only_for_admin' => 'VanguardLTE\Http\Middleware\OnlyForAdmin', 
             'permission_api' => 'VanguardLTE\Http\Middleware\VerifyPermission', 
-            'checker' => 'VanguardLTE\Http\Middleware\Checker', 
+            'checker' => 'VanguardLTE\Http\Middleware\Checker',
+            'staff_only' => 'VanguardLTE\Http\Middleware\StaffOnly',
             '2fa' => 'PragmaRX\Google2FALaravel\Middleware',
             'disable.legacy' => 'VanguardLTE\Http\Middleware\DisableLegacyFeatures',
             'game.homebutton' => 'VanguardLTE\Http\Middleware\InjectGameHomeButton'

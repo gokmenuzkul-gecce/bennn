@@ -27,6 +27,7 @@ $read = static function (string $path) use ($root): string {
 
 $blade = $read('resources/views/frontend/Minimal/layouts/clean.blade.php');
 $header = $read('resources/views/frontend/Minimal/partials/site-header.blade.php');
+$modals = $read('resources/views/frontend/Minimal/partials/modals.blade.php');
 
 $checks = [
     'header partial renders a dedicated nav bar' => str_contains($header, 'class="site-header-nav"'),
@@ -61,6 +62,20 @@ $checks = [
 
     'no duplicate account row is emitted below the banner' => !str_contains($blade, 'Desktop top-right account area')
         && substr_count($blade, 'id="account-menu-toggle"') === 0,
+
+    'guest nav offers a top-right admin login button' => str_contains($header, 'site-nav-cta--admin open-modal" data-target="modal-admin-login"')
+        && strpos($header, 'site-nav-right') < strpos($header, 'data-target="modal-admin-login"')
+        && strpos($header, 'data-target="modal-admin-login"') < strpos($header, 'class="site-header-banner"'),
+
+    'admin login modal exists with its own form' => str_contains($modals, 'id="modal-admin-login"')
+        && str_contains($modals, 'id="admin-login-form"')
+        && str_contains($modals, "route('frontend.auth.login.post')"),
+
+    'admin form posts to the operator console' => str_contains($modals, 'name="to" value="{{ url(\'/liteback\') }}"')
+        && str_contains($modals, "window.location.href = '/liteback';"),
+
+    'signed-in admins get a console link in the nav' => str_contains($header, "(int) Auth::user()->role_id === 6")
+        && str_contains($header, "route('liteback.users.index')"),
 ];
 
 foreach ($checks as $name => $passed) {

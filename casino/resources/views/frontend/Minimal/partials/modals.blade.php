@@ -90,6 +90,39 @@
     </div>
 </div>
 
+<!-- Admin / Operator Login Modal (separate from the player login) -->
+<div id="modal-admin-login" class="modal">
+    <div class="modal-content glass-panel border border-amber-500/25 shadow-2xl">
+        <button type="button" class="close-modal" aria-label="Kapat">&times;</button>
+        <div class="mb-4 flex items-center gap-3">
+            <div class="w-11 h-11 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 flex-shrink-0">
+                <span class="material-symbols-outlined text-2xl">admin_panel_settings</span>
+            </div>
+            <div>
+                <h2 class="text-lg font-bold text-white tracking-tight">Operatör Girişi</h2>
+                <p class="text-xs text-on-surface-muted mt-0.5">Yetkili hesapla yönetim konsoluna erişin.</p>
+            </div>
+        </div>
+        <form id="admin-login-form" action="{{ route('frontend.auth.login.post') }}" method="POST" class="space-y-3.5">
+            @csrf
+            <input type="hidden" name="to" value="{{ url('/liteback') }}">
+            <div class="form-group">
+                <label for="admin-login-username">Yönetici Kullanıcı Adı / E-posta</label>
+                <input type="text" id="admin-login-username" name="username" required placeholder="Yönetici kullanıcı adı veya e-posta">
+            </div>
+            <div class="form-group">
+                <label for="admin-login-password">Parola</label>
+                <input type="password" id="admin-login-password" name="password" required placeholder="••••••••">
+            </div>
+            <button type="submit" id="btn-admin-login-submit" class="btn-primary bg-amber-500 hover:bg-amber-400 text-black">Konsola Giriş Yap</button>
+            <div id="admin-login-status-msg" class="text-xs font-bold text-center mt-2 min-h-[18px]"></div>
+        </form>
+        <p class="text-[11px] text-on-surface-subtle text-center pt-2">
+            Bu giriş yalnızca yönetici (Admin) rolüne sahip hesaplar içindir.
+        </p>
+    </div>
+</div>
+
 <!-- Fast Register Modal -->
 <div id="modal-register" class="modal">
     <div class="modal-content glass-panel border border-white/10 shadow-2xl">
@@ -897,6 +930,96 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (loginStatusMsg) {
                     loginStatusMsg.className = "text-xs font-bold text-center mt-2 text-accent-rose";
                     loginStatusMsg.innerText = "Connection error. Please try again.";
+                }
+            });
+        });
+    }
+
+    // Admin / Operator Login Form Handler
+    const adminLoginForm = document.getElementById('admin-login-form');
+    const adminLoginStatusMsg = document.getElementById('admin-login-status-msg');
+    const adminLoginBtn = document.getElementById('btn-admin-login-submit');
+
+    if (adminLoginForm) {
+        adminLoginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const usernameInput = document.getElementById('admin-login-username').value.trim();
+            const passwordInput = document.getElementById('admin-login-password').value;
+
+            if (!usernameInput || !passwordInput) {
+                if (adminLoginStatusMsg) {
+                    adminLoginStatusMsg.className = "text-xs font-bold text-center mt-2 text-accent-rose";
+                    adminLoginStatusMsg.innerText = "Lütfen kullanıcı adı ve parolayı girin.";
+                }
+                return;
+            }
+
+            if (adminLoginBtn) {
+                adminLoginBtn.disabled = true;
+                adminLoginBtn.innerHTML = '<span class="inline-block animate-spin mr-1.5">⏳</span> Doğrulanıyor...';
+            }
+            if (adminLoginStatusMsg) {
+                adminLoginStatusMsg.className = "text-xs font-bold text-center mt-2 text-secondary";
+                adminLoginStatusMsg.innerText = "Yetki kontrol ediliyor...";
+            }
+
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
+            const formData = new URLSearchParams();
+            formData.append('_token', csrfToken);
+            formData.append('username', usernameInput);
+            formData.append('password', passwordInput);
+            formData.append('to', '/liteback');
+            formData.append('is_ajax', '1');
+
+            fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
+                },
+                body: formData.toString()
+            })
+            .then(async (res) => {
+                const data = await res.json().catch(() => ({}));
+                if (res.ok && (data.link || res.status === 200)) {
+                    // The shared login endpoint always reports the site root, so
+                    // the operator form deliberately routes to the console.
+                    if (adminLoginStatusMsg) {
+                        adminLoginStatusMsg.className = "text-xs font-bold text-center mt-2 text-primary";
+                        adminLoginStatusMsg.innerText = "✓ Giriş başarılı! Konsola yönlendiriliyorsunuz...";
+                    }
+                    setTimeout(() => { window.location.href = '/liteback'; }, 400);
+                } else {
+                    if (adminLoginBtn) {
+                        adminLoginBtn.disabled = false;
+                        adminLoginBtn.innerHTML = 'Konsola Giriş Yap';
+                    }
+                    let err = "Kullanıcı adı veya parola hatalı.";
+                    if (res.status === 419) {
+                        err = "Oturum süresi doldu. Sayfayı yenileyin.";
+                    } else if (data.error) {
+                        err = data.error;
+                    } else if (data.message && data.message !== 'CSRF token mismatch.') {
+                        err = data.message;
+                    } else if (Array.isArray(data) && data[0] && !data[0].includes('Unknown')) {
+                        err = data[0];
+                    }
+                    if (adminLoginStatusMsg) {
+                        adminLoginStatusMsg.className = "text-xs font-bold text-center mt-2 text-accent-rose";
+                        adminLoginStatusMsg.innerText = err;
+                    }
+                }
+            })
+            .catch(() => {
+                if (adminLoginBtn) {
+                    adminLoginBtn.disabled = false;
+                    adminLoginBtn.innerHTML = 'Konsola Giriş Yap';
+                }
+                if (adminLoginStatusMsg) {
+                    adminLoginStatusMsg.className = "text-xs font-bold text-center mt-2 text-accent-rose";
+                    adminLoginStatusMsg.innerText = "Bağlantı hatası. Tekrar deneyin.";
                 }
             });
         });

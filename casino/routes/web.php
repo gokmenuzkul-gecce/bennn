@@ -275,7 +275,7 @@ Route::post('webhooks/aggregator/{slug}/wallet/{operation?}', [
  *
  */
 Route::prefix('liteback')
-    ->middleware(['auth', 'checker'])
+    ->middleware(['auth', 'checker', 'staff_only'])
     ->namespace('Liteback')
     ->group(function () {
         Route::get('/help/{locale?}', ['as' => 'liteback.help', 'uses' => 'HelpController@index'])->where('locale', 'en|fr|es|ru|tr|ar|he');
