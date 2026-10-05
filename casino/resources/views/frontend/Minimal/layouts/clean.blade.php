@@ -79,13 +79,13 @@
             grid-auto-rows: 30vh;
             gap: 30px;
             transform: translate3d(0, var(--sp, 0px), 0);
-            filter: blur(13px) saturate(1.1) brightness(1.16);
-            opacity: 0.2;
+            filter: blur(11px) saturate(1.12) brightness(1.18);
+            opacity: 0.3;
             transition: opacity 0.8s ease;
             will-change: transform;
             contain: strict;
         }
-        .casino-bg.is-scrolled .bg-shots { opacity: 0.3; }
+        .casino-bg.is-scrolled .bg-shots { opacity: 0.42; }
         .bg-shot {
             position: relative;
             border-radius: 26px;
@@ -113,8 +113,48 @@
             position: absolute;
             inset: 0;
             background:
-                radial-gradient(ellipse 78% 62% at 50% 28%, rgba(7,9,15,0.2), rgba(7,9,15,0.72) 78%),
-                linear-gradient(180deg, rgba(7,9,15,0.55), rgba(7,9,15,0.34) 42%, rgba(7,9,15,0.74));
+                radial-gradient(ellipse 78% 62% at 50% 28%, rgba(7,9,15,0.12), rgba(7,9,15,0.62) 78%),
+                linear-gradient(180deg, rgba(7,9,15,0.44), rgba(7,9,15,0.26) 42%, rgba(7,9,15,0.66));
+        }
+        /* Layer 2b — fine diamond lattice, faded toward the centre so it reads as
+           an engraved table surface rather than a visible grid. */
+        .bg-pattern {
+            position: absolute;
+            inset: 0;
+            background-image:
+                repeating-linear-gradient(45deg, rgba(255,255,255,0.045) 0 1px, transparent 1px 26px),
+                repeating-linear-gradient(-45deg, rgba(255,255,255,0.045) 0 1px, transparent 1px 26px);
+            -webkit-mask-image: radial-gradient(ellipse 82% 78% at 50% 42%, transparent 6%, #000 78%);
+                    mask-image: radial-gradient(ellipse 82% 78% at 50% 42%, transparent 6%, #000 78%);
+            opacity: 0.7;
+        }
+        /* Layer 2c — warm spotlight pooling behind the content for depth */
+        .bg-spot {
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 62% 44% at 50% -6%, rgba(16,185,129,0.20), transparent 68%),
+                radial-gradient(ellipse 46% 36% at 88% 12%, rgba(6,182,212,0.16), transparent 70%),
+                radial-gradient(ellipse 50% 40% at 8% 96%, rgba(245,158,11,0.12), transparent 70%);
+        }
+        /* Layer 2d — oversized card-suit watermarks, casino identity at low opacity */
+        .bg-suits { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+        .bg-suits span {
+            position: absolute;
+            font-size: var(--ssz, 120px);
+            line-height: 1;
+            color: rgba(255,255,255,0.03);
+            filter: blur(0.4px);
+            animation: suitDrift var(--sdur, 30s) ease-in-out infinite alternate;
+            animation-delay: var(--sdel, 0s);
+        }
+        .bg-suits span:nth-child(1) { top: 8%;  left: 4%;  --ssz: 150px; --sdur: 34s; --sdel: -4s; color: rgba(244,63,94,0.045); }
+        .bg-suits span:nth-child(2) { top: 62%; left: 82%; --ssz: 170px; --sdur: 40s; --sdel: -12s; }
+        .bg-suits span:nth-child(3) { top: 30%; left: 68%; --ssz: 110px; --sdur: 28s; --sdel: -8s; color: rgba(244,63,94,0.04); }
+        .bg-suits span:nth-child(4) { top: 78%; left: 16%; --ssz: 130px; --sdur: 36s; --sdel: -16s; }
+        @keyframes suitDrift {
+            0%   { transform: translate3d(0, 0, 0) rotate(-6deg); }
+            100% { transform: translate3d(0, -26px, 0) rotate(6deg); }
         }
         /* Layer 3 — soft moving colour wash */
         .bg-wash {
@@ -193,12 +233,13 @@
         .casino-bg.is-paused .burst,
         .casino-bg.is-paused .bg-ticker span { animation-play-state: paused !important; }
         @media (prefers-reduced-motion: reduce) {
-            .bg-shot, .bg-wash, .burst, .bg-ticker span { animation: none !important; }
+            .bg-shot, .bg-wash, .burst, .bg-ticker span, .bg-suits span { animation: none !important; }
             .bg-shots { transform: none !important; }
         }
         @media (max-width: 767px) {
-            .bg-shots { grid-template-columns: repeat(2, 1fr); gap: 22px; opacity: 0.22; filter: blur(18px) brightness(1.12); }
+            .bg-shots { grid-template-columns: repeat(2, 1fr); gap: 22px; opacity: 0.26; filter: blur(16px) brightness(1.14); }
             .bg-ticker { display: none; }
+            .bg-suits span:nth-child(3), .bg-suits span:nth-child(4) { display: none; }
             .burst-chip, .burst-coin { --sz: 30px; }
         }
 
@@ -1159,6 +1200,14 @@
         @endif
         <div class="bg-wash"></div>
         <div class="bg-scrim"></div>
+        <div class="bg-spot"></div>
+        <div class="bg-pattern"></div>
+        <div class="bg-suits" aria-hidden="true">
+            <span>&#9824;</span>
+            <span>&#9827;</span>
+            <span>&#9829;</span>
+            <span>&#9830;</span>
+        </div>
         <div class="bg-bursts">
             @php
                 $bursts = [

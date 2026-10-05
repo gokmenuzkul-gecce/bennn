@@ -84,6 +84,34 @@ $checks = [
     'lobby section headers stay removed' => !str_contains($blade, 'Oyun Arenası')
         && !str_contains($blade, 'Oyun Sağlayıcıları')
         && !str_contains($blade, 'tek çatı altında'),
+
+    'ambient background keeps its layered depth' => str_contains($css, '.bg-shots')
+        && str_contains($css, '.bg-wash')
+        && str_contains($css, '.bg-scrim')
+        && str_contains($css, '.bg-bursts')
+        && str_contains($css, '.bg-ticker')
+        && str_contains($css, '<div class="casino-bg"')
+        && str_contains($css, 'class="bg-wash"')
+        && str_contains($css, 'class="bg-scrim"'),
+
+    'background gains lattice, spotlight and suit watermarks' => str_contains($css, '.bg-pattern')
+        && str_contains($css, 'repeating-linear-gradient(45deg')
+        && str_contains($css, '.bg-spot')
+        && str_contains($css, '.bg-suits')
+        && str_contains($css, '@keyframes suitDrift')
+        && str_contains($css, 'class="bg-pattern"')
+        && str_contains($css, 'class="bg-spot"')
+        && str_contains($css, 'class="bg-suits"')
+        && substr_count($css, '&#98') === 4,
+
+    'decorative background layers sit above the scrim' => strpos($css, 'class="bg-scrim"') < strpos($css, 'class="bg-pattern"')
+        && strpos($css, 'class="bg-scrim"') < strpos($css, 'class="bg-suits"'),
+
+    'background art is legible but still subdued' => str_contains($css, 'opacity: 0.3;')
+        && str_contains($css, '.casino-bg.is-scrolled .bg-shots { opacity: 0.42; }')
+        && str_contains($css, '.bg-suits span:nth-child(3), .bg-suits span:nth-child(4) { display: none; }'),
+
+    'background motion collapses under reduced motion' => str_contains($css, '.bg-shot, .bg-wash, .burst, .bg-ticker span, .bg-suits span { animation: none !important; }'),
 ];
 
 foreach ($checks as $name => $passed) {
