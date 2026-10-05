@@ -172,15 +172,6 @@
 
 <!-- ===== PROVIDERS / OYUN SAĞLAYICILARI ===== -->
 <section class="space-y-4">
-    <div class="flex items-center justify-between gap-3">
-        <div class="flex items-center gap-3">
-            <span class="section-title-bar"></span>
-            <div>
-                <h2 class="text-lg sm:text-xl font-extrabold tracking-tight text-white uppercase">Oyun Sağlayıcıları</h2>
-                <p class="text-on-surface-muted text-[11px] sm:text-xs">Dünyanın en iyi slot stüdyoları tek çatı altında</p>
-            </div>
-        </div>
-    </div>
     <div class="marquee-mask overflow-hidden">
         <div class="marquee-track">
             @php
