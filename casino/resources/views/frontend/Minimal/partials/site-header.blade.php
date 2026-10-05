@@ -47,7 +47,7 @@
 
     <!-- Center: brand mark -->
     <a href="{{ route('frontend.game.list') }}" class="site-brand-center" aria-label="{{ $hBrandName }}">
-        <span class="site-brand-halo" aria-hidden="true"></span>
+        <span class="site-brand-ring" aria-hidden="true"></span>
         <img src="{{ $hBrandMark }}" alt="{{ $hBrandName }}" decoding="async" fetchpriority="high">
     </a>
 

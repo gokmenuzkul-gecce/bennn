@@ -866,80 +866,79 @@
             min-width: 0;
             isolation: isolate;
         }
-        /* Warm halo that breathes behind the crest. */
-        .site-brand-halo {
+        /* Glowing ring that orbits the crest on hover. */
+        .site-brand-ring {
             position: absolute;
             left: 50%;
             top: 50%;
-            width: clamp(48px, 5.2vw, 64px);
-            height: clamp(48px, 5.2vw, 64px);
+            width: clamp(48px, 5vw, 62px);
+            height: clamp(48px, 5vw, 62px);
             transform: translate(-50%, -50%);
             border-radius: 999px;
-            background: radial-gradient(circle,
-                rgba(250, 162, 30, .55) 0%,
-                rgba(250, 162, 30, .22) 42%,
-                rgba(250, 162, 30, 0) 70%);
-            filter: blur(7px);
-            opacity: .5;
+            background: conic-gradient(from 0deg,
+                rgba(250,162,30,0) 0deg,
+                rgba(250,162,30,.95) 90deg,
+                rgba(255,214,130,.35) 190deg,
+                rgba(250,162,30,0) 300deg,
+                rgba(250,162,30,0) 360deg);
+            -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
+                    mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
+            filter: blur(.4px);
+            opacity: 0;
             z-index: -1;
             pointer-events: none;
-            animation: brandHalo 6s ease-in-out infinite;
+            transition: opacity .3s ease;
         }
         .site-brand-center img {
             position: relative;
             z-index: 1;
-            height: clamp(30px, 3.6vw, 42px);
+            height: clamp(34px, 3.9vw, 46px);
             width: auto;
             object-fit: contain;
             filter: drop-shadow(0 2px 10px rgba(0,0,0,.55));
             transform-origin: 50% 55%;
             will-change: transform, filter;
             animation:
-                brandIntro .9s cubic-bezier(.22,.72,.28,1.08) both,
-                brandFloat 6s ease-in-out 1s infinite,
-                brandGlow 6s ease-in-out 1s infinite;
-            transition: transform .35s ease, filter .35s ease;
+                brandIntro .7s cubic-bezier(.22,.72,.28,1.08) both,
+                brandFloat 7s ease-in-out .7s infinite,
+                brandGlow 7s ease-in-out .7s infinite;
+            transition: transform .5s cubic-bezier(.34,1.56,.64,1), filter .4s ease;
         }
+        /* Hover: springy pop, brighter glow and an orbiting ring. */
         .site-brand-center:hover img,
         .site-brand-center:focus-visible img {
-            animation: brandSpin 1.4s linear infinite;
-            transform: scale(1.1);
+            animation: brandGlow 3.5s ease-in-out infinite;
+            transform: scale(1.16);
+            filter: drop-shadow(0 4px 14px rgba(0,0,0,.5)) drop-shadow(0 0 16px rgba(250,162,30,.7));
         }
-        .site-brand-center:hover .site-brand-halo,
-        .site-brand-center:focus-visible .site-brand-halo {
-            animation: brandHalo 1.4s ease-in-out infinite;
-            opacity: .85;
+        .site-brand-center:hover .site-brand-ring,
+        .site-brand-center:focus-visible .site-brand-ring {
+            opacity: 1;
+            animation: brandRing 2.6s linear infinite;
         }
-        /* One-time entrance: rises and settles into the bar. */
+        /* One-time entrance: settles into the bar. */
         @keyframes brandIntro {
-            0%   { opacity: 0; transform: translateY(9px) scale(.82); }
+            0%   { opacity: 0; transform: translateY(7px) scale(.86); }
             60%  { opacity: 1; }
             100% { opacity: 1; transform: translateY(0) scale(1); }
         }
-        /* Idle: a slow float with a barely-there sway. */
         @keyframes brandFloat {
-            0%, 100% { transform: translateY(0) rotate(-.5deg); }
-            50%      { transform: translateY(-4px) rotate(.5deg); }
+            0%, 100% { transform: translateY(0); }
+            50%      { transform: translateY(-3px); }
         }
         @keyframes brandGlow {
             0%, 100% { filter: drop-shadow(0 2px 10px rgba(0,0,0,.55)) drop-shadow(0 0 0 rgba(250,162,30,0)); }
-            50%      { filter: drop-shadow(0 3px 12px rgba(0,0,0,.5)) drop-shadow(0 0 12px rgba(250,162,30,.6)); }
+            50%      { filter: drop-shadow(0 3px 12px rgba(0,0,0,.5)) drop-shadow(0 0 12px rgba(250,162,30,.55)); }
         }
-        @keyframes brandHalo {
-            0%, 100% { transform: translate(-50%, -50%) scale(.85); opacity: .4; }
-            50%      { transform: translate(-50%, -50%) scale(1.12); opacity: .7; }
-        }
-        @keyframes brandSpin {
-            from { transform: rotate(0deg) scale(1.1); }
-            to   { transform: rotate(360deg) scale(1.1); }
+        @keyframes brandRing {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to   { transform: translate(-50%, -50%) rotate(360deg); }
         }
         @media (prefers-reduced-motion: reduce) {
             .site-brand-center img { animation: none; }
-            .site-brand-center .site-brand-halo { animation: none; opacity: .45; }
             .site-brand-center:hover img,
             .site-brand-center:focus-visible img { animation: none; transform: none; }
-            .site-brand-center:hover .site-brand-halo,
-            .site-brand-center:focus-visible .site-brand-halo { animation: none; }
+            .site-brand-center .site-brand-ring { animation: none; opacity: .5; }
         }
         /* Hamburger button, top-left of the nav bar */
         .site-burger {

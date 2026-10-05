@@ -44,18 +44,20 @@ $checks = [
     'brand logo carries a subtle animation with reduced-motion fallback' => str_contains($blade, '@keyframes brandFloat')
         && str_contains($blade, '@keyframes brandGlow')
         && str_contains($blade, 'animation:')
-        && str_contains($blade, 'brandFloat 6s ease-in-out 1s infinite')
+        && str_contains($blade, 'brandFloat 7s ease-in-out .7s infinite')
         && str_contains($blade, 'prefers-reduced-motion: reduce'),
 
-    'brand logo has a one-time intro and a breathing halo' => str_contains($blade, '@keyframes brandIntro')
-        && str_contains($blade, 'brandIntro .9s cubic-bezier')
-        && str_contains($blade, '@keyframes brandHalo')
-        && str_contains($blade, '.site-brand-halo')
-        && str_contains($header, 'site-brand-halo'),
+    'brand logo has a one-time intro and an orbiting hover ring' => str_contains($blade, '@keyframes brandIntro')
+        && str_contains($blade, 'brandIntro .7s cubic-bezier')
+        && str_contains($blade, '@keyframes brandRing')
+        && str_contains($blade, 'conic-gradient(from 0deg')
+        && str_contains($blade, '.site-brand-ring')
+        && str_contains($header, 'site-brand-ring'),
 
-    'brand logo spins on hover/focus' => str_contains($blade, '@keyframes brandSpin')
-        && str_contains($blade, 'rotate(360deg) scale(1.1)')
-        && str_contains($blade, 'animation: brandSpin 1.4s linear infinite'),
+    'brand logo springs larger and glows on hover/focus' => str_contains($blade, 'scale(1.16)')
+        && str_contains($blade, 'cubic-bezier(.34,1.56,.64,1)')
+        && str_contains($blade, 'animation: brandRing 2.6s linear infinite')
+        && str_contains($blade, 'animation: brandGlow 3.5s ease-in-out infinite'),
 
     'brand logo asset is present and cache-busted' => is_file($root . '/../minimal/brand-logo.png')
         && str_contains($header, 'brand-logo.png?v='),
