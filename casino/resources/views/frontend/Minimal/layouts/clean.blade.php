@@ -726,7 +726,7 @@
             align-items: center;
             gap: 1rem;
             padding: 0 clamp(12px, 2vw, 28px);
-            min-height: 56px;
+            min-height: 62px;
             background: rgba(9, 11, 18, 0.92);
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             backdrop-filter: blur(10px);
@@ -865,32 +865,29 @@
             min-width: 0;
         }
         .site-brand-center img {
-            height: clamp(30px, 4.4vw, 52px);
+            height: clamp(30px, 3.6vw, 42px);
             width: auto;
             object-fit: contain;
             filter: drop-shadow(0 2px 10px rgba(0,0,0,.55));
+            transform-origin: 50% 55%;
+            animation: brandFloat 5.5s ease-in-out infinite, brandGlow 5.5s ease-in-out infinite;
+            transition: transform .35s ease;
         }
-        .site-brand-wordmark {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            line-height: 1;
+        .site-brand-center:hover img,
+        .site-brand-center:focus-visible img {
+            animation-play-state: paused;
+            transform: scale(1.07);
         }
-        .site-brand-wordmark .w1 {
-            font-size: clamp(15px, 2.4vw, 26px);
-            font-weight: 900;
-            letter-spacing: .06em;
-            color: #fff;
-            text-shadow: 0 2px 10px rgba(0,0,0,.6);
-            text-transform: uppercase;
+        @keyframes brandFloat {
+            0%, 100% { transform: translateY(0); }
+            50%      { transform: translateY(-3px); }
         }
-        .site-brand-wordmark .w2 {
-            font-size: clamp(7px, .95vw, 10px);
-            font-weight: 700;
-            letter-spacing: .34em;
-            color: #34d399;
-            text-transform: uppercase;
-            margin-top: 4px;
+        @keyframes brandGlow {
+            0%, 100% { filter: drop-shadow(0 2px 10px rgba(0,0,0,.55)) drop-shadow(0 0 0 rgba(250,162,30,0)); }
+            50%      { filter: drop-shadow(0 2px 10px rgba(0,0,0,.55)) drop-shadow(0 0 10px rgba(250,162,30,.55)); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .site-brand-center img { animation: none; }
         }
         /* Hamburger button, top-left of the nav bar */
         .site-burger {

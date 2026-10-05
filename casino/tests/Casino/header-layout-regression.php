@@ -36,6 +36,19 @@ $checks = [
 
     'banner CSS is gone from the layout' => !str_contains($blade, '.site-header-banner'),
 
+    'centre brand is the supplied logo image, not the old wordmark' => str_contains($header, 'class="site-brand-center"')
+        && str_contains($header, '$hBrandMark')
+        && !str_contains($header, 'site-brand-wordmark')
+        && !str_contains($blade, '.site-brand-wordmark'),
+
+    'brand logo carries a subtle animation with reduced-motion fallback' => str_contains($blade, '@keyframes brandFloat')
+        && str_contains($blade, '@keyframes brandGlow')
+        && str_contains($blade, 'animation: brandFloat 5.5s ease-in-out infinite, brandGlow')
+        && str_contains($blade, 'prefers-reduced-motion: reduce'),
+
+    'brand logo asset is present and cache-busted' => is_file($root . '/../minimal/brand-logo.png')
+        && str_contains($header, 'brand-logo.png?v='),
+
     'hamburger sits inside the top nav bar' => str_contains($header, 'id="btn-open-site-drawer"')
         && strpos($header, 'site-header-nav') < strpos($header, 'id="btn-open-site-drawer"')
         && strpos($header, 'id="btn-open-site-drawer"') < strpos($header, 'id="site-drawer"'),

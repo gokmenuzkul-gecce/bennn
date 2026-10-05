@@ -2,6 +2,9 @@
     $hBrandName = settings('app_name') ?: 'Casino Gecce';
     $hTagline = settings('brand_tagline') ?: 'Sosyal Oyun';
     $hLogo = settings('brand_logo_path');
+    $hBrandMark = $hLogo
+        ? \Illuminate\Support\Facades\Storage::url($hLogo)
+        : '/minimal/brand-logo.png?v=' . (@filemtime(base_path('../minimal/brand-logo.png')) ?: '1');
     $hStaff = Auth::check() && (in_array((int)Auth::user()->role_id, [2, 3, 4, 5, 6]) || Auth::user()->hasRole('admin') || Auth::user()->hasRole('manager') || (env('ADMIN_PHONE') && Auth::user()->phone == env('ADMIN_PHONE')));
 
     // Primary horizontal navigation: left block is the product, right block is engagement.
@@ -42,16 +45,9 @@
         @endforeach
     </div>
 
-    <!-- Center: brand logo / wordmark -->
+    <!-- Center: brand mark -->
     <a href="{{ route('frontend.game.list') }}" class="site-brand-center" aria-label="{{ $hBrandName }}">
-        @if($hLogo)
-            <img src="{{ \Illuminate\Support\Facades\Storage::url($hLogo) }}" alt="">
-        @else
-            <span class="site-brand-wordmark">
-                <span class="w1">{{ $hBrandName }}</span>
-                <span class="w2">{{ $hTagline }}</span>
-            </span>
-        @endif
+        <img src="{{ $hBrandMark }}" alt="{{ $hBrandName }}" decoding="async" fetchpriority="high">
     </a>
 
     <!-- Right: engagement links + auth / account cluster -->
