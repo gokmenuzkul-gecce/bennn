@@ -8,6 +8,8 @@ use VanguardLTE\Casino\OroPlay\OroPlayClient;
 use VanguardLTE\Casino\Providers\CasinoProviderRegistry;
 use VanguardLTE\Casino\Providers\GregmornProvider;
 use VanguardLTE\Casino\Providers\OroPlayProvider;
+use VanguardLTE\Casino\Providers\SmplCoreProvider;
+use VanguardLTE\Casino\SmplCore\SmplCoreClient;
 use VanguardLTE\Game;
 
 /**
@@ -43,6 +45,10 @@ class CasinoCatalogSyncService
 
         if ($providerKey === GregmornProvider::KEY) {
             return $this->fetchGregmorn();
+        }
+
+        if ($providerKey === SmplCoreProvider::KEY) {
+            return $this->fetchSmplCore();
         }
 
         $provider = $this->registry->make($providerKey);
@@ -176,6 +182,40 @@ class CasinoCatalogSyncService
                 'name' => $title,
                 'icon' => (string) ($row['imageUrl'] ?? ''),
                 'vendor' => (string) ($row['provider'] ?? ''),
+            ];
+        }
+
+        return $games;
+    }
+
+    /**
+     * Fetch the whole smpl core catalogue (slots + live casino).
+     *
+     * smpl core pages /games; each item carries the game UUID, its display name,
+     * cover art and the vendor/category. Live tables arrive in the same list, so
+     * a single walk covers everything the merchant account can play. Launch ids
+     * are the game UUIDs, kept verbatim.
+     *
+     * @return array<int, array{gameid: string, symbol: string, name: string, icon: string, vendor: string}>
+     */
+    private function fetchSmplCore(): array
+    {
+        $client = new SmplCoreClient();
+
+        $games = [];
+        foreach ($client->games() as $row) {
+            $id = (string) ($row['uuid'] ?? $row['game_uuid'] ?? $row['id'] ?? '');
+            $title = trim((string) ($row['name'] ?? $row['title'] ?? ''));
+            if ($id === '' || $title === '') {
+                continue;
+            }
+
+            $games[] = [
+                'gameid' => $id,
+                'symbol' => preg_replace('/[^A-Za-z0-9_]/', '_', $id) ?: $id,
+                'name' => $title,
+                'icon' => (string) ($row['image'] ?? $row['image_url'] ?? $row['icon'] ?? ''),
+                'vendor' => (string) ($row['provider'] ?? $row['vendor'] ?? $row['category'] ?? ''),
             ];
         }
 

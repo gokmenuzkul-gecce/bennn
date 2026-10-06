@@ -24,6 +24,7 @@ class CasinoProviderRegistry
             AmusnetProvider::KEY => static fn (): CasinoProvider => new AmusnetProvider(),
             OroPlayProvider::KEY => static fn (): CasinoProvider => new OroPlayProvider(),
             GregmornProvider::KEY => static fn (): CasinoProvider => new GregmornProvider(),
+            SmplCoreProvider::KEY => static fn (): CasinoProvider => new SmplCoreProvider(),
         ];
     }
 

@@ -31,7 +31,10 @@ namespace VanguardLTE\Http\Controllers\Web\Frontend {
             ]);
             $frontend = 'Minimal';
             if (empty($category1)) {
-                $category1 = 'hot';
+                // The lobby opens on the full catalogue. "hot" only holds the
+                // few titles with play history, so landing on it hid every
+                // freshly synced aggregator game from the homepage.
+                $category1 = 'all';
             }
             if ($category1 != '') {
                 $cat1 = \VanguardLTE\Category::where(['href' => $category1])->first();

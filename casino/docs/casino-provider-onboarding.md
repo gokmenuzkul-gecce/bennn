@@ -40,10 +40,12 @@ Bu markalar çalışıyor (slot). Canlı masa için ek içerik gerekiyor.
 - [ ] **Callback URL'imizi kayıt** → yukarıdaki agregator URL
 - [ ] **Canlı casino (live dealer) içeriği aktivasyonu** — şu an hesapta canlı masa yok
 
-### B. OroPlay (canlı casino + slot + mini oyun) — ŞU AN ÖLÜ
-Yapılandırılan host `api.oroplay.com` **DNS'te yok** (çözülmüyor).
+### B. OroPlay (canlı casino + slot + mini oyun) — BASE URL BEKLİYOR
+Yapılandırılan host `api.oroplay.com` **DNS'te yok** (çözülmüyor). Sağlayıcının
+gerçek sitesi `https://oroplay.io` (B2B iGaming API altyapısı); public API
+subdomain'i yok, base URL operatör onboarding'inde veriliyor.
 
-- [ ] **Doğru API base URL** (staging + prod)
+- [ ] **Doğru API base URL** (staging + prod) — sağlayıcıdan isteyin
 - [ ] `clientId` (mevcut: `stg-TRY-Geccebet53`)
 - [ ] `clientSecret` (mevcut)
 - [ ] Agent kaydı + canlı casino vendor/game listesi
@@ -64,11 +66,20 @@ hesabı olmadığı için `/auth/login` 401 dönüyor.
 - [ ] Callback URL'imizi kayıt → `https://<SITE_ALAN_ADI>/webhooks/gregmorn/callbacks`
 - [ ] Para birimi: `TRY` kataloğu aktif mi
 
-### D. smpl core (alternatif agregatör)
-- [ ] Base URL (staging + prod)
-- [ ] `merchant_id`
-- [ ] `merchant_key`
+### D. smpl core — 35.000+ oyun (slot + CANLI CASINO) — ÖNERİLEN CANLI MASA KAYNAĞI
+Docs: <https://smplcore.com/docs/getting-started>. Entegrasyon tamamen hazır
+(client + cüzdan + webhook + provider adapter); **sadece kimlik eksik**.
+
+- [ ] **`merchant_id`** (ŞU AN BOŞ — `SMPL_MERCHANT_ID`)
+- [ ] **`merchant_key`** (HMAC-SHA1 imza anahtarı)
+- [ ] Base API URL teyidi: stage `https://staging.smplcore.net/api/index.php/v1`, prod `<prod-url>`
+- [ ] **Canlı casino (live dealer) kategorisinin hesapta aktif olduğu teyidi**
 - [ ] Callback URL'imizi kayıt → `https://<SITE_ALAN_ADI>/webhooks/smplcore/callbacks`
+- [ ] Webhook'lar: balance / bet / win / refund / rollback (tek URL, `action` gövdede)
+- [ ] İmza: `X-Sign = HMAC-SHA1(http_build_query(payload), merchant_key)` + `X-Merchant-Id`, `X-Timestamp`, `X-Nonce`
+- [ ] Para birimi: `TRY`
+
+> smpl core ayrıca 35.000+ oyun ve canlı casino sağlıyor; doğru kaynak bu.
 
 ---
 
@@ -98,9 +109,10 @@ hareketi; mevcut agregatör markalarında 45/55 geçiyor).
 | Sağlayıcı | Durum | Not |
 |---|---|---|
 | Pragmatic / PGSoft / Amatic / Amusnet | Çalışıyor (slot) | Launch OK, cüzdan bağlı |
-| OroPlay | Ölü | `api.oroplay.com` çözülmüyor — doğru host gerekli |
+| OroPlay | Base URL bekliyor | `api.oroplay.com` çözülmüyor; gerçek site `oroplay.io` |
 | Gregmorn Hub | Kimlik bekliyor | Kod hazır, operatör login/secret/IP allowlist gerekli |
-| smpl core | Placeholder | merchant id/key gerekli |
+| smpl core | Kimlik bekliyor | Kod+adapter hazır; `merchant_id` boş (35.000+ oyun + canlı casino) |
 
-Canlı masaların görünmesi için **OroPlay doğru host** veya **Gregmorn operatör
-kimlikleri** gerekli; ikisi de canlı masa (live dealer) içeriği sağlıyor.
+Canlı masaların görünmesi için **smpl core merchant_id** (en hızlı yol),
+**OroPlay doğru base URL** veya **Gregmorn operatör kimlikleri** gerekli;
+üçü de canlı masa (live dealer) içeriği sağlıyor.

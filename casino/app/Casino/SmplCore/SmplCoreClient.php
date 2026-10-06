@@ -77,6 +77,31 @@ class SmplCoreClient
         return ['configured' => true, 'message' => 'Yapılandırıldı · ' . $this->config['base_url']];
     }
 
+    /**
+     * Verify the merchant account is usable without moving money.
+     *
+     * Calls the signed /games endpoint; any authenticated response (even a 4xx
+     * with a JSON body) proves the host is live and the credentials resolve.
+     */
+    public function testConnectivity(): array
+    {
+        if (!$this->isConfigured()) {
+            return ['success' => false, 'message' => $this->configStatus()['message']];
+        }
+
+        try {
+            $response = $this->request('GET', '/games');
+        } catch (\Throwable $e) {
+            return ['success' => false, 'message' => 'smpl core: ' . $e->getMessage()];
+        }
+
+        if ($response['status'] >= 200 && $response['status'] < 500) {
+            return ['success' => true, 'message' => 'Sunucuya ulaşıldı (HTTP ' . $response['status'] . ')'];
+        }
+
+        return ['success' => false, 'message' => 'smpl core: beklenmeyen yanıt (HTTP ' . $response['status'] . ')'];
+    }
+
     public function currency(): string
     {
         return (string) ($this->config['currency'] ?? 'TRY');
