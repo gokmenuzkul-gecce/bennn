@@ -42,6 +42,13 @@ Bunun yerine:
 
 ## Kumarhane sağlayıcı entegrasyonu (seamless wallet)
 - Dört gerçek marka: Pragmatic, PGSoft, Amatic, Amusnet — tek agregatör protokolü.
+- Güncel endpoint'ler (agregatör 2026'da iki markayı taşıdı): Pragmatic `apipk.lxgame.io`,
+  Amatic `apiam.lxgame.io`; PGSoft `ggapi.loginxgamesapi.com`, Amusnet `api.gitamus.net` kalır.
+  Kimlikler `.env`'de (`*_AGENT_ID`/`*_API_TOKEN`/`*_SECRET_KEY`); varsayılanlar
+  `config/casino_providers.php` içinde. Callback `CASINO_CALLBACK_BASE` + `CASINO_CALLBACK_SLUG`.
+- Canlı casino masası YOK: bu dört marka yalnızca slot/RNG masa (Rulet) veriyor; baccarat/live
+  dealer yok. Gerçek canlı masa için smpl core (35.000+ oyun) veya Gregmorn Hub canlı vendor'ları
+  yapılandırılmalı (kimlikleri bekliyor).
 - Bağdaştırıcılar: `app/Casino/Providers/{AbstractCasinoProvider,PragmaticProvider,...}.php`,
   kayıt defteri `CasinoProviderRegistry` (`findBySlug`, `callbackUrl`, `catalog`).
 - İmza: HMAC-SHA256, alanlar sabit sırayla birleştirilir, para alanları 2 ondalığa yuvarlanır
