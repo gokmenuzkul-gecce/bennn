@@ -185,6 +185,9 @@ class CasinoCatalogSyncService
             $game->provider_game_id = $entry['symbol'];
             $game->launch_code = $entry['gameid'];
             $game->icon_url = $entry['icon'] ?: self::FALLBACK_ICON;
+            // The vendor still lists it, so it is launchable: re-show rows a
+            // previous --prune/--hide-unlinked run had hidden.
+            $game->view = 1;
             $game->save();
 
             $this->attachCategory((int) $game->original_id, $categoryId);
@@ -261,7 +264,21 @@ class CasinoCatalogSyncService
             if (!$this->registry->make($key)->isConfigured()) {
                 continue;
             }
-            $report[$key] = $this->sync($key, $createMissing, $shopId, $prune);
+            try {
+                $report[$key] = $this->sync($key, $createMissing, $shopId, $prune);
+            } catch (\Throwable $e) {
+                // One unreachable provider must not abort the others; record
+                // the failure and carry on with the next catalogue.
+                $report[$key] = [
+                    'provider' => $key,
+                    'fetched' => 0,
+                    'linked' => 0,
+                    'created' => 0,
+                    'skipped' => 0,
+                    'pruned' => 0,
+                    'error' => $e->getMessage(),
+                ];
+            }
         }
 
         return $report;

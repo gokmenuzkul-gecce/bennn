@@ -45,6 +45,10 @@ class CasinoSyncCatalog extends Command
         }
 
         foreach ($report as $row) {
+            if (!empty($row['error'])) {
+                $this->error(sprintf('%-10s  HATA: %s', $row['provider'], $row['error']));
+                continue;
+            }
             $this->line(sprintf(
                 '%-10s  getirilen=%-5d  eşleşen=%-5d  eklenen=%-5d  atlanan=%-5d  gizlenen=%-4d',
                 $row['provider'],
