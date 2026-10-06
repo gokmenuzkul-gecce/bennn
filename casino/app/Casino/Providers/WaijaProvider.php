@@ -114,6 +114,16 @@ class WaijaProvider extends AbstractCasinoProvider
     }
 
     /**
+     * Fun-play launch, no player and no wallet involved.
+     *
+     * @return array{url: string, session_id: string}
+     */
+    public function demoLaunch(string $gameId, string $lang = 'tr'): array
+    {
+        return $this->client()->demo($gameId, $lang);
+    }
+
+    /**
      * Password Waija stores for the player. It is never shown to the player (the
      * session is opened server-side), but it must be stable so a relaunch does
      * not invalidate an in-flight session.

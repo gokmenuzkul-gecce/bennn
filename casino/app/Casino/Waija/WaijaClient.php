@@ -255,6 +255,39 @@ class WaijaClient
     }
 
     /**
+     * Open a fun-play (demo) session.
+     *
+     * No player account and no wallet callbacks are involved, so this is the
+     * cleanest way to prove a game id launches before the account is unlocked
+     * for real money.
+     *
+     * @param  array<string, mixed>  $extra
+     * @return array{url: string, session_id: string}
+     */
+    public function demo(string $gameId, string $lang = 'tr', array $extra = []): array
+    {
+        $payload = array_merge([
+            'gameid' => $gameId,
+            'homeurl' => (string) ($this->config['home_url'] ?? config('app.url')),
+            'cashierurl' => (string) ($this->config['cashier_url'] ?? config('app.url')),
+            'lang' => $lang,
+            'currency' => strtoupper($this->currency()),
+        ], $extra);
+
+        $response = $this->call('getGameDemo', $payload);
+        $body = $response['body'] ?? [];
+
+        if (($body['error'] ?? null) !== 0) {
+            throw new \RuntimeException('waija: demo oturumu açılamadı (' . ($body['message'] ?? ('http ' . $response['status'])) . ').');
+        }
+
+        return [
+            'url' => (string) ($body['response'] ?? ''),
+            'session_id' => (string) ($body['session_id'] ?? ''),
+        ];
+    }
+
+    /**
      * Full catalogue for the account currency.
      *
      * Each row carries id_hash (the launch id), name, category/vendor and image

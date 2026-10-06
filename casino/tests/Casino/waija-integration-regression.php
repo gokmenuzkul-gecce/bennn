@@ -62,6 +62,12 @@ $checks = [
         && str_contains($client, "'getFreeRounds'")
         && str_contains($client, "'deleteFreeRounds'"),
 
+    'client exposes the demo (fun-play) launch' => str_contains($client, "'getGameDemo'")
+        && str_contains($client, 'public function demo(')
+        && str_contains($provider, 'function demoLaunch('),
+
+    'client does not call the deprecated playerExists' => !str_contains($client, "'playerExists'"),
+
     'client mints a session with createPlayer then getGame' => str_contains($client, "'createPlayer'")
         && str_contains($client, "'getGame'")
         && str_contains($client, "'user_username'")

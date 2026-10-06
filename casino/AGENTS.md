@@ -136,13 +136,17 @@ Bunun yerine:
   `WaijaWebhookController` → `GET|POST /webhooks/waija/callbacks` (CSRF'ten muaf),
   bağdaştırıcı `app/Casino/Providers/WaijaProvider.php`, kayıt `CasinoProviderRegistry`,
   config bloğu `config/casino_providers.php` → `waija`.
+- Demo (fun-play) launch: `WaijaClient::demo()` / `WaijaProvider::demoLaunch()` →
+  `getGameDemo` (oyuncu ve cüzdan gerektirmez). Hesap kilitliyken gerçek para yerine
+  bununla test edilir. `playerExists` **deprecated**; onun yerine `createPlayer` kullanılır
+  (oyuncu varsa Waija içeride yönlendirir), bu yüzden hiç çağrılmaz.
 - Kimlik bilgileri `.env`'de (`WAIJA_BASE_URL`, `WAIJA_API_LOGIN`, `WAIJA_API_PASSWORD`,
   `WAIJA_SALT_KEY`, `WAIJA_PLAYER_PASSWORD`, `WAIJA_PLAYER_NICKNAME`, `WAIJA_REQUEST_FORMAT`,
   `WAIJA_CURRENCY=TRY`, `WAIJA_CALLBACK_PATH`, `WAIJA_SIGNATURE_WINDOW=30`).
   Prod base: `https://api-eu-1.waija.com/api/system/operator`. Waija backoffice'te sunucu IP
   allowlist'i ZORUNLUDUR; eklenmemişse API `401 {"error":"Ip not whitelisted."}` döner.
 - Katalog senkronizasyonu: `CasinoCatalogSyncService::fetchWaija`; `gameid` = `id_hash`.
-- Testler: `tests/Casino/waija-integration-regression.php` (23 statik kontrol),
+- Testler: `tests/Casino/waija-integration-regression.php` (25 statik kontrol),
   `tests/Casino/waija-wallet-e2e.php` (17 cüzdan kontrolü),
   `tests/Casino/waija-webhook-e2e.php` (12 gerçek rota kontrolü, GET + cents).
 
