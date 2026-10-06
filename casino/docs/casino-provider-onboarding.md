@@ -83,12 +83,16 @@ Doküman: <https://documentation.waija.com>. Entegrasyon kod tarafında tamamen 
 (`WaijaClient`, `WaijaWalletService`, `WaijaWebhookController`, `WaijaProvider`).
 Backoffice'ten gelen kimlikler girilince çalışır.
 
-- [ ] **Base API URL** (Settings → API Base URL; stage ve prod ayrı olabilir)
-- [ ] **api_login** ve **api_password** (her istekte gerekir)
-- [ ] **Salt key** (callback imzası `md5(timestamp + saltkey)`; backoffice'ten rotate edilir)
-- [ ] **IP allowlist**'e bizim sunucu IP'mizi ekleme (aksi halde istekler bloklanır)
-- [ ] **Callback URL'imizi kayıt** → `https://<SITE_ALAN_ADI>/webhooks/waija/callbacks` (GET)
-- [ ] (Opsiyonel) `WAIJA_PLAYER_PASSWORD` — sabit oyuncu şifresi; boşsa `APP_KEY`'den türetilir
+- [x] **Base API URL**: `https://api-eu-1.waija.com/api/system/operator` (backoffice'ten alındı)
+- [x] **api_login** / **api_password**: backoffice'ten alındı, `.env`'e yazıldı
+- [ ] **Salt key** (callback imzası `md5(timestamp + saltkey)`; backoffice → Spinshield detayı)
+- [ ] **IP allowlist**'e `34.45.0.142` ekleme (ZORUNLU — eklenmezse API `401 Ip not whitelisted` döner)
+- [x] **Callback URL kaydı** → `https://work-1-tlcfjicrlanlyelk.prod-runtime.all-hands.dev/webhooks/waija/callbacks`
+- [x] **Kumarhane URL'i** → `https://work-1-tlcfjicrlanlyelk.prod-runtime.all-hands.dev/`
+- [ ] (Opsiyonel) `WAIJA_PLAYER_PASSWORD` / `WAIJA_PLAYER_NICKNAME`
+
+> Not: Waija istekleri **form-encoded** (`application/x-www-form-urlencoded`) gönderir; doküman
+> "JSON" yazsa da referans SDK form kullanır. Para birimi wire'da BÜYÜK harftir (`TRY`).
 
 > Not: Waija cüzdanı **integer cent** kullanır (`$2.50 → 250`); rollback `rb=1` ile normal
 > hareket olarak gelir; `type=bonus_fs` debit'inde nakit düşülmez. Tüm yanıtlar HTTP 200.

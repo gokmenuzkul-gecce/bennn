@@ -95,7 +95,7 @@ class WaijaProvider extends AbstractCasinoProvider
     public function launchUrl(string $userCode, string $gameId, string $lang = 'tr'): string
     {
         // createPlayer is idempotent and must precede any real-money session.
-        $this->client()->createPlayer($userCode, $this->playerPassword());
+        $this->client()->createPlayer($userCode, $this->playerPassword(), $this->playerNickname());
 
         return $this->client()->launch($userCode, $this->playerPassword(), $gameId, ['lang' => $lang]);
     }
@@ -103,6 +103,14 @@ class WaijaProvider extends AbstractCasinoProvider
     public function embeddedLaunchPayload(string $userCode, string $gameId, string $lang = 'tr'): array
     {
         return ['url' => $this->launchUrl($userCode, $gameId, $lang)];
+    }
+
+    /** Display nickname shown in the Waija backoffice; optional. */
+    private function playerNickname(): ?string
+    {
+        $configured = (string) ($this->config()['player_nickname'] ?? '');
+
+        return $configured !== '' ? $configured : null;
     }
 
     /**

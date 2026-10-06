@@ -116,10 +116,13 @@ Bunun yerine:
 
 ### Waija (Slotsgateway) agregatörü (slot + canlı, 150-250+ satıcı)
 - Docs: <https://documentation.waija.com>. Tek kimlik seti arkasında çok satıcı.
-- Dışa çağrılar JSON POST'tur ve `api_login` / `api_password` / `method` taşır:
-  `createPlayer` → `getGameList` (katalog, satır `id_hash` = launch id) → `getGame`
+- Dışa çağrılar **form-encoded POST**'tur (`application/x-www-form-urlencoded`) ve
+  `api_login` / `api_password` / `method` taşır — doküman "JSON" yazsa da referans SDK
+  (`slotsgateway/slotsgateway-php-client`, `sendRequest` → Guzzle `form_params`) form gönderir.
+  Akış: `createPlayer` → `getGameList` (katalog, satır `id_hash` = launch id) → `getGame`
   (oynanabilir `response` URL'i). `WaijaProvider::launchUrl` önce `createPlayer` çağırır
-  (idempotent; oyuncu varsa Waija içeride `playerExists`e yönlendirir).
+  (idempotent; oyuncu varsa Waija içeride `playerExists`e yönlendirir). Para birimi wire'da
+  BÜYÜK harftir (`strtoupper`). `WAIJA_REQUEST_FORMAT=form` ile JSON'a çevrilebilir.
 - Cüzdan callback'i: Waija tek URL'e **GET** atar, `action=balance|debit|credit`.
   İmza `key = md5(timestamp + saltkey)`; `timestamp` son **30 saniye** içinde olmalı.
   **Her yanıt HTTP 200**; hata gövdede: `{error, balance}` — `0` ok, `1` yetersiz bakiye,
@@ -134,10 +137,12 @@ Bunun yerine:
   bağdaştırıcı `app/Casino/Providers/WaijaProvider.php`, kayıt `CasinoProviderRegistry`,
   config bloğu `config/casino_providers.php` → `waija`.
 - Kimlik bilgileri `.env`'de (`WAIJA_BASE_URL`, `WAIJA_API_LOGIN`, `WAIJA_API_PASSWORD`,
-  `WAIJA_SALT_KEY`, `WAIJA_PLAYER_PASSWORD`, `WAIJA_CURRENCY=TRY`, `WAIJA_CALLBACK_PATH`,
-  `WAIJA_SIGNATURE_WINDOW=30`). Waija backoffice'te sunucu IP allowlist'i gerekir.
+  `WAIJA_SALT_KEY`, `WAIJA_PLAYER_PASSWORD`, `WAIJA_PLAYER_NICKNAME`, `WAIJA_REQUEST_FORMAT`,
+  `WAIJA_CURRENCY=TRY`, `WAIJA_CALLBACK_PATH`, `WAIJA_SIGNATURE_WINDOW=30`).
+  Prod base: `https://api-eu-1.waija.com/api/system/operator`. Waija backoffice'te sunucu IP
+  allowlist'i ZORUNLUDUR; eklenmemişse API `401 {"error":"Ip not whitelisted."}` döner.
 - Katalog senkronizasyonu: `CasinoCatalogSyncService::fetchWaija`; `gameid` = `id_hash`.
-- Testler: `tests/Casino/waija-integration-regression.php` (20 statik kontrol),
+- Testler: `tests/Casino/waija-integration-regression.php` (23 statik kontrol),
   `tests/Casino/waija-wallet-e2e.php` (17 cüzdan kontrolü),
   `tests/Casino/waija-webhook-e2e.php` (12 gerçek rota kontrolü, GET + cents).
 

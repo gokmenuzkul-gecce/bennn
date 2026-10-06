@@ -46,10 +46,21 @@ $checks = [
 
     'client compares signatures in constant time' => str_contains($client, 'hash_equals($this->sign($timestamp), strtolower(trim($key)))'),
 
-    'client posts JSON method calls with api_login/api_password' => str_contains($client, "'api_login'")
+    'client posts method calls form-encoded (reference SDK wire format)' => str_contains($client, "http_build_query(\$payload)")
+        && str_contains($client, "application/x-www-form-urlencoded")
+        && str_contains($client, "'api_login'")
         && str_contains($client, "'api_password'")
-        && str_contains($client, "'method' => \$method")
-        && str_contains($client, 'json_encode($payload)'),
+        && str_contains($client, "'method' => \$method"),
+
+    'client sends createPlayer with nickname' => str_contains($client, "'user_nickname'")
+        && str_contains($client, "'user_username'")
+        && str_contains($client, "'user_password'"),
+
+    'client uppercases the currency on the wire' => str_contains($client, 'strtoupper((string) ($this->config[\'currency\'] ?? \'TRY\'))'),
+
+    'client exposes free-round methods' => str_contains($client, "'addFreeRounds'")
+        && str_contains($client, "'getFreeRounds'")
+        && str_contains($client, "'deleteFreeRounds'"),
 
     'client mints a session with createPlayer then getGame' => str_contains($client, "'createPlayer'")
         && str_contains($client, "'getGame'")

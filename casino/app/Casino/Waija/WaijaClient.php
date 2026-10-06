@@ -83,7 +83,7 @@ class WaijaClient
 
     public function currency(): string
     {
-        return (string) ($this->config['currency'] ?? 'TRY');
+        return strtoupper((string) ($this->config['currency'] ?? 'TRY'));
     }
 
     public function baseUrl(): string
@@ -143,6 +143,10 @@ class WaijaClient
     /**
      * Perform a signed outbound method call.
      *
+     * The reference SDK (slotsgateway/slotsgateway-php-client) posts these as
+     * form parameters, so the body is application/x-www-form-urlencoded by
+     * default; set `request_format=json` only if the account requires JSON.
+     *
      * @param  array<string, mixed>  $params
      * @return array{status: int, body: array<string, mixed>|null, raw: string}
      */
@@ -154,14 +158,19 @@ class WaijaClient
             'method' => $method,
         ], $params);
 
+        $asJson = strtolower((string) ($this->config['request_format'] ?? 'form')) === 'json';
+
         $ch = curl_init($this->baseUrl());
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_POST => true,
             CURLOPT_TIMEOUT => 25,
             CURLOPT_CONNECTTIMEOUT => 10,
-            CURLOPT_HTTPHEADER => ['Content-Type: application/json', 'Accept: application/json'],
-            CURLOPT_POSTFIELDS => json_encode($payload),
+            CURLOPT_HTTPHEADER => [
+                $asJson ? 'Content-Type: application/json' : 'Content-Type: application/x-www-form-urlencoded',
+                'Accept: application/json',
+            ],
+            CURLOPT_POSTFIELDS => $asJson ? json_encode($payload) : http_build_query($payload),
         ]);
         $raw = curl_exec($ch);
         $status = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -190,15 +199,59 @@ class WaijaClient
      *
      * @return array<string, mixed>|null
      */
-    public function createPlayer(string $username, string $password): ?array
+    public function createPlayer(string $username, string $password, ?string $nickname = null): ?array
     {
-        $response = $this->call('createPlayer', [
+        $params = [
             'user_username' => $username,
             'user_password' => $password,
-            'currency' => $this->currency(),
-        ]);
+            'currency' => strtoupper($this->currency()),
+        ];
+        if ($nickname !== null && $nickname !== '') {
+            $params['user_nickname'] = $nickname;
+        }
+
+        $response = $this->call('createPlayer', $params);
 
         return $response['body']['response'] ?? null;
+    }
+
+    /**
+     * Add free rounds (free spins) to a player for a game.
+     *
+     * @return array<string, mixed>
+     */
+    public function addFreeRounds(string $username, string $password, string $gameId, int $freespins, float $betLevel, string $lang = 'tr'): array
+    {
+        return $this->call('addFreeRounds', [
+            'lang' => $lang,
+            'user_username' => $username,
+            'user_password' => $password,
+            'gameid' => $gameId,
+            'freespins' => $freespins,
+            'bet_level' => $betLevel,
+            'currency' => strtoupper($this->currency()),
+        ])['body'] ?? [];
+    }
+
+    /** @return array<string, mixed> */
+    public function getFreeRounds(string $username, string $password): array
+    {
+        return $this->call('getFreeRounds', [
+            'user_username' => $username,
+            'user_password' => $password,
+            'currency' => strtoupper($this->currency()),
+        ])['body'] ?? [];
+    }
+
+    /** @return array<string, mixed> */
+    public function deleteFreeRounds(string $username, string $password, string $gameId): array
+    {
+        return $this->call('deleteFreeRounds', [
+            'gameid' => $gameId,
+            'user_username' => $username,
+            'user_password' => $password,
+            'currency' => strtoupper($this->currency()),
+        ])['body'] ?? [];
     }
 
     /**
@@ -244,7 +297,7 @@ class WaijaClient
             'homeurl' => (string) ($this->config['home_url'] ?? config('app.url')),
             'cashierurl' => (string) ($this->config['cashier_url'] ?? config('app.url')),
             'play_for_fun' => 0,
-            'currency' => $this->currency(),
+            'currency' => strtoupper($this->currency()),
         ], $extra);
 
         $response = $this->call('getGame', $payload);

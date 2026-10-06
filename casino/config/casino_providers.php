@@ -119,6 +119,10 @@ return [
         'api_password' => env('WAIJA_API_PASSWORD', ''),
         'salt_key' => env('WAIJA_SALT_KEY', ''),
         'player_password' => env('WAIJA_PLAYER_PASSWORD', ''),
+        'player_nickname' => env('WAIJA_PLAYER_NICKNAME', ''),
+        // The reference SDK posts form-encoded bodies; keep 'form' unless the
+        // account is configured for JSON.
+        'request_format' => env('WAIJA_REQUEST_FORMAT', 'form'),
         'callback_path' => env('WAIJA_CALLBACK_PATH', '/webhooks/waija/callbacks'),
         'currency' => env('WAIJA_CURRENCY', env('CASINO_WALLET_CURRENCY', 'TRY')),
         'signature_window' => (int) env('WAIJA_SIGNATURE_WINDOW', 30),
