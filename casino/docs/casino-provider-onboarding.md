@@ -85,12 +85,24 @@ Backoffice'ten gelen kimlikler girilince çalışır.
 
 - [x] **Base API URL**: `https://api-eu-1.waija.com/api/system/operator` (backoffice'ten alındı)
 - [x] **api_login** / **api_password**: backoffice'ten alındı, `.env`'e yazıldı
+- [x] **IP allowlist**: `34.45.0.142` eklendi (API artık `200` dönüyor)
 - [ ] **Salt key** (callback imzası `md5(timestamp + saltkey)`; backoffice → Spinshield detayı)
-- [ ] **IP allowlist**'e `34.45.0.142` ekleme (ZORUNLU — eklenmezse API `401 Ip not whitelisted` döner)
+- [ ] **Para birimi kararı** — TRY Waija'da DESTEKLENMİYOR (aşağıya bak)
 - [x] **Callback URL kaydı** → `https://work-1-tlcfjicrlanlyelk.prod-runtime.all-hands.dev/webhooks/waija/callbacks`
-- [x] **Kumarhane URL'i** → `https://work-1-tlcfjicrlanlyelk.prod-runtime.all-hands.dev/`
+- [x] **Kumarhane URL'i** kayıtlı
+- [ ] **Access & Limits**: oyun kilitlerini aç (şu an tüm oyunlar "disabled")
 - [ ] (Opsiyonel) `WAIJA_PLAYER_PASSWORD` / `WAIJA_PLAYER_NICKNAME`
 
+> **Doğrulanan canlı sonuçlar (2026-10):**
+> - `getGameList` → `USD`/`EUR` **3704 oyun**, `GBP` 3687, `BRL` 2709, ama **`TRY` 0 oyun**
+>   (tüm `list_type` 0-5 için). TRY Waija'nın desteklediği para birimleri arasında yok:
+>   USD, EUR, GBP, BRL, AUD, CAD, NZD, TND.
+> - `createPlayer` TRY ve USD için `error:0` dönüyor (oyuncu açılıyor).
+> - `getGame` şu an her oyunda `error:1 "Game is disabled or does not exist."` →
+>   hesapta oyun kilidi var; backoffice **Access & Limits**'ten açılmalı.
+> - Katalog içeriği: ~3139 video-slot + ~565 canlı masa (Pragmatic 651+504, Evolution 401,
+>   Spinomenal 481, Bgaming 258, Booming 251, Hacksaw 173, ...).
+>
 > Not: Waija istekleri **form-encoded** (`application/x-www-form-urlencoded`) gönderir; doküman
 > "JSON" yazsa da referans SDK form kullanır. Para birimi wire'da BÜYÜK harftir (`TRY`).
 
