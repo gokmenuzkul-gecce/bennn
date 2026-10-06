@@ -42,9 +42,9 @@ $checks = [
         && str_contains($registry, 'AmaticProvider::KEY')
         && str_contains($registry, 'AmusnetProvider::KEY'),
 
-    'each brand carries its endpoint and reads credentials from env' => str_contains($config, 'pk2api.loginxgamesapi.com')
+    'each brand carries its endpoint and reads credentials from env' => str_contains($config, 'apipk.lxgame.io')
         && str_contains($config, 'ggapi.loginxgamesapi.com')
-        && str_contains($config, 'amapi.loginxgamesapi.com')
+        && str_contains($config, 'apiam.lxgame.io')
         && str_contains($config, 'api.gitamus.net')
         && str_contains($config, "env('PRAGMATIC_SECRET_KEY'")
         && str_contains($config, "env('AMUSNET_SECRET_KEY'"),

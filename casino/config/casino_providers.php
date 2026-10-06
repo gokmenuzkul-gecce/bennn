@@ -103,7 +103,7 @@ return [
 
         'pragmatic' => [
             'label' => 'Pragmatic Play',
-            'endpoint' => env('PRAGMATIC_ENDPOINT', 'pk2api.loginxgamesapi.com'),
+            'endpoint' => env('PRAGMATIC_ENDPOINT', 'apipk.lxgame.io'),
             'scheme' => 'https',
             'agent_id' => env('PRAGMATIC_AGENT_ID', ''),
             'api_token' => env('PRAGMATIC_API_TOKEN', ''),
@@ -131,7 +131,7 @@ return [
 
         'amatic' => [
             'label' => 'Amatic',
-            'endpoint' => env('AMATIC_ENDPOINT', 'amapi.loginxgamesapi.com'),
+            'endpoint' => env('AMATIC_ENDPOINT', 'apiam.lxgame.io'),
             'scheme' => 'https',
             'agent_id' => env('AMATIC_AGENT_ID', ''),
             'api_token' => env('AMATIC_API_TOKEN', ''),
