@@ -260,7 +260,17 @@ class GregmornClient
         ], $raw);
 
         $body = $response['body'];
-        $url = is_array($body) ? ($body['content']['game']['url'] ?? null) : null;
+        // The documented sample redacts the payload, so the playable URL may sit
+        // under content.game.url, content.gameRes.url or content.url depending on
+        // the vendor. Probe each in order.
+        $url = null;
+        if (is_array($body)) {
+            $url = $body['content']['game']['url']
+                ?? $body['content']['gameRes']['url']
+                ?? $body['content']['url']
+                ?? $body['url']
+                ?? null;
+        }
 
         if ($response['status'] !== 200 || !is_string($url) || $url === '') {
             $message = is_array($body) ? ($body['error'] ?? $body['message'] ?? 'bilinmeyen hata') : 'geçersiz yanıt';
