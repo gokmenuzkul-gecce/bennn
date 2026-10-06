@@ -29,6 +29,9 @@ php artisan casino:integration-status --test
 |---|---|
 | Callback / Wallet URL (agregatör markaları) | `https://<SITE_ALAN_ADI>/webhooks/aggregator/gregmorn/wallet` |
 | Callback base (Gregmorn Hub) | `https://<SITE_ALAN_ADI>/webhooks/gregmorn` → `/api/balance`, `/api/transaction`, `/api/batch-transaction` |
+| Callback (Waija) | `https://<SITE_ALAN_ADI>/webhooks/waija/callbacks` (GET; `action=balance\|debit\|credit`) |
+| Callback (OroPlay) | `https://<SITE_ALAN_ADI>/webhooks/oroplay/api` → `/balance`, `/transaction`, `/batch-transactions` |
+| Callback (smpl core) | `https://<SITE_ALAN_ADI>/webhooks/smplcore/callbacks` |
 | Para birimi | `TRY` |
 | Oyuncu kimliği formatı | `<prefix><site_user_id>` (kayıt anında üretilir, satıcı aynen geri gönderir) |
 | Operasyonlar | `GetBalance`, `Withdraw`, `Deposit`, `BetWin`, `RollbackTransaction` |
@@ -75,7 +78,22 @@ hesabı olmadığı için `/auth/login` 401 dönüyor.
       (Hub kendi yollarını ekler: `/api/balance`, `/api/transaction`, `/api/batch-transaction`)
 - [ ] Para birimi: `TRY` kataloğu aktif mi
 
-### D. smpl core — 35.000+ oyun (slot + CANLI CASINO) — ÖNERİLEN CANLI MASA KAYNAĞI
+### D. Waija / Slotsgateway (slot + canlı, 150-250+ satıcı) — KİMLİK BEKLİYOR
+Doküman: <https://documentation.waija.com>. Entegrasyon kod tarafında tamamen hazır
+(`WaijaClient`, `WaijaWalletService`, `WaijaWebhookController`, `WaijaProvider`).
+Backoffice'ten gelen kimlikler girilince çalışır.
+
+- [ ] **Base API URL** (Settings → API Base URL; stage ve prod ayrı olabilir)
+- [ ] **api_login** ve **api_password** (her istekte gerekir)
+- [ ] **Salt key** (callback imzası `md5(timestamp + saltkey)`; backoffice'ten rotate edilir)
+- [ ] **IP allowlist**'e bizim sunucu IP'mizi ekleme (aksi halde istekler bloklanır)
+- [ ] **Callback URL'imizi kayıt** → `https://<SITE_ALAN_ADI>/webhooks/waija/callbacks` (GET)
+- [ ] (Opsiyonel) `WAIJA_PLAYER_PASSWORD` — sabit oyuncu şifresi; boşsa `APP_KEY`'den türetilir
+
+> Not: Waija cüzdanı **integer cent** kullanır (`$2.50 → 250`); rollback `rb=1` ile normal
+> hareket olarak gelir; `type=bonus_fs` debit'inde nakit düşülmez. Tüm yanıtlar HTTP 200.
+
+### E. smpl core — 35.000+ oyun (slot + CANLI CASINO) — ÖNERİLEN CANLI MASA KAYNAĞI
 Docs: <https://smplcore.com/docs/getting-started>. Entegrasyon tamamen hazır
 (client + cüzdan + webhook + provider adapter); **sadece kimlik eksik**.
 
@@ -127,9 +145,15 @@ hareketi; mevcut agregatör markalarında 45/55 geçiyor).
 |---|---|---|
 | Pragmatic / PGSoft / Amatic / Amusnet | Çalışıyor (slot) | Launch OK, cüzdan bağlı |
 | OroPlay | Base URL bekliyor | `api.oroplay.com` çözülmüyor; gerçek site `oroplay.io` |
-| Gregmorn Hub | Kimlik bekliyor | Kod hazır, operatör login/secret/IP allowlist gerekli |
-| smpl core | Kimlik bekliyor | Kod+adapter hazır; `merchant_id` boş (35.000+ oyun + canlı casino) |
+| Gregmorn Hub | Kapalı (kimlik yok) | Kod hazır, operatör login/secret/IP allowlist gerekli |
+| Waija / Slotsgateway | Kimlik bekliyor | Kod tamamen hazır; base_url + api_login/password + salt_key gerekli |
+| smpl core | Kapalı (kimlik yok) | Kod+adapter hazır; `merchant_id` boş |
 
-Canlı masaların görünmesi için **smpl core merchant_id** (en hızlı yol),
-**OroPlay doğru base URL** veya **Gregmorn operatör kimlikleri** gerekli;
+Canlı masaların görünmesi için **Waija** (tek kimlik, 150-250+ satıcı, slot + canlı),
+**smpl core merchant_id** veya **Gregmorn operatör kimlikleri** gerekli;
 üçü de canlı masa (live dealer) içeriği sağlıyor.
+
+> **Waija cüzdan farkı:** callback tek URL'e **GET** gelir (`action=balance|debit|credit`),
+> imza `md5(timestamp + saltkey)` (30 sn pencere), tutar/bakiye **integer cent**, yanıt her
+> zaman **HTTP 200** + `{error, balance}`. Bu, yukarıdaki `GetBalance/Withdraw/...` uçlarından
+> farklıdır; Waija için `WaijaWebhookController` kullanılır.

@@ -320,6 +320,17 @@ Route::prefix('webhooks/oroplay/api')->group(function () {
     ])->name('webhooks.oroplay.batch');
 });
 
+// Waija (Slotsgateway) seamless-wallet callback. Waija GETs one URL with the
+// action in the query string (action=balance|debit|credit) and a key of
+// md5(timestamp + saltkey). GET and POST are both accepted so the exact method
+// Waija sends never breaks the wallet. Registered as
+// <APP_URL>/webhooks/waija/callbacks.
+foreach (['get', 'post'] as $method) {
+    Route::$method('webhooks/waija/callbacks', [
+        \VanguardLTE\Http\Controllers\Web\Webhooks\WaijaWebhookController::class, 'handle',
+    ])->name('webhooks.waija.callbacks' . ($method === 'get' ? '' : '.post'));
+}
+
 
 /**
  *

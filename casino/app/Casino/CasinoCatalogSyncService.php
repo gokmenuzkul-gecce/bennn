@@ -10,6 +10,8 @@ use VanguardLTE\Casino\Providers\GregmornProvider;
 use VanguardLTE\Casino\Providers\OroPlayProvider;
 use VanguardLTE\Casino\Providers\SmplCoreProvider;
 use VanguardLTE\Casino\SmplCore\SmplCoreClient;
+use VanguardLTE\Casino\Waija\WaijaClient;
+use VanguardLTE\Casino\Providers\WaijaProvider;
 use VanguardLTE\Game;
 
 /**
@@ -49,6 +51,10 @@ class CasinoCatalogSyncService
 
         if ($providerKey === SmplCoreProvider::KEY) {
             return $this->fetchSmplCore();
+        }
+
+        if ($providerKey === WaijaProvider::KEY) {
+            return $this->fetchWaija();
         }
 
         $provider = $this->registry->make($providerKey);
@@ -216,6 +222,40 @@ class CasinoCatalogSyncService
                 'name' => $title,
                 'icon' => (string) ($row['image'] ?? $row['image_url'] ?? $row['icon'] ?? ''),
                 'vendor' => (string) ($row['provider'] ?? $row['vendor'] ?? $row['category'] ?? ''),
+            ];
+        }
+
+        return $games;
+    }
+
+    /**
+     * Fetch the whole Waija (Slotsgateway) catalogue.
+     *
+     * Waija returns one flat list for the account currency; each row carries
+     * id_hash (the launch id, e.g. "softswiss/WildChicago"), the display name,
+     * the vendor in `category` and cover art. Slots and live tables arrive in
+     * the same list. Launch ids are the id_hash, kept verbatim.
+     *
+     * @return array<int, array{gameid: string, symbol: string, name: string, icon: string, vendor: string}>
+     */
+    private function fetchWaija(): array
+    {
+        $client = new WaijaClient();
+
+        $games = [];
+        foreach ($client->games() as $row) {
+            $id = (string) ($row['id_hash'] ?? '');
+            $title = trim((string) ($row['name'] ?? ''));
+            if ($id === '' || $title === '') {
+                continue;
+            }
+
+            $games[] = [
+                'gameid' => $id,
+                'symbol' => preg_replace('/[^A-Za-z0-9_]/', '_', $id) ?: $id,
+                'name' => $title,
+                'icon' => (string) ($row['image_square'] ?? $row['image'] ?? $row['image_portrait'] ?? ''),
+                'vendor' => (string) ($row['category'] ?? $row['subcategory'] ?? ''),
             ];
         }
 

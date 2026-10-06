@@ -33,6 +33,8 @@ namespace VanguardLTE\Http\Middleware
             '/webhooks/gregmorn/*',
             'webhooks/oroplay/*',
             '/webhooks/oroplay/*',
+            'webhooks/waija/*',
+            '/webhooks/waija/*',
             'register'
         ];
     }

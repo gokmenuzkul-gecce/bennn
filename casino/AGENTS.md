@@ -114,6 +114,33 @@ Bunun yerine:
 - Admin: `/liteback/casino/providers` (durum + test + aç/kapat), `/liteback/casino/transactions`.
 - Callback slug `gregmorn`; callback tabanı `CASINO_CALLBACK_BASE`.
 
+### Waija (Slotsgateway) agregatörü (slot + canlı, 150-250+ satıcı)
+- Docs: <https://documentation.waija.com>. Tek kimlik seti arkasında çok satıcı.
+- Dışa çağrılar JSON POST'tur ve `api_login` / `api_password` / `method` taşır:
+  `createPlayer` → `getGameList` (katalog, satır `id_hash` = launch id) → `getGame`
+  (oynanabilir `response` URL'i). `WaijaProvider::launchUrl` önce `createPlayer` çağırır
+  (idempotent; oyuncu varsa Waija içeride `playerExists`e yönlendirir).
+- Cüzdan callback'i: Waija tek URL'e **GET** atar, `action=balance|debit|credit`.
+  İmza `key = md5(timestamp + saltkey)`; `timestamp` son **30 saniye** içinde olmalı.
+  **Her yanıt HTTP 200**; hata gövdede: `{error, balance}` — `0` ok, `1` yetersiz bakiye,
+  `2` işlem hatası (bilinmeyen oyuncu / kötü veya eski imza).
+- **Bakiye ve tutarlar wire'da integer CENT'tir** (`$2.50 → 250`); site defteri ondalık tutar,
+  bu yüzden sınırda ×100 ölçeklenir.
+- Rollback ayrı bir action değildir: `rb=1` ile debit/credit olarak gelir, normal hareket gibi
+  uygulanır. `type=bonus_fs` debit'inde **nakit düşülmez** (ücretsiz spin Waija tarafından ödenir).
+  `call_id` idempotency anahtarıdır.
+- Dosyalar: `app/Casino/Waija/{WaijaClient,WaijaWalletService}.php`,
+  `WaijaWebhookController` → `GET|POST /webhooks/waija/callbacks` (CSRF'ten muaf),
+  bağdaştırıcı `app/Casino/Providers/WaijaProvider.php`, kayıt `CasinoProviderRegistry`,
+  config bloğu `config/casino_providers.php` → `waija`.
+- Kimlik bilgileri `.env`'de (`WAIJA_BASE_URL`, `WAIJA_API_LOGIN`, `WAIJA_API_PASSWORD`,
+  `WAIJA_SALT_KEY`, `WAIJA_PLAYER_PASSWORD`, `WAIJA_CURRENCY=TRY`, `WAIJA_CALLBACK_PATH`,
+  `WAIJA_SIGNATURE_WINDOW=30`). Waija backoffice'te sunucu IP allowlist'i gerekir.
+- Katalog senkronizasyonu: `CasinoCatalogSyncService::fetchWaija`; `gameid` = `id_hash`.
+- Testler: `tests/Casino/waija-integration-regression.php` (20 statik kontrol),
+  `tests/Casino/waija-wallet-e2e.php` (17 cüzdan kontrolü),
+  `tests/Casino/waija-webhook-e2e.php` (12 gerçek rota kontrolü, GET + cents).
+
 ### Testler
 - `php scripts/verify_casino_wallet.php` — 15 cüzdan kontrolü (kendi verisini temizler).
 - `php tests/Casino/provider-integration-regression.php` — 19 entegrasyon kontrolü.

@@ -38,6 +38,7 @@ class CasinoIntegrationStatus extends Command
         $this->line('Gregmorn Hub: ' . rtrim($base, '/') . '/' . ltrim((string) config('casino_providers.gregmorn.callback_path', '/webhooks/gregmorn/callbacks'), '/'));
         $this->line('OroPlay: ' . rtrim($base, '/') . '/' . ltrim((string) config('casino_providers.oroplay.callback_path', '/webhooks/oroplay/api'), '/'));
         $this->line('smpl core: ' . rtrim($base, '/') . '/' . ltrim((string) config('casino_providers.smplcore.callback_path', '/webhooks/smplcore/callbacks'), '/'));
+        $this->line('Waija: ' . rtrim($base, '/') . '/' . ltrim((string) config('casino_providers.waija.callback_path', '/webhooks/waija/callbacks'), '/'));
         $this->line('(Gregmorn için alternatif: ' . rtrim($base, '/') . '/webhooks/aggregator/gregmorn/wallet)');
 
         $rows = [];

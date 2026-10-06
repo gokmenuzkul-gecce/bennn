@@ -99,6 +99,34 @@ return [
         'settings_key' => 'casino_provider_oroplay',
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Waija (Slotsgateway) aggregator — slots + live, 150-250+ vendors
+    |--------------------------------------------------------------------------
+    |
+    | Waija (documentation.waija.com, formerly Slotsgateway) fronts many vendors
+    | behind one credential set. Outbound calls are JSON POSTs to the account base
+    | URL carrying api_login/api_password and a "method" (createPlayer,
+    | getGameList, getGame). Seamless-wallet callbacks arrive as GETs to our
+    | callback URL with action=balance|debit|credit and a key of
+    | md5(timestamp + saltkey); the timestamp must be within 30 seconds. Balances
+    | on the wire are integer cents.
+    |
+    */
+    'waija' => [
+        'base_url' => env('WAIJA_BASE_URL', ''),
+        'api_login' => env('WAIJA_API_LOGIN', ''),
+        'api_password' => env('WAIJA_API_PASSWORD', ''),
+        'salt_key' => env('WAIJA_SALT_KEY', ''),
+        'player_password' => env('WAIJA_PLAYER_PASSWORD', ''),
+        'callback_path' => env('WAIJA_CALLBACK_PATH', '/webhooks/waija/callbacks'),
+        'currency' => env('WAIJA_CURRENCY', env('CASINO_WALLET_CURRENCY', 'TRY')),
+        'signature_window' => (int) env('WAIJA_SIGNATURE_WINDOW', 30),
+        'home_url' => env('WAIJA_HOME_URL', rtrim(env('APP_URL', ''), '/')),
+        'cashier_url' => env('WAIJA_CASHIER_URL', rtrim(env('APP_URL', ''), '/')),
+        'settings_key' => 'casino_provider_waija',
+    ],
+
     'providers' => [
 
         'pragmatic' => [
@@ -163,6 +191,14 @@ return [
         'oroplay' => [
             'label' => 'OroPlay',
             'settings_key' => 'casino_provider_oroplay',
+            'embeddable' => true,
+        ],
+
+        // Waija is also an aggregator (Slotsgateway); WaijaProvider carries the
+        // protocol, this entry only supplies the label + admin toggles.
+        'waija' => [
+            'label' => 'Waija',
+            'settings_key' => 'casino_provider_waija',
             'embeddable' => true,
         ],
 

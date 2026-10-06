@@ -43,4 +43,4 @@ php "$ROOT/artisan" config:clear >/dev/null 2>&1 || true
 echo "Callback tabani guncellendi: $DOMAIN"
 echo
 echo "== Saglayici portallarina kaydettirilecek URL'ler =="
-php "$ROOT/artisan" casino:integration-status | grep -E "callback URL|^Aggregator|^Gregmorn|^OroPlay|^smpl|alternatif" || true
+php "$ROOT/artisan" casino:integration-status | grep -E "callback URL|^Aggregator|^Gregmorn|^OroPlay|^smpl|^Waija|alternatif" || true
