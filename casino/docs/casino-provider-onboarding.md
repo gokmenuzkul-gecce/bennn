@@ -21,6 +21,7 @@ php artisan casino:integration-status --test
 | Bilgi | Değer |
 |---|---|
 | Callback / Wallet URL (agregatör markaları) | `https://<SITE_ALAN_ADI>/webhooks/aggregator/gregmorn/wallet` |
+| Callback base (Gregmorn Hub) | `https://<SITE_ALAN_ADI>/webhooks/gregmorn` → `/api/balance`, `/api/transaction`, `/api/batch-transaction` |
 | Para birimi | `TRY` |
 | Oyuncu kimliği formatı | `<prefix><site_user_id>` (kayıt anında üretilir, satıcı aynen geri gönderir) |
 | Operasyonlar | `GetBalance`, `Withdraw`, `Deposit`, `BetWin`, `RollbackTransaction` |
@@ -63,7 +64,8 @@ hesabı olmadığı için `/auth/login` 401 dönüyor.
 - [ ] **Stage ve prod** için ayrı kimlikler (ayrı login/secret/IP listesi)
 - [ ] Stage base: `office-api-dev.gregmorn.org` + `client-api-dev.gregmorn.org` teyidi
 - [ ] Prod base: `office-api.gamble-hub.net` + `client-api.gamble-hub.net` teyidi
-- [ ] Callback URL'imizi kayıt → `https://<SITE_ALAN_ADI>/webhooks/gregmorn/callbacks`
+- [ ] **Callback base URL'imizi kayıt** → `https://<SITE_ALAN_ADI>/webhooks/gregmorn`
+      (Hub kendi yollarını ekler: `/api/balance`, `/api/transaction`, `/api/batch-transaction`)
 - [ ] Para birimi: `TRY` kataloğu aktif mi
 
 ### D. smpl core — 35.000+ oyun (slot + CANLI CASINO) — ÖNERİLEN CANLI MASA KAYNAĞI

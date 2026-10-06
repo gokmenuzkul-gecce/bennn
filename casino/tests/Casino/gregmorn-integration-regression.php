@@ -74,10 +74,25 @@ $checks = [
     'rollback reverses the matching writeBet exactly once' => str_contains($wallet, "(float) \$original->bet_amount - (float) \$original->win_amount")
         && str_contains($wallet, "\$original->status = 'rolled_back'"),
 
-    'wallet replies with the documented always-200 JSON shape' => str_contains($wallet, "'balance' => round(")
+    'wallet replies with the documented JSON shape' => str_contains($wallet, "'balance' => round(")
         && str_contains($wallet, "'currency' =>")
         && str_contains($wallet, "'login' =>")
         && str_contains($wallet, "'status' => 'success'"),
+
+    'wallet exposes the Hub balance, transaction and batch endpoints' => str_contains($wallet, 'function apiBalance(')
+        && str_contains($wallet, 'function apiTransaction(')
+        && str_contains($wallet, 'function apiBatchTransaction('),
+
+    'webhook answers 200 on success and 400 on failure' => str_contains($controller, "=== 'success') ? 200 : 400")
+        && str_contains($controller, 'function balance(')
+        && str_contains($controller, 'function transaction(')
+        && str_contains($controller, 'function batchTransaction('),
+
+    'the three Hub callback paths are registered' => str_contains($routes, "'webhooks/gregmorn' => 'webhooks.gregmorn'")
+        && str_contains($routes, "/api")
+        && str_contains($routes, "post('balance'")
+        && str_contains($routes, "post('transaction'")
+        && str_contains($routes, "post('batch-transaction'"),
 
     'webhook verifies the raw body signature before acting' => str_contains($controller, '$request->getContent()')
         && str_contains($controller, "header('X-Signature'")

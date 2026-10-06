@@ -281,6 +281,28 @@ Route::post('webhooks/gregmorn/callbacks', [
     \VanguardLTE\Http\Controllers\Web\Webhooks\GregmornWebhookController::class, 'handle',
 ])->name('webhooks.gregmorn.callbacks');
 
+// The Hub takes a callback base URL and appends its own paths, so it calls
+// <base>/api/balance, <base>/api/transaction and <base>/api/batch-transaction.
+// Expose them under both the base itself and beneath /callbacks, so it does not
+// matter whether the registered base was .../webhooks/gregmorn or
+// .../webhooks/gregmorn/callbacks.
+foreach ([
+    'webhooks/gregmorn' => 'webhooks.gregmorn',
+    'webhooks/gregmorn/callbacks' => 'webhooks.gregmorn.callbacks',
+] as $prefix => $name) {
+    Route::prefix($prefix . '/api')->group(function () use ($name) {
+        Route::post('balance', [
+            \VanguardLTE\Http\Controllers\Web\Webhooks\GregmornWebhookController::class, 'balance',
+        ])->name($name . '.balance');
+        Route::post('transaction', [
+            \VanguardLTE\Http\Controllers\Web\Webhooks\GregmornWebhookController::class, 'transaction',
+        ])->name($name . '.transaction');
+        Route::post('batch-transaction', [
+            \VanguardLTE\Http\Controllers\Web\Webhooks\GregmornWebhookController::class, 'batchTransaction',
+        ])->name($name . '.batch');
+    });
+}
+
 // OroPlay seamless-wallet callbacks. OroPlay documents these as
 // /api/balance, /api/transaction and /api/batch-transactions; they are mounted
 // under /webhooks/oroplay so they never collide with the site's own /api

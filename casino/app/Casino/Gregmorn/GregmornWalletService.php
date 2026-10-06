@@ -57,6 +57,65 @@ class GregmornWalletService
         return $this->success($payload, $client, (float) $user->balance);
     }
 
+    /**
+     * Hub balance endpoint (/api/balance).
+     *
+     * The endpoint carries only the player identity, so the command is implied.
+     */
+    public function apiBalance(array $payload, GregmornClient $client): array
+    {
+        $payload['cmd'] = 'getBalance';
+
+        return $this->getBalance($payload, $client);
+    }
+
+    /**
+     * Hub single-transaction endpoint (/api/transaction).
+     *
+     * A stake/win pair is the default, so an absent cmd is treated as writeBet;
+     * an explicit cmd (rollback) is honoured.
+     */
+    public function apiTransaction(array $payload, GregmornClient $client): array
+    {
+        $cmd = (string) ($payload['cmd'] ?? 'writeBet');
+
+        return $this->handle($cmd, $payload, $client);
+    }
+
+    /**
+     * Hub batch endpoint (/api/batch-transaction).
+     *
+     * Applies each entry in order and returns the last result, whose balance is
+     * the running total after the whole batch. A single transaction object is
+     * accepted as well as a list.
+     *
+     * @return array<string, mixed>
+     */
+    public function apiBatchTransaction(array $payload, GregmornClient $client): array
+    {
+        $entries = $payload['transactions'] ?? $payload['batch'] ?? $payload['data'] ?? null;
+
+        if (!is_array($entries)) {
+            // A bare object carrying one transaction (or a cmd) is a batch of one.
+            if (isset($payload['cmd']) || isset($payload['transactionId'])) {
+                $entries = [$payload];
+            } else {
+                return $this->fail($payload, $client, 'Invalid batch payload', 0.0);
+            }
+        }
+
+        $result = null;
+        foreach ($entries as $entry) {
+            if (!is_array($entry)) {
+                continue;
+            }
+            $cmd = (string) ($entry['cmd'] ?? 'writeBet');
+            $result = $this->handle($cmd, $entry, $client);
+        }
+
+        return $result ?? $this->fail($payload, $client, 'Empty batch', 0.0);
+    }
+
     public function writeBet(array $payload, GregmornClient $client): array
     {
         $user = $this->resolveUser($payload);
