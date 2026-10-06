@@ -78,6 +78,32 @@ Bunun yerine:
   satırlar `view=0` yapılır (tıklanınca 404 veren eski oyunlar gizlenir).
 - Kimlik bilgileri `.env`'de (`PRAGMATIC_*`, `PGSOFT_*`, `AMATIC_*`, `AMUSNET_*`); config yalnızca
   `env()` okur, sır tutmaz. Operatör Liteback'ten (`/liteback/casino/providers`) override edebilir.
+
+## Gregmorn Hub agregatörü (çok sağlayıcılı slot + canlı casino)
+- Doküman: <https://docs.gregmorn.org> (HTTP Basic, login `gregmorn`). Stage ve prod ayrı
+  login/secret/IP allowlist kullanır. Gregmorn Hub tek kimlik bilgisiyle birçok sağlayıcıyı
+  (slotlar + canlı masa) sunar ve her oyunu site cüzdanına bağlar.
+- Protokol (legacy loginxgames'ten farklı): `POST /auth/login` (form-encoded) kısa ömürlü JWT verir;
+  `GET /users/{user_id}/getUserGames/{currency}` kataloğu döner; `POST /games/openGame` (JSON +
+  `X-Signature`) oynanabilir oturum URL'i verir. `X-Signature` = ham gövde üzerinde hex HMAC-SHA256,
+  hesap secret'ı ile.
+- Cüzdan callback'leri: Hub `getBalance` / `writeBet` / `rollback` komutlarını tek URL'e JSON olarak
+  POST eder; yanıt her zaman HTTP 200 + `{balance,currency,duration,error,login,status}`.
+  `writeBet` stake'i düşüp kazancı ekler (delta = win - bet); `transactionId` idempotency anahtarıdır;
+  `rollback` aynı `transactionId`'li writeBet'i geri alır.
+- Dosyalar: `app/Casino/Gregmorn/{GregmornClient,GregmornWalletService}.php`,
+  `GregmornWebhookController` → `POST /webhooks/gregmorn/callbacks` (CSRF'ten muaf),
+  bağdaştırıcı `app/Casino/Providers/GregmornProvider.php`, kayıt `CasinoProviderRegistry`,
+  config bloğu `config/casino_providers.php` → `gregmorn`.
+- Kimlik bilgileri `.env`'de (`GREGMORN_OFFICE_BASE_URL`, `GREGMORN_CLIENT_BASE_URL`, `GREGMORN_LOGIN`,
+  `GREGMORN_PASSWORD`, `GREGMORN_SECRET_KEY`, `GREGMORN_USER_ID`, `GREGMORN_CURRENCY=TRY`).
+  Operatör Liteback'ten override edebilir. `GREGMORN_USER_ID` boşsa `/auth/login` yanıtındaki
+  `user.id` kullanılır. Hub operatör API'si IP allowlist ister; allowlist yoksa `/auth/login` 401
+  döner (doküman girişi bundan bağımsızdır).
+- Katalog senkronizasyonu: `CasinoCatalogSyncService::fetchGregmorn` tüm listeyi (slot + canlı masa)
+  çeker; `gameid` Hub'ın kendi id'sidir (ör. `integration_a:provider_a:game_001`).
+- Testler: `tests/Casino/gregmorn-integration-regression.php` (18 statik kontrol),
+  `tests/Casino/gregmorn-wallet-e2e.php` (gerçek DB'de 9 cüzdan kontrolü).
 - Admin: `/liteback/casino/providers` (durum + test + aç/kapat), `/liteback/casino/transactions`.
 - Callback slug `gregmorn`; callback tabanı `CASINO_CALLBACK_BASE`.
 
