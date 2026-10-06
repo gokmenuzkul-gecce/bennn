@@ -3,7 +3,9 @@
 namespace VanguardLTE\Casino;
 
 use Illuminate\Support\Facades\DB;
+use VanguardLTE\Casino\OroPlay\OroPlayClient;
 use VanguardLTE\Casino\Providers\CasinoProviderRegistry;
+use VanguardLTE\Casino\Providers\OroPlayProvider;
 use VanguardLTE\Game;
 
 /**
@@ -33,6 +35,10 @@ class CasinoCatalogSyncService
      */
     public function fetch(string $providerKey): array
     {
+        if ($providerKey === OroPlayProvider::KEY) {
+            return $this->fetchOroPlay();
+        }
+
         $provider = $this->registry->make($providerKey);
         $config = $provider->config();
 
@@ -83,6 +89,52 @@ class CasinoCatalogSyncService
                 'icon' => (string) $icon,
                 'vendor' => (string) ($row['vendorid'] ?? ''),
             ];
+        }
+
+        return $games;
+    }
+
+    /**
+     * Fetch the whole OroPlay catalogue.
+     *
+     * OroPlay is an aggregator: it exposes vendors via /vendors/list and each
+     * vendor's games via /games/list. Every game carries its own vendorCode, so
+     * we encode both halves into the launch id as "<vendorCode>:<gameCode>" —
+     * the launch endpoint needs both, and the colon survives the game id column.
+     *
+     * @return array<int, array{gameid: string, symbol: string, name: string, icon: string, vendor: string}>
+     */
+    private function fetchOroPlay(): array
+    {
+        $client = new OroPlayClient();
+
+        $vendors = $client->vendors();
+        if ($vendors === []) {
+            throw new \RuntimeException('oroplay: sağlayıcı listesi alınamadı.');
+        }
+
+        $games = [];
+        foreach ($vendors as $vendor) {
+            $vendorCode = (string) ($vendor['vendorCode'] ?? '');
+            if ($vendorCode === '') {
+                continue;
+            }
+
+            foreach ($client->games($vendorCode, 'tr') as $row) {
+                $gameCode = (string) ($row['gameCode'] ?? '');
+                $name = trim((string) ($row['gameName'] ?? ''));
+                if ($gameCode === '' || $name === '') {
+                    continue;
+                }
+
+                $games[] = [
+                    'gameid' => $vendorCode . ':' . $gameCode,
+                    'symbol' => $vendorCode . '_' . $gameCode,
+                    'name' => $name,
+                    'icon' => (string) ($row['thumbnail'] ?? ''),
+                    'vendor' => $vendorCode,
+                ];
+            }
         }
 
         return $games;

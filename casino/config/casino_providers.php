@@ -49,6 +49,29 @@ return [
         'settings_key' => 'casino_provider_smplcore',
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | OroPlay aggregator (Live Casino, Slot & Mini Game API v1.1.3)
+    |--------------------------------------------------------------------------
+    |
+    | OroPlay speaks a third protocol: outbound calls authenticate with a bearer
+    | token minted from clientId/clientSecret (POST /auth/createtoken), while the
+    | operator-side seamless-wallet callbacks are authenticated with HTTP Basic
+    | (base64 of clientId:clientSecret). One transaction endpoint receives every
+    | bet/win (amount<0 = bet, amount>0 = win). Credentials are issued per agent
+    | in the OroPlay agent page; the staging client id is prefixed "stg-TRY-".
+    |
+    */
+    'oroplay' => [
+        'base_url' => env('OROPLAY_BASE_URL', 'https://api.oroplay.com/api/v2'),
+        'client_id' => env('OROPLAY_CLIENT_ID', ''),
+        'client_secret' => env('OROPLAY_CLIENT_SECRET', ''),
+        'callback_path' => env('OROPLAY_CALLBACK_PATH', '/webhooks/oroplay/api'),
+        'currency' => env('OROPLAY_CURRENCY', env('CASINO_WALLET_CURRENCY', 'TRY')),
+        'lobby_url' => env('OROPLAY_LOBBY_URL', rtrim(env('APP_URL', ''), '/')),
+        'settings_key' => 'casino_provider_oroplay',
+    ],
+
     'providers' => [
 
         'pragmatic' => [
@@ -104,6 +127,16 @@ return [
             'settings_key' => 'casino_provider_amusnet',
             'launch_path' => '/userauth',
             'gamelist_path' => '/gamelist',
+        ],
+
+        // OroPlay is an aggregator, not a single brand: one credential set
+        // fronts many vendors. Its own client (OroPlayClient) speaks the token/
+        // launch protocol; this entry only carries the label + admin toggles so
+        // it appears in Liteback alongside the legacy brands.
+        'oroplay' => [
+            'label' => 'OroPlay',
+            'settings_key' => 'casino_provider_oroplay',
+            'embeddable' => true,
         ],
 
     ],

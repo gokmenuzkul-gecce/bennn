@@ -94,32 +94,56 @@
                             <form action="{{ route('liteback.casino.providers.update') }}" method="POST">
                                 @csrf
                                 <input type="hidden" name="provider" value="{{ $provider['key'] }}">
-                                <div class="row">
-                                    <div class="col-md-3">
-                                        <label class="small mb-0">Endpoint</label>
-                                        <input type="text" name="endpoint" class="form-control form-control-sm"
-                                               value="{{ $provider['endpoint'] }}" placeholder="pk2api.loginxgamesapi.com">
+                                @if($provider['key'] === 'oroplay')
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <label class="small mb-0">Base URL</label>
+                                            <input type="text" name="base_url" class="form-control form-control-sm"
+                                                   value="{{ $provider['endpoint'] }}" placeholder="https://api.oroplay.com/api/v2">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="small mb-0">Client ID</label>
+                                            <input type="text" name="client_id" class="form-control form-control-sm"
+                                                   placeholder="stg-TRY-...">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="small mb-0">Client Secret</label>
+                                            <input type="text" name="client_secret" class="form-control form-control-sm"
+                                                   placeholder="boş bırak = değişmez">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="small mb-0">Para Birimi</label>
+                                            <input type="text" class="form-control form-control-sm" value="TRY" readonly>
+                                        </div>
                                     </div>
-                                    <div class="col-md-2">
-                                        <label class="small mb-0">Agent ID</label>
-                                        <input type="text" name="agent_id" class="form-control form-control-sm"
-                                               placeholder="agent kimliği">
+                                @else
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <label class="small mb-0">Endpoint</label>
+                                            <input type="text" name="endpoint" class="form-control form-control-sm"
+                                                   value="{{ $provider['endpoint'] }}" placeholder="pk2api.loginxgamesapi.com">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="small mb-0">Agent ID</label>
+                                            <input type="text" name="agent_id" class="form-control form-control-sm"
+                                                   placeholder="agent kimliği">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="small mb-0">API Token</label>
+                                            <input type="text" name="api_token" class="form-control form-control-sm"
+                                                   placeholder="boş bırak = değişmez">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="small mb-0">Secret Key</label>
+                                            <input type="text" name="secret_key" class="form-control form-control-sm"
+                                                   placeholder="boş bırak = değişmez">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="small mb-0">Callback URL (salt okunur)</label>
+                                            <input type="text" class="form-control form-control-sm" value="{{ $provider['callback_url'] }}" readonly>
+                                        </div>
                                     </div>
-                                    <div class="col-md-2">
-                                        <label class="small mb-0">API Token</label>
-                                        <input type="text" name="api_token" class="form-control form-control-sm"
-                                               placeholder="boş bırak = değişmez">
-                                    </div>
-                                    <div class="col-md-2">
-                                        <label class="small mb-0">Secret Key</label>
-                                        <input type="text" name="secret_key" class="form-control form-control-sm"
-                                               placeholder="boş bırak = değişmez">
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="small mb-0">Callback URL (salt okunur)</label>
-                                        <input type="text" class="form-control form-control-sm" value="{{ $provider['callback_url'] }}" readonly>
-                                    </div>
-                                </div>
+                                @endif
                                 <button type="submit" class="btn btn-primary btn-sm mt-2">Kaydet</button>
                             </form>
                         </div>

@@ -274,6 +274,23 @@ Route::post('webhooks/smplcore/callbacks', [
     \VanguardLTE\Http\Controllers\Web\Webhooks\SmplCoreWebhookController::class, 'handle',
 ])->name('webhooks.smplcore.callbacks');
 
+// OroPlay seamless-wallet callbacks. OroPlay documents these as
+// /api/balance, /api/transaction and /api/batch-transactions; they are mounted
+// under /webhooks/oroplay so they never collide with the site's own /api
+// routes. Registered in the OroPlay agent page as
+// <APP_URL>/webhooks/oroplay/api/{balance,transaction,batch-transactions}.
+Route::prefix('webhooks/oroplay/api')->group(function () {
+    Route::post('balance', [
+        \VanguardLTE\Http\Controllers\Web\Webhooks\OroPlayWebhookController::class, 'balance',
+    ])->name('webhooks.oroplay.balance');
+    Route::post('transaction', [
+        \VanguardLTE\Http\Controllers\Web\Webhooks\OroPlayWebhookController::class, 'transaction',
+    ])->name('webhooks.oroplay.transaction');
+    Route::post('batch-transactions', [
+        \VanguardLTE\Http\Controllers\Web\Webhooks\OroPlayWebhookController::class, 'batchTransactions',
+    ])->name('webhooks.oroplay.batch');
+});
+
 
 /**
  *

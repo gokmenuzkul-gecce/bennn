@@ -22,6 +22,7 @@ class CasinoProviderRegistry
             PGSoftProvider::KEY => static fn (): CasinoProvider => new PGSoftProvider(),
             AmaticProvider::KEY => static fn (): CasinoProvider => new AmaticProvider(),
             AmusnetProvider::KEY => static fn (): CasinoProvider => new AmusnetProvider(),
+            OroPlayProvider::KEY => static fn (): CasinoProvider => new OroPlayProvider(),
         ];
     }
 
@@ -110,7 +111,7 @@ class CasinoProviderRegistry
                 'configured' => $status['configured'],
                 'enabled' => $this->isEnabled($key),
                 'endpoint' => (string) ($config['endpoint'] ?? ''),
-                'callback_url' => $this->callbackUrl(),
+                'callback_url' => method_exists($provider, 'callbackUrl') ? $provider->callbackUrl() : $this->callbackUrl(),
                 'message' => $status['message'],
             ];
         }
