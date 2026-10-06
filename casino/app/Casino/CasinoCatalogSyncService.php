@@ -3,8 +3,10 @@
 namespace VanguardLTE\Casino;
 
 use Illuminate\Support\Facades\DB;
+use VanguardLTE\Casino\Gregmorn\GregmornClient;
 use VanguardLTE\Casino\OroPlay\OroPlayClient;
 use VanguardLTE\Casino\Providers\CasinoProviderRegistry;
+use VanguardLTE\Casino\Providers\GregmornProvider;
 use VanguardLTE\Casino\Providers\OroPlayProvider;
 use VanguardLTE\Game;
 
@@ -37,6 +39,10 @@ class CasinoCatalogSyncService
     {
         if ($providerKey === OroPlayProvider::KEY) {
             return $this->fetchOroPlay();
+        }
+
+        if ($providerKey === GregmornProvider::KEY) {
+            return $this->fetchGregmorn();
         }
 
         $provider = $this->registry->make($providerKey);
@@ -135,6 +141,42 @@ class CasinoCatalogSyncService
                     'vendor' => $vendorCode,
                 ];
             }
+        }
+
+        return $games;
+    }
+
+    /**
+     * Fetch the whole Gregmorn Hub catalogue (slots + live tables).
+     *
+     * The Hub returns one flat list for the account currency; each item carries
+     * the vendor name in `provider`, so slots and live-casino tables arrive
+     * together. Launch ids are the Hub's own game ids (kept verbatim).
+     *
+     * @return array<int, array{gameid: string, symbol: string, name: string, icon: string, vendor: string}>
+     */
+    private function fetchGregmorn(): array
+    {
+        $client = new GregmornClient();
+
+        $games = [];
+        foreach ($client->games() as $row) {
+            $id = (string) ($row['id'] ?? '');
+            $title = trim((string) ($row['title'] ?? ''));
+            if ($id === '' || $title === '') {
+                continue;
+            }
+            if (array_key_exists('isEnabled', $row) && !$row['isEnabled']) {
+                continue;
+            }
+
+            $games[] = [
+                'gameid' => $id,
+                'symbol' => preg_replace('/[^A-Za-z0-9_]/', '_', $id) ?: $id,
+                'name' => $title,
+                'icon' => (string) ($row['imageUrl'] ?? ''),
+                'vendor' => (string) ($row['provider'] ?? ''),
+            ];
         }
 
         return $games;

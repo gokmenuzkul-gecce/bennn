@@ -51,6 +51,33 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Gregmorn Hub aggregator (slots + live casino, multi-vendor)
+    |--------------------------------------------------------------------------
+    |
+    | Gregmorn Hub (docs.gregmorn.org) fronts many vendors behind one credential
+    | set and speaks its own protocol: POST /auth/login mints a short-lived JWT,
+    | GET /users/{user_id}/getUserGames/{currency} lists the catalogue, and
+    | POST /games/openGame returns a playable session URL. Wallet callbacks are
+    | signed with X-Signature = hex HMAC-SHA256 over the raw JSON body, keyed by
+    | the account secret. Credentials are issued per operator account; stage and
+    | prod have separate logins, secrets and IP allowlists.
+    |
+    */
+    'gregmorn' => [
+        'office_base_url' => env('GREGMORN_OFFICE_BASE_URL', 'https://office-api-dev.gregmorn.org'),
+        'client_base_url' => env('GREGMORN_CLIENT_BASE_URL', 'https://client-api-dev.gregmorn.org'),
+        'login' => env('GREGMORN_LOGIN', ''),
+        'password' => env('GREGMORN_PASSWORD', ''),
+        'secret_key' => env('GREGMORN_SECRET_KEY', ''),
+        'user_id' => env('GREGMORN_USER_ID', ''),
+        'currency' => env('GREGMORN_CURRENCY', env('CASINO_WALLET_CURRENCY', 'TRY')),
+        'callback_path' => env('GREGMORN_CALLBACK_PATH', '/webhooks/gregmorn/callbacks'),
+        'exit_url' => env('GREGMORN_EXIT_URL', rtrim(env('APP_URL', ''), '/')),
+        'settings_key' => 'casino_provider_gregmorn',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | OroPlay aggregator (Live Casino, Slot & Mini Game API v1.1.3)
     |--------------------------------------------------------------------------
     |

@@ -274,6 +274,13 @@ Route::post('webhooks/smplcore/callbacks', [
     \VanguardLTE\Http\Controllers\Web\Webhooks\SmplCoreWebhookController::class, 'handle',
 ])->name('webhooks.smplcore.callbacks');
 
+// Gregmorn Hub seamless-wallet callback. The Hub posts getBalance/writeBet/
+// rollback as JSON signed with X-Signature (HMAC-SHA256 over the raw body).
+// Registered with Gregmorn as <APP_URL>/webhooks/gregmorn/callbacks.
+Route::post('webhooks/gregmorn/callbacks', [
+    \VanguardLTE\Http\Controllers\Web\Webhooks\GregmornWebhookController::class, 'handle',
+])->name('webhooks.gregmorn.callbacks');
+
 // OroPlay seamless-wallet callbacks. OroPlay documents these as
 // /api/balance, /api/transaction and /api/batch-transactions; they are mounted
 // under /webhooks/oroplay so they never collide with the site's own /api

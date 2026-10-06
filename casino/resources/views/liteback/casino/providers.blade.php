@@ -94,7 +94,50 @@
                             <form action="{{ route('liteback.casino.providers.update') }}" method="POST">
                                 @csrf
                                 <input type="hidden" name="provider" value="{{ $provider['key'] }}">
-                                @if($provider['key'] === 'oroplay')
+                                @if($provider['key'] === 'gregmorn')
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <label class="small mb-0">Office Base URL</label>
+                                            <input type="text" name="office_base_url" class="form-control form-control-sm"
+                                                   value="{{ $provider['endpoint'] }}" placeholder="https://office-api-dev.gregmorn.org">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="small mb-0">Client Base URL</label>
+                                            <input type="text" name="client_base_url" class="form-control form-control-sm"
+                                                   placeholder="https://client-api-dev.gregmorn.org">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="small mb-0">Login</label>
+                                            <input type="text" name="login" class="form-control form-control-sm"
+                                                   placeholder="operatör hesabı">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="small mb-0">Password</label>
+                                            <input type="text" name="password" class="form-control form-control-sm"
+                                                   placeholder="boş bırak = değişmez">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="small mb-0">Secret Key</label>
+                                            <input type="text" name="secret_key" class="form-control form-control-sm"
+                                                   placeholder="boş bırak = değişmez">
+                                        </div>
+                                    </div>
+                                    <div class="row mt-1">
+                                        <div class="col-md-4">
+                                            <label class="small mb-0">User ID (boş = login yanıtından)</label>
+                                            <input type="text" name="user_id" class="form-control form-control-sm"
+                                                   placeholder="uuid">
+                                        </div>
+                                        <div class="col-md-5">
+                                            <label class="small mb-0">Callback URL (salt okunur)</label>
+                                            <input type="text" class="form-control form-control-sm" value="{{ $provider['callback_url'] }}" readonly>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="small mb-0">Para Birimi</label>
+                                            <input type="text" class="form-control form-control-sm" value="TRY" readonly>
+                                        </div>
+                                    </div>
+                                @elseif($provider['key'] === 'oroplay')
                                     <div class="row">
                                         <div class="col-md-4">
                                             <label class="small mb-0">Base URL</label>

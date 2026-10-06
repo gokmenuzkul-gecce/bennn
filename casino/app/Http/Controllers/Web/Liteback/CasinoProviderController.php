@@ -48,6 +48,12 @@ class CasinoProviderController extends Controller
             'base_url' => 'nullable|string|max:190',
             'client_id' => 'nullable|string|max:190',
             'client_secret' => 'nullable|string|max:190',
+            // Gregmorn Hub (aggregator) credentials.
+            'office_base_url' => 'nullable|string|max:190',
+            'client_base_url' => 'nullable|string|max:190',
+            'login' => 'nullable|string|max:190',
+            'password' => 'nullable|string|max:190',
+            'user_id' => 'nullable|string|max:190',
         ]);
 
         if (!$this->registry->has($data['provider'])) {
@@ -61,7 +67,11 @@ class CasinoProviderController extends Controller
         // an operator who only edits one of them.
         $stored = settings($settingsKey);
         $current = is_string($stored) ? (json_decode($stored, true) ?: []) : [];
-        foreach (['endpoint', 'agent_id', 'api_token', 'secret_key', 'base_url', 'client_id', 'client_secret'] as $field) {
+        foreach ([
+            'endpoint', 'agent_id', 'api_token', 'secret_key',
+            'base_url', 'client_id', 'client_secret',
+            'office_base_url', 'client_base_url', 'login', 'password', 'user_id',
+        ] as $field) {
             if (isset($data[$field]) && $data[$field] !== '') {
                 $current[$field] = $data[$field];
             }

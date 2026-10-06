@@ -29,6 +29,8 @@ namespace VanguardLTE\Http\Middleware
             '/webhooks/aggregator/*',
             'webhooks/smplcore/*',
             '/webhooks/smplcore/*',
+            'webhooks/gregmorn/*',
+            '/webhooks/gregmorn/*',
             'webhooks/oroplay/*',
             '/webhooks/oroplay/*',
             'register'
