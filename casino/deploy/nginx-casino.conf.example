@@ -1,0 +1,62 @@
+# Nginx vhost for the casino site, ready for a permanent domain.
+#
+# Copy to /etc/nginx/sites-available/casino.conf, replace <DOMAIN> with the real
+# host (same value you pass to deploy/set-callback-domain.sh), then:
+#   ln -s /etc/nginx/sites-available/casino.conf /etc/nginx/sites-enabled/
+#   certbot --nginx -d <DOMAIN>          # HTTPS is mandatory: vendors post over TLS
+#   nginx -t && systemctl reload nginx
+#
+# The Laravel app lives in <root>/casino/public.
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name <DOMAIN>;
+
+    # certbot rewrites this block to 443 and adds the redirect.
+    location /.well-known/acme-challenge/ {
+        root /var/www/html;
+    }
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name <DOMAIN>;
+
+    # certbot --nginx fills these in.
+    ssl_certificate     /etc/letsencrypt/live/<DOMAIN>/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/<DOMAIN>/privkey.pem;
+
+    root /var/www/casino/casino/public;
+    index index.php;
+
+    charset utf-8;
+    client_max_body_size 32m;
+
+    # Seamless-wallet callbacks are small JSON/form posts. Give them room but
+    # keep a sane ceiling so a stuck vendor cannot hold a worker forever.
+    location ~ ^/webhooks/ {
+        try_files $uri /index.php?$query_string;
+        fastcgi_read_timeout 30s;
+    }
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        include fastcgi_params;
+        fastcgi_pass unix:/run/php/php8.4-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        fastcgi_param DOCUMENT_ROOT $realpath_root;
+    }
+
+    location ~ /\.(?!well-known).* {
+        deny all;
+    }
+}

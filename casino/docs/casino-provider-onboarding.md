@@ -18,6 +18,13 @@ php artisan casino:integration-status --test
 
 ## 1) Bizden sağlayıcıya VERİLECEKLER (hepsine ortak)
 
+> **Kalıcı alan adı ZORUNLU.** Sağlayıcılar callback'i bize kaydedilen URL'e atar; bu host
+> DNS'te çözülmeli ve HTTPS olmalı. Sandbox host'u (`*.prod-runtime.all-hands.dev`) yalnızca
+> geliştirme içindir — portallara kaydettirmeyin. Alan adı hazır olunca tek komut yeter:
+> `deploy/set-callback-domain.sh https://<SITE_ALAN_ADI>` (APP_URL + CASINO_CALLBACK_BASE'i
+> yazar, cache temizler ve aşağıdaki URL'leri basar). Nginx şablonu:
+> `deploy/nginx-casino.conf.example`.
+
 | Bilgi | Değer |
 |---|---|
 | Callback / Wallet URL (agregatör markaları) | `https://<SITE_ALAN_ADI>/webhooks/aggregator/gregmorn/wallet` |
@@ -71,6 +78,14 @@ hesabı olmadığı için `/auth/login` 401 dönüyor.
 ### D. smpl core — 35.000+ oyun (slot + CANLI CASINO) — ÖNERİLEN CANLI MASA KAYNAĞI
 Docs: <https://smplcore.com/docs/getting-started>. Entegrasyon tamamen hazır
 (client + cüzdan + webhook + provider adapter); **sadece kimlik eksik**.
+
+> **ÖNEMLİ:** smpl core, **Merchant ID + Merchant Key** ister (doküman: "Contact your sales
+> manager to receive Merchant ID and Merchant Key"). Elimizdeki `stg-TRY-Geccebet53` /
+> Client Secret **bu API'nin kimliği DEĞİL** — o, agregatörün (loginxgames) OAuth client'ı.
+> O yüzden staging `/games` çağrısı **403 "RBAC: access denied"** döner. Canlı masa açmak için
+> smpl core entegrasyon müdüründen ayrı **Merchant ID + Merchant Key** alınmalı; gelince
+> `.env`'e `SMPL_MERCHANT_ID` / `SMPL_MERCHANT_KEY` yazılıp `php artisan casino:sync-catalog`
+> çalıştırılır (istek imzası: HMAC-SHA1, `X-Merchant-Id`/`X-Timestamp`/`X-Nonce`/`X-Sign`).
 
 - [ ] **`merchant_id`** (ŞU AN BOŞ — `SMPL_MERCHANT_ID`)
 - [ ] **`merchant_key`** (HMAC-SHA1 imza anahtarı)
