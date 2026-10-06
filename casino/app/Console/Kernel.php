@@ -5,6 +5,7 @@ namespace VanguardLTE\Console
     class Kernel extends \Illuminate\Foundation\Console\Kernel
     {
         protected $commands = [
+            Commands\CasinoIntegrationStatus::class,
             Commands\SettleCedarCrash::class,
             Commands\ProcessCryptoRounds::class,
             Commands\ProcessStockRounds::class,
