@@ -202,42 +202,44 @@
 </div>
 
 <!-- Floating Mobile App Bottom Dock Navigation -->
-<nav class="lg:hidden fixed bottom-3 inset-x-3 sm:inset-x-6 z-40 bg-[#121622]/95 border border-white/[0.12] rounded-2xl shadow-2xl backdrop-blur-2xl px-2 py-1.5 flex items-center justify-around">
+<nav class="app-dock" aria-label="Ana gezinme">
     <!-- 1. Casino -->
     @if(settings('enable_casino_slots', '1') == '1')
-    <a href="{{ route('frontend.game.list') }}" class="flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-all no-underline {{ Route::is('frontend.game.list*') && !request()->is('categories/cedar_games*') && !request()->is('categories/cedar_remakes*') ? 'text-primary' : 'text-on-surface-subtle hover:text-white' }}">
-        <span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' {{ Route::is('frontend.game.list*') && !request()->is('categories/cedar_games*') && !request()->is('categories/cedar_remakes*') ? '1' : '0' }};">casino</span>
-        <span class="text-[10px] font-bold tracking-tight">{{ $navCasino }}</span>
+    @php($dockCasinoActive = Route::is('frontend.game.list*') && !request()->is('categories/cedar_games*') && !request()->is('categories/cedar_remakes*') && !request()->is('categories/live_casino*'))
+    <a href="{{ route('frontend.game.list') }}" class="app-dock-link {{ $dockCasinoActive ? 'is-active' : '' }}">
+        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' {{ $dockCasinoActive ? '1' : '0' }};">casino</span>
+        <span class="app-dock-label">Casino</span>
     </a>
     @endif
 
-    <!-- 2. CEDAR Originals -->
+    <!-- 2. Canlı Casino -->
+    @php($dockLiveActive = request()->is('categories/live_casino*'))
+    <a href="{{ route('frontend.game.list.category', ['category1' => 'live_casino']) }}" class="app-dock-link {{ $dockLiveActive ? 'is-active' : '' }}">
+        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' {{ $dockLiveActive ? '1' : '0' }};">live_tv</span>
+        <span class="app-dock-label">Canlı</span>
+    </a>
+
+    <!-- 3. CEDAR Originals -->
     @if(settings('enable_cedar_originals', '1') == '1')
-    <a href="/categories/cedar_games" class="flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-all no-underline {{ request()->is('categories/cedar_games*') ? 'text-accent-gold' : 'text-on-surface-subtle hover:text-white' }}">
-        <span class="material-symbols-outlined text-2xl text-accent-gold" style="font-variation-settings: 'FILL' 1;">rocket_launch</span>
-        <span class="text-[10px] font-bold tracking-tight text-accent-gold">{{ $cedarBrand }}</span>
+    @php($dockCedarActive = request()->is('categories/cedar_games*'))
+    <a href="/categories/cedar_games" class="app-dock-link {{ $dockCedarActive ? 'is-active' : '' }}">
+        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">rocket_launch</span>
+        <span class="app-dock-label">{{ $cedarBrand }}</span>
     </a>
     @endif
 
-    <!-- 3. Battle Odds / Sports -->
+    <!-- 4. Battle Odds / Sports -->
     @if(settings('enable_sportsbook', '1') == '1')
-    <a href="{{ route('frontend.sports.index') }}" class="flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-all no-underline {{ Route::is('frontend.sports*') ? 'text-secondary' : 'text-on-surface-subtle hover:text-white' }}">
-        <span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' {{ Route::is('frontend.sports*') ? '1' : '0' }};">sports_soccer</span>
-        <span class="text-[10px] font-bold tracking-tight">{{ $navSports }}</span>
-    </a>
-    @endif
-
-    <!-- 4. Jackpot Zone -->
-    @if(settings('enable_lotto', '1') == '1')
-    <a href="{{ route('frontend.lotto.index') }}" class="flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-all no-underline {{ Route::is('frontend.lotto*') ? 'text-primary' : 'text-on-surface-subtle hover:text-white' }}">
-        <span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' {{ Route::is('frontend.lotto*') ? '1' : '0' }};">auto_awesome</span>
-        <span class="text-[10px] font-bold tracking-tight">{{ $navLotto }}</span>
+    @php($dockSportsActive = Route::is('frontend.sports*'))
+    <a href="{{ route('frontend.sports.index') }}" class="app-dock-link {{ $dockSportsActive ? 'is-active' : '' }}">
+        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' {{ $dockSportsActive ? '1' : '0' }};">sports_soccer</span>
+        <span class="app-dock-label">Spor</span>
     </a>
     @endif
 
     <!-- 5. Hub / Menu Toggle -->
-    <button type="button" id="btn-open-mobile-menu" class="flex flex-col items-center gap-1 py-1 px-3 rounded-xl text-on-surface-subtle hover:text-white transition-all">
-        <span class="material-symbols-outlined text-2xl">widgets</span>
-        <span class="text-[10px] font-bold tracking-tight">Merkez</span>
+    <button type="button" id="btn-open-mobile-menu" class="app-dock-link">
+        <span class="material-symbols-outlined">widgets</span>
+        <span class="app-dock-label">Merkez</span>
     </button>
 </nav>

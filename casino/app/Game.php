@@ -36,6 +36,7 @@ namespace VanguardLTE
             'source_type',
             'provider_key',
             'provider_game_id',
+            'game_type',
             'launch_code',
             'icon_url',
             'custom_path',
@@ -718,6 +719,51 @@ namespace VanguardLTE
             'table_bank' => 'Table', 
             'fish' => 'Fish'
         ];
+
+        /** Aggregator-normalised game types stored in `game_type`. */
+        public const GAME_TYPES = [
+            'slots' => 'Slot',
+            'live' => 'Canlı Casino',
+            'crash' => 'Crash',
+            'table' => 'Masa Oyunu',
+            'instant' => 'Instant',
+            'bingo' => 'Bingo',
+            'keno' => 'Keno',
+            'arcade' => 'Arcade',
+            'fishing' => 'Balıkçılık',
+            'virtual' => 'Sanal',
+            'sportsbook' => 'Spor Bahis',
+            'other' => 'Diğer',
+        ];
+
+        /** Types that are real live-dealer tables, not RNG games. */
+        public const LIVE_TYPES = ['live'];
+
+        /**
+         * Normalised type, falling back to a slot guess for rows imported
+         * before `game_type` existed.
+         */
+        public function gameType(): string
+        {
+            $type = strtolower(trim((string) $this->game_type));
+            if ($type !== '' && isset(self::GAME_TYPES[$type])) {
+                return $type;
+            }
+
+            return 'slots';
+        }
+
+        public function isLive(): bool
+        {
+            return in_array($this->gameType(), self::LIVE_TYPES, true);
+        }
+
+        /** Short label shown on the lobby card badge. */
+        public function typeLabel(): string
+        {
+            return self::GAME_TYPES[$this->gameType()] ?? 'Slot';
+        }
+
         public static function boot()
         {
             parent::boot();

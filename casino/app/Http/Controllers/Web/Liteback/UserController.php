@@ -156,7 +156,10 @@ class UserController extends Controller
         $user = new User();
         $user->username = $request->input('username');
         $user->email = $request->input('email');
-        $user->password = bcrypt($request->input('password'));
+        // The User model's setPasswordAttribute mutator already bcrypts, so the
+        // plaintext password is assigned as-is here. Pre-hashing would produce a
+        // double hash and lock the new account out of every login form.
+        $user->password = $request->input('password');
         $user->balance = $balance;
         $user->count_balance = $balance;
         $user->role_id = 1;

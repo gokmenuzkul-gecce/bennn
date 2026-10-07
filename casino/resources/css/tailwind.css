@@ -171,9 +171,14 @@
     /* ============ PAGE INTRO (staggered entrance) ============ */
     /* The page column fades up on first paint. The per-card sequence is handled
        by the reveal transition (--motion-delay), not by an animation: a filling
-       animation would pin transform and swallow every later hover transform. */
+       animation would pin transform and swallow every later hover transform.
+       The fill mode is `backwards`, never `both`/`forwards`: a retained
+       keyframe with `transform: none` still computes to an identity matrix,
+       which turns <main> into the containing block for every descendant
+       `position: fixed` overlay (the in-page game player would land off-screen
+       at the bottom of the page instead of over the viewport). */
     .motion-intro {
-        animation: motion-fade-up 0.7s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+        animation: motion-fade-up 0.7s cubic-bezier(0.22, 0.61, 0.36, 1) backwards;
     }
 
     /* ============ NAV / MENU ITEM ============ */

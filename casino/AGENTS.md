@@ -181,9 +181,63 @@ Bunun yerine:
 ### Testler
 - `php scripts/verify_casino_wallet.php` — 15 cüzdan kontrolü (kendi verisini temizler).
 - `php tests/Casino/provider-integration-regression.php` — 19 entegrasyon kontrolü.
-- `php tests/Casino/catalog-sync-regression.php` — 16 katalog senkronizasyon kontrolü.
+- `php tests/Casino/catalog-sync-regression.php` — 33 katalog senkronizasyon + lobi performans + logo + kapak + mobil navigasyon kontrolü.
 - `php tests/Casino/embed-aspect-regression.php` — 10 gömülü en-boy oranı kontrolü.
+- `php tests/Casino/game-player-overlay-regression.php` — 7 oyun oynatıcı overlay kontrolü.
+- `php tests/Account/account-security-regression.php` — 17 hesap güvenliği + tek-hash kontrolü.
 - Spor regresyonları: `tests/Sports/*.php`.
+
+## Oyun oynatıcı overlay (containing block)
+`#game-player` (`games/list.blade.php`) `position: fixed` ve `<main class="motion-intro">` içinde
+render edilir. `.motion-intro` giriş animasyonu **`backwards`** dolgu kullanmalıdır; `both`/
+`forwards` son keyframe'i tutar ve `transform: none` bile **identity matrix** olarak hesaplandığından
+`<main>` fixed overlay'ler için containing block olur. Sonuç: oyuncu sayfanın tepesine değil, uzun
+sayfa kolonunun dibine (~2600px) yerleşir ve telefonda oyun hiç açılmıyormuş gibi görünür.
+Kural: fixed torun taşıyan animasyonlu bir kapsayıcıya asla `both`/`forwards` dolgu verme.
+Kaynak `resources/css/tailwind.css`, servis edilen derlenmiş dosya `../minimal/css/tailwind.css`
+(`npm run css:build`). Regresyon: `tests/Casino/game-player-overlay-regression.php`.
+
+## Şifre hash'leme (tek hash kuralı)
+`app/User.php:setPasswordAttribute` gelen değeri **zaten `bcrypt`** yapar. Bu yüzden şifre atayan
+hiçbir yer ön-hash (`bcrypt()` / `Hash::make()`) çağırmamalıdır; aksi halde çift hash oluşur ve
+hesap hiçbir giriş formundan açılamaz. `MultiAuthController` (OTP kaydı) ve `Liteback/UserController`
+(admin kullanıcı oluşturma) düz metni doğrudan atar. Regresyon: `tests/Account/account-security-regression.php`.
+
+## Lobi performansı ve launch (telefon)
+
+Lobi katalogu **kademeli** basar: ilk ekran kadarı (`$initialCards = 120`) sunucuda render edilir,
+kalanı `#games-rest-data` içindeki JSON'dan istemcide `CHUNK = 120`'lik parçalarla eklenir
+(`appendChunk`, scroll sentinel + "Daha Fazla Yükle"). Telefonda DOM 6252 → 120 kart, HTML
+13.3 MB → ~1.9 MB, DOMContentLoaded 3.4 s → ~1.3 s. Arama (`#home-game-search`) artık kartları
+her seferinde DOM'dan okur (`allCards()`), böylece hydrate edilen kartları da filtreler.
+- **gzip:** Prod'da nginx yapar (`deploy/nginx-casino.conf.example` → `gzip on` + tipler).
+  nginx olmayan ortamlarda (`php -S`, `PHP_SAPI === 'cli-server'`) `Http/Middleware/GzipResponse`
+  devreye girer; nginx arkasında `Content-Encoding` zaten set olduğundan **no-op**'tur (çift
+  sıkıştırma olmaz).
+- **`content-visibility: auto`** (`.game-card`, `layouts/clean.blade.php`): ekran dışı kartlar
+  çizilmeden atlanır; `contain-intrinsic-size` kaydırma zıplamasını önler. Tasarım/JS değişmez.
+- **Kapak görselleri:** `scripts/optimize_game_images.py` büyük JPEG'leri kart oranına (300×400,
+  progressive q80) çeker; 1128 dosya 48.6 → 28.2 MB. Yeni indirmeler `localize_game_images.php`
+  içinde aynı boyutta üretilir.
+- Kategori sayfaları (`/categories/live_casino`) zaten küçük ve hızlıdır.
+
+### Mobil navigasyon
+- Üst barda telefonda `.site-nav-mobile` kümesi: misafirde Giriş/Kayıt, üyede bakiye chip'i
+  (`site-nav-wallet`, TRY) + avatar (`.js-open-mobile-sheet` → bottom sheet). Masaüstünde
+  `.site-nav-right` tam link + CTA satırını gösterir; ikisi `@media (max-width:1023px)` ile ayrışır.
+- Alt dock `.app-dock` (`partials/navbar.blade.php`): Casino / Canlı / Cedar / Spor / Merkez;
+  aktif sekme rota ile `is-active` olur. Dokunma hedefleri ≥40px.
+
+Canlı masa launch'ı (`SoftAggregatorProvider` → `WaijaClient::launch`):
+- `device` **istek User-Agent'ından** türetilir (`detectDevice()`; `MobileDetect`'e
+  `setUserAgent()` ile verilir — yapıcıya geçirmek çalışmaz). Telefona masaüstü build verilmesi
+  canlı masaların açılmamasının/geç yüklenmesinin bir nedenidir. `country` config'ten (TR).
+  İkisi de `getGame` **ve** `getGameDemo`'ya `launchContext()` ile eklenir.
+- Agregatörün **saatlik launch limiti** ("Too many game launches") `launchErrorMessage()` ile
+  Türkçe'ye çevrilir; oyuncuya "birkaç dakika sonra tekrar deneyin" gösterilir (ham İngilizce
+  metin "oyun bozuk" gibi okunuyordu).
+- Navbar "Canlı Casino" artık **konsolide `live_casino` hub'ına** gider (203 masa);
+  `evolution` yalnız 19 masa gösteriyordu.
 
 ## Modern tasarım sistemi (frontend/Minimal)
 Tüm stiller `layouts/clean.blade.php` içindeki `<style>` bloğunda; tema `tailwind.config` ile uyumlu.
@@ -200,3 +254,11 @@ Tüm stiller `layouts/clean.blade.php` içindeki `<style>` bloğunda; tema `tail
 ### Kural
 Yeni bölüm eklerken bu sınıfları kullan; satır içi stillerle yeni renk paleti icat etme.
 Slayt/şerit eklemek için `.hero-slide` ve `.provider-tile` kalıplarını kopyala.
+
+### Sağlayıcı logoları
+`public/frontend/Default/provider-logos/*.svg` **elle düzenlenmez**; `scripts/gen_provider_logos.py`
+üretir (`python3 scripts/gen_provider_logos.py`). Tasarım: cam efektli (yarı saydam dolgu + ince
+gradyan kontur) yuvarlatılmış monogram rozeti + anlamsal ikon (slot/fiş/zar/elmas/yıldız/şimşek/taç/
+kart) + beyaz wordmark; tamamen şeffaf arka plan. Renk paleti ve ikon `BRANDS`/`G` sözlüklerinde;
+yeni sağlayıcı eklerken ikisine de kayıt gir. Script iki dizine yazar (kaynak + `casino/public/...`).
+Logo ekleme/değiştirme sonrası `catalog-sync-regression.php` çalıştırılır (rozet deseni doğrulanır).

@@ -8,7 +8,9 @@ namespace VanguardLTE\Http
             'Illuminate\Foundation\Http\Middleware\CheckForMaintenanceMode', 
             'VanguardLTE\Http\Middleware\TrimStrings', 
             'Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull', 
-            'VanguardLTE\Http\Middleware\TrustProxies'
+            'VanguardLTE\Http\Middleware\TrustProxies',
+            // No-op behind nginx (it gzips); compresses in-process for php -S.
+            'VanguardLTE\Http\Middleware\GzipResponse'
         ];
         protected $middlewareGroups = [
             'web' => [

@@ -20,12 +20,12 @@
     $providerList = \VanguardLTE\Category::where('parent', 0)
         ->orderBy('position', 'ASC')
         ->get()
-        ->reject(fn($c) => in_array($c->href, ['cedar_games','cedar_cards','cedar_remakes','slots'], true))
+        ->reject(fn($c) => in_array($c->href, ['cedar_games','cedar_cards','cedar_remakes','slots','live_casino'], true))
         ->filter(fn($c) => is_file($logoDir . '/' . $c->href . '.svg'))
         ->values();
     if ($providerList->isEmpty() && is_iterable($categories)) {
         $providerList = collect($categories)
-            ->reject(fn($c) => in_array($c->href, ['cedar_games','cedar_cards','cedar_remakes','slots'], true))
+            ->reject(fn($c) => in_array($c->href, ['cedar_games','cedar_cards','cedar_remakes','slots','live_casino'], true))
             ->filter(fn($c) => is_file($logoDir . '/' . $c->href . '.svg'))
             ->values();
     }
@@ -255,13 +255,13 @@
     <div class="marquee-mask overflow-hidden">
         <div class="marquee-track">
             @foreach($providerList as $i => $cat)
-                @php($logo = '/frontend/Default/provider-logos/' . $cat->href . '.svg')
+                @php $logo = '/frontend/Default/provider-logos/' . $cat->href . '.svg'; @endphp
                 <a href="{{ route('frontend.game.list.category', $cat->href) }}" class="provider-tile" style="--pc: {{ $providerColors[$i % count($providerColors)] }};" title="{{ $cat->title }}">
                     <img src="{{ $logo }}" alt="{{ $cat->title }}" class="provider-logo" loading="eager" decoding="async">
                 </a>
             @endforeach
             @foreach($providerList as $i => $cat)
-                @php($logo = '/frontend/Default/provider-logos/' . $cat->href . '.svg')
+                @php $logo = '/frontend/Default/provider-logos/' . $cat->href . '.svg'; @endphp
                 <a href="{{ route('frontend.game.list.category', $cat->href) }}" class="provider-tile" style="--pc: {{ $providerColors[$i % count($providerColors)] }};" aria-hidden="true" tabindex="-1" title="{{ $cat->title }}">
                     <img src="{{ $logo }}" alt="" class="provider-logo" loading="eager" decoding="async">
                 </a>
@@ -314,27 +314,59 @@
     </div>
 
     <!-- Games Grid: 3-col mobile, 4-col tablet, 6-col laptop, 7-col wide -->
+    @php
+        // The catalogue ships thousands of titles. Rendering every card up front
+        // costs a multi-second DOM on a phone, so only the first screenful is
+        // server-rendered; the rest travels as a compact JSON payload and is
+        // appended in chunks as the player scrolls (see the hydration script).
+        $initialCards = 120;
+        $initialGames = $games instanceof \Illuminate\Support\Collection ? $games->take($initialCards) : collect($games)->take($initialCards);
+        $restGames = $games instanceof \Illuminate\Support\Collection ? $games->slice($initialCards) : collect($games)->slice($initialCards);
+        $cardMeta = function ($game) use ($cedarBrand) {
+            $isCedarProvider = str_starts_with($game->name, 'Cedar') || $game->name === 'RoyalSteps';
+            $isAggregator = !empty($game->provider_key);
+            $isLive = $isAggregator && $game->isLive();
+            if ($isCedarProvider) {
+                $badge = strtoupper($cedarBrand) . ' ORİJİNAL';
+                $badgeClass = 'bg-amber-400/20 text-amber-300 border border-amber-400/30';
+            } elseif ($isLive) {
+                $badge = 'CANLI';
+                $badgeClass = 'bg-rose-500/25 text-rose-200 border border-rose-400/40';
+            } elseif ($isAggregator) {
+                $badge = \Illuminate\Support\Str::upper($game->typeLabel());
+                $badgeClass = 'bg-black/50 text-emerald-300 border border-emerald-400/25';
+            } else {
+                $badge = strtoupper(substr($game->name, -2) === 'AM' ? 'AMATIC' : (substr($game->name, -3) === 'PGD' ? 'PGD' : 'SLOT'));
+                $badgeClass = 'bg-black/50 text-emerald-300 border border-emerald-400/25';
+            }
+            return [
+                'name' => $game->name,
+                'title' => $game->title,
+                'icon' => game_cover($game),
+                'badge' => $badge,
+                'badgeClass' => $badgeClass,
+                'provider' => $isAggregator,
+            ];
+        };
+        $restPayload = $restGames->map($cardMeta)->values();
+    @endphp
     <div id="games-grid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-2.5 sm:gap-3">
-        @forelse($games as $game)
-            @php($isCedarProvider = str_starts_with($game->name, 'Cedar') || $game->name === 'RoyalSteps')
+        @forelse($initialGames as $game)
+            @php($meta = $cardMeta($game))
             <div class="game-card group aspect-[3/4] flex flex-col justify-end" data-title="{{ \Illuminate\Support\Str::lower($game->title . ' ' . $game->name) }}">
                 <span class="card-shine"></span>
-                <!-- Cover Image -->
-                <img src="{{ game_cover($game) }}"
+                <img src="{{ $meta['icon'] }}"
                      onerror="this.src='/frontend/Default/ico/DayofDead.jpg'"
                      alt="{{ $game->title }}"
                      class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                     loading="lazy">
+                     loading="lazy" decoding="async">
 
-                <!-- Badge -->
-                <span class="absolute top-1.5 left-1.5 z-10 text-[8px] font-mono-jet font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md backdrop-blur-md {{ $isCedarProvider ? 'bg-amber-400/20 text-amber-300 border border-amber-400/30' : 'bg-black/50 text-emerald-300 border border-emerald-400/25' }}">
-                    {{ $isCedarProvider ? strtoupper($cedarBrand) . ' ORİJİNAL' : strtoupper(substr($game->name, -2) === 'AM' ? 'AMATIC' : (substr($game->name, -3) === 'PGD' ? 'PGD' : 'SLOT')) }}
+                <span class="absolute top-1.5 left-1.5 z-10 text-[8px] font-mono-jet font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md backdrop-blur-md {{ $meta['badgeClass'] }}">
+                    {{ $meta['badge'] }}
                 </span>
 
-                <!-- Dark Gradient Overlay -->
                 <div class="absolute inset-0 bg-gradient-to-t from-black via-black/45 to-transparent opacity-90 group-hover:opacity-95 transition-opacity"></div>
 
-                <!-- Game Info & Action -->
                 <div class="relative z-10 p-2 space-y-1.5">
                     <h4 class="text-[10px] sm:text-[11px] font-bold text-white leading-tight truncate" title="{{ $game->title }}">
                         {{ $game->title }}
@@ -364,6 +396,14 @@
             </div>
         @endforelse
     </div>
+    @if($restPayload->isNotEmpty())
+        <script type="application/json" id="games-rest-data">@json($restPayload, 15)</script>
+        <div id="games-load-more" class="flex justify-center pt-2">
+            <button type="button" class="btn-glow bg-white/[0.06] hover:bg-white/[0.12] text-white border border-white/15 px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all">
+                Daha Fazla Yükle
+            </button>
+        </div>
+    @endif
 </section>
 
 <!-- ===== IN-SITE GAME PLAYER (keeps header + left menu visible) ===== -->
@@ -467,6 +507,40 @@
         errorNewTab.classList.toggle('hidden', !allowNewTab);
     }
 
+    // Live-dealer studios embed a video player behind one or two extra frames,
+    // so a slow table can sit on the spinner far longer than a slot. If the
+    // frame has not finished loading in time, stop waiting and offer the game
+    // in a new tab (the session URL is already valid) instead of hanging.
+    var LOAD_TIMEOUT_MS = 20000;
+    var loadTimer = null;
+
+    function armLoadTimeout() {
+        clearLoadTimeout();
+        loadTimer = setTimeout(function () {
+            if (loading.classList.contains('hidden')) return;
+            showError('Oyun beklenenden uzun sürede yüklendi. Bağlantınızı kontrol edin veya yeni sekmede açın.', !!currentUrl);
+        }, LOAD_TIMEOUT_MS);
+    }
+
+    function clearLoadTimeout() {
+        if (loadTimer) { clearTimeout(loadTimer); loadTimer = null; }
+    }
+
+    // Warm the TLS/DNS path to the vendor before the frame requests it, so the
+    // first paint after a click is not spent on a cold handshake.
+    function preconnect(url) {
+        try {
+            var origin = new URL(url, window.location.href).origin;
+            if (!origin || origin === window.location.origin) return;
+            if (document.querySelector('link[rel="preconnect"][href="' + origin + '"]')) return;
+            var link = document.createElement('link');
+            link.rel = 'preconnect';
+            link.href = origin;
+            link.crossOrigin = 'anonymous';
+            document.head.appendChild(link);
+        } catch (e) { /* ignore malformed URLs */ }
+    }
+
     function openPlayer(gameName, title) {
         titleEl.textContent = title || gameName;
         providerEl.textContent = '';
@@ -476,6 +550,7 @@
         loading.classList.remove('hidden');
         player.classList.remove('hidden');
         player.classList.add('flex');
+        armLoadTimeout();
 
         fetch('{{ url('/game') }}/' + encodeURIComponent(gameName) + '/launch', {
             headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
@@ -484,6 +559,7 @@
             .then(function (res) {
                 var data = res.data || {};
                 if (!res.ok || !data.success) {
+                    clearLoadTimeout();
                     if (res.status === 401) {
                         // Not signed in: fall back to the lobby login modal.
                         player.classList.add('hidden');
@@ -499,6 +575,7 @@
                 applyAspect(data.aspect);
                 currentUrl = data.url;
                 if (!data.embedded) {
+                    clearLoadTimeout();
                     showError('Bu sağlayıcı site içinde açılamıyor; lütfen yeni sekmede açın.', true);
                     return;
                 }
@@ -508,10 +585,11 @@
                     submitFormToFrame(data.form);
                     return;
                 }
+                preconnect(data.url);
                 frame.src = data.url;
-                frame.onload = function () { loading.classList.add('hidden'); };
+                frame.onload = function () { clearLoadTimeout(); loading.classList.add('hidden'); };
             })
-            .catch(function () { showError('Bağlantı hatası. Lütfen tekrar deneyin.', false); });
+            .catch(function () { clearLoadTimeout(); showError('Bağlantı hatası. Lütfen tekrar deneyin.', false); });
     }
 
     function submitFormToFrame(formData) {
@@ -528,12 +606,13 @@
             form.appendChild(input);
         });
         document.body.appendChild(form);
-        frame.onload = function () { loading.classList.add('hidden'); };
+        frame.onload = function () { clearLoadTimeout(); loading.classList.add('hidden'); };
         form.submit();
         setTimeout(function () { form.remove(); }, 0);
     }
 
     function closePlayer() {
+        clearLoadTimeout();
         player.classList.add('hidden');
         player.classList.remove('flex');
         frame.src = 'about:blank';
@@ -601,6 +680,67 @@
 })();
 </script>
 
+<!-- ===== PROGRESSIVE GRID HYDRATION ===== -->
+<script>
+(function () {
+    var dataEl = document.getElementById('games-rest-data');
+    var grid = document.getElementById('games-grid');
+    if (!dataEl || !grid) return;
+    var rest;
+    try { rest = JSON.parse(dataEl.textContent || '[]'); } catch (e) { return; }
+    if (!rest.length) return;
+
+    var CHUNK = 120;
+    var cursor = 0;
+    var loadMore = document.getElementById('games-load-more');
+    var counter = document.getElementById('games-count-label');
+
+    function cardHtml(g) {
+        var action = g.provider
+            ? '<button type="button" class="btn-glow block w-full text-center bg-gradient-to-r from-emerald-500 to-teal-500 text-white py-1.5 rounded-lg font-bold text-[10px] uppercase tracking-wider shadow-md shadow-emerald-500/30 play-game" data-game="' + g.name + '" data-title="' + g.title + '">Oyna</button>'
+            : '<a href="/game/' + encodeURIComponent(g.name) + '" class="btn-glow block w-full text-center bg-gradient-to-r from-emerald-500 to-teal-500 text-white py-1.5 rounded-lg font-bold text-[10px] uppercase tracking-wider no-underline shadow-md shadow-emerald-500/30">Oyna</a>';
+        return '<div class="game-card group aspect-[3/4] flex flex-col justify-end" data-title="' + (g.title + ' ' + g.name).toLowerCase() + '">' +
+            '<span class="card-shine"></span>' +
+            '<img src="' + g.icon + '" onerror="this.src=\'/frontend/Default/ico/DayofDead.jpg\'" alt="' + g.title + '" class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" loading="lazy" decoding="async">' +
+            '<span class="absolute top-1.5 left-1.5 z-10 text-[8px] font-mono-jet font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md backdrop-blur-md ' + g.badgeClass + '">' + g.badge + '</span>' +
+            '<div class="absolute inset-0 bg-gradient-to-t from-black via-black/45 to-transparent opacity-90 group-hover:opacity-95 transition-opacity"></div>' +
+            '<div class="relative z-10 p-2 space-y-1.5">' +
+            '<h4 class="text-[10px] sm:text-[11px] font-bold text-white leading-tight truncate" title="' + g.title + '">' + g.title + '</h4>' +
+            action + '</div></div>';
+    }
+
+    function appendChunk() {
+        var slice = rest.slice(cursor, cursor + CHUNK);
+        if (!slice.length) return;
+        var frag = document.createElement('div');
+        frag.innerHTML = slice.map(cardHtml).join('');
+        while (frag.firstChild) grid.appendChild(frag.firstChild);
+        cursor += slice.length;
+        if (counter) counter.textContent = grid.querySelectorAll('.game-card').length + ' OYUN ÇEVRİMİÇİ';
+        if (cursor >= rest.length && loadMore) loadMore.remove();
+    }
+
+    // The label counts what is actually on screen, not the whole catalogue.
+    if (counter) counter.textContent = grid.querySelectorAll('.game-card').length + ' OYUN ÇEVRİMİÇİ';
+
+    if (loadMore) {
+        loadMore.querySelector('button').addEventListener('click', appendChunk);
+    }
+
+    // Auto-reveal the next chunk a screen before the footer, so scrolling keeps
+    // going without the player having to hunt for the button.
+    if ('IntersectionObserver' in window && loadMore) {
+        var sentinel = new IntersectionObserver(function (entries) {
+            if (entries[0].isIntersecting) {
+                appendChunk();
+                if (cursor >= rest.length) sentinel.disconnect();
+            }
+        }, { rootMargin: '600px 0px' });
+        sentinel.observe(loadMore);
+    }
+})();
+</script>
+
 <!-- ===== HOMEPAGE SCROLL REVEAL ===== -->
 <script>
 (function () {
@@ -634,14 +774,16 @@
     var clearBtn = document.getElementById('home-game-search-clear');
     var spinner = document.getElementById('home-game-search-spinner');
     var counter = document.getElementById('games-count-label');
-    var cards = grid ? Array.prototype.slice.call(grid.querySelectorAll('.game-card')) : [];
-    var originalCount = cards.length;
     var timer = null;
+
+    function allCards() {
+        return grid ? Array.prototype.slice.call(grid.querySelectorAll('.game-card')) : [];
+    }
 
     function applyFilter(query) {
         var q = query.trim().toLowerCase();
         var shown = 0;
-        cards.forEach(function (card) {
+        allCards().forEach(function (card) {
             var match = q === '' || (card.dataset.title || '').indexOf(q) !== -1;
             card.classList.toggle('hidden', !match);
             if (match) shown++;
@@ -695,7 +837,7 @@
             input.value = '';
             applyFilter('');
             if (grid) grid.querySelectorAll('.game-card.search-extra').forEach(function (n) { n.remove(); });
-            if (counter) counter.textContent = originalCount + ' OYUN ÇEVRİMİÇİ';
+            if (counter) counter.textContent = allCards().length + ' OYUN ÇEVRİMİÇİ';
             input.focus();
         });
     }

@@ -335,13 +335,13 @@ class WaijaClient
             'cashierurl' => (string) ($this->config['cashier_url'] ?? config('app.url')),
             'lang' => $lang,
             'currency' => strtoupper($this->currency()),
-        ], $this->branded() !== null ? ['branded' => $this->branded()] : [], $extra);
+        ], $this->launchContext(), $this->branded() !== null ? ['branded' => $this->branded()] : [], $extra);
 
         $response = $this->call('getGameDemo', $payload);
         $body = $response['body'] ?? [];
 
         if ($this->failed($response)) {
-            throw new \RuntimeException($this->label() . ': demo oturumu açılamadı (' . ($body['message'] ?? ('http ' . $response['status'])) . ').');
+            throw new \RuntimeException($this->launchErrorMessage((string) ($body['message'] ?? ('http ' . $response['status']))));
         }
 
         return [
@@ -426,7 +426,7 @@ class WaijaClient
             'cashierurl' => (string) ($this->config['cashier_url'] ?? config('app.url')),
             'play_for_fun' => 0,
             'currency' => strtoupper($this->currency()),
-        ], $this->branded() !== null ? ['branded' => $this->branded()] : [], $extra);
+        ], $this->launchContext(), $this->branded() !== null ? ['branded' => $this->branded()] : [], $extra);
 
         $response = $this->call('getGame', $payload);
         $body = $response['body'] ?? [];
@@ -434,10 +434,82 @@ class WaijaClient
         $url = $this->extractLaunchUrl($body);
         if ($this->failed($response) || $url === null) {
             $message = $body['message'] ?? 'geçersiz yanıt';
-            throw new \RuntimeException($this->label() . ': oyun başlatılamadı (' . $message . ').');
+            throw new \RuntimeException($this->launchErrorMessage((string) $message));
         }
 
         return $url;
+    }
+
+    /**
+     * Turn a vendor launch refusal into a message a player can act on.
+     *
+     * The aggregator's most common refusal is its hourly per-account launch cap
+     * ("Too many game launches — ..."). It is transient and not the player's
+     * fault, so it is surfaced in Turkish rather than the raw English vendor
+     * text, which otherwise reads as a broken game.
+     */
+    protected function launchErrorMessage(string $message): string
+    {
+        $needle = strtolower($message);
+        if (str_contains($needle, 'too many') || str_contains($needle, 'launch limit')) {
+            return 'Şu anda çok fazla oyun açılıyor; lütfen birkaç dakika sonra tekrar deneyin.';
+        }
+
+        return $this->label() . ': oyun başlatılamadı (' . $message . ').';
+    }
+
+    /**
+     * Extra getGame fields the docs say some studios require.
+     *
+     * `device` is mandatory for platforms that refuse a launch without it, and
+     * `country` (ISO 3166 alpha-2) is enforced for accounts serving a
+     * restricted market. Both are optional and only sent when configured, so
+     * studios that reject unknown fields are unaffected.
+     *
+     * @return array<string, string>
+     */
+    protected function launchContext(): array
+    {
+        $context = [];
+
+        $device = $this->detectDevice();
+        if ($device !== null) {
+            $context['device'] = $device;
+        }
+
+        $country = strtoupper(trim((string) ($this->config['country'] ?? '')));
+        if ($country !== '') {
+            $context['country'] = $country;
+        }
+
+        return $context;
+    }
+
+    /**
+     * Which build to ask the studio for.
+     *
+     * Derived from the launching request's user agent so a phone gets the
+     * vendor's mobile build — a desktop build on a phone is what makes live
+     * tables fail to open or render without video. The configured value is only
+     * a fallback for contexts with no request (CLI, queue).
+     */
+    protected function detectDevice(): ?string
+    {
+        try {
+            $ua = (string) (request()->userAgent() ?? '');
+            if ($ua !== '') {
+                $detect = new \Detection\MobileDetect();
+                $detect->setUserAgent($ua);
+
+                return $detect->isMobile() ? 'mobile' : 'desktop';
+            }
+        } catch (\Throwable $e) {
+            // No request bound (CLI/queue): fall through to config.
+        }
+
+        $configured = strtolower(trim((string) ($this->config['device'] ?? '')));
+
+        return in_array($configured, ['desktop', 'mobile'], true) ? $configured : null;
     }
 
     /**

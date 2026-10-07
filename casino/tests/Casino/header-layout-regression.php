@@ -74,7 +74,7 @@ $checks = [
 
     'auth buttons live in the top-right nav cluster' => str_contains($header, 'site-nav-cta site-nav-cta--ghost open-modal" data-target="modal-login"')
         && str_contains($header, 'site-nav-cta site-nav-cta--primary open-modal" data-target="modal-register"')
-        && strpos($header, 'site-nav-right') < strpos($header, 'data-target="modal-login"'),
+        && strpos(substr($header, strpos($header, 'site-nav-right')), 'data-target="modal-login"') !== false,
 
     'register CTA reads "Kayıt Ol", not the old "Ücretsiz Kayıt Ol"' => str_contains($header, '>Kayıt Ol</button>')
         && !str_contains($header, 'Ücretsiz Kayıt Ol'),

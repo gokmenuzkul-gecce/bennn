@@ -11,7 +11,7 @@
     $hLeft = [
         ['label' => 'Ana Sayfa', 'url' => route('frontend.game.list'), 'active' => Route::is('frontend.game.list') && !request()->is('categories/*')],
         ['label' => 'Slot', 'url' => route('frontend.game.list.category', ['category1' => 'slots']), 'active' => request()->is('categories/slots*')],
-        ['label' => 'Canlı Casino', 'url' => route('frontend.game.list.category', ['category1' => 'evolution']), 'active' => request()->is('categories/evolution*')],
+        ['label' => 'Canlı Casino', 'url' => route('frontend.game.list.category', ['category1' => 'live_casino']), 'active' => request()->is('categories/live_casino*')],
         ['label' => 'Spor Bahisleri', 'url' => route('frontend.sports.index'), 'active' => Route::is('frontend.sports*') && request('live') != 1],
         ['label' => 'Canlı Bahis', 'url' => route('frontend.sports.index', ['live' => 1]), 'active' => Route::is('frontend.sports*') && request('live') == 1],
     ];
@@ -50,6 +50,25 @@
         <span class="site-brand-ring" aria-hidden="true"></span>
         <img src="{{ $hBrandMark }}" alt="{{ $hBrandName }}" decoding="async" fetchpriority="high">
     </a>
+
+    <!-- Right (phones): compact wallet + account cluster. The full link set lives
+         in the drawer/dock, so the top bar keeps only what a player needs at a
+         glance: their balance and a way into their account. -->
+    <div class="site-nav-mobile">
+        @guest
+            <button type="button" class="site-nav-cta site-nav-cta--primary site-nav-cta--compact open-modal" data-target="modal-login">Giriş</button>
+            <button type="button" class="site-nav-cta site-nav-cta--ghost site-nav-cta--compact open-modal" data-target="modal-register">Kayıt</button>
+        @else
+            <button type="button" class="site-nav-wallet open-modal" data-target="modal-deposit" title="Bakiye Yükle">
+                <span class="material-symbols-outlined">account_balance_wallet</span>
+                <span class="site-nav-wallet-amount">{{ number_format(Auth::user()->balance, 0, ',', '.') }}</span>
+                <span class="site-nav-wallet-cur">{{ strtoupper(settings('default_currency') ?: 'TRY') }}</span>
+            </button>
+            <button type="button" class="site-nav-avatar-btn js-open-mobile-sheet" aria-label="Hesap menüsü">
+                <span class="site-nav-avatar">{{ strtoupper(substr(Auth::user()->username ?? 'U', 0, 1)) }}</span>
+            </button>
+        @endguest
+    </div>
 
     <!-- Right: engagement links + auth / account cluster -->
     <div class="site-nav-right">

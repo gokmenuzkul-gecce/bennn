@@ -256,7 +256,7 @@ $(document).ready(function () {
         }
     }
 
-    $(document).on('click', '#btn-open-mobile-menu', function(e) {
+    $(document).on('click', '#btn-open-mobile-menu, .js-open-mobile-sheet', function(e) {
         e.preventDefault();
         openMobileSheet();
     });

@@ -787,6 +787,13 @@
             background: #10141f;
             border: 1px solid rgba(255,255,255,0.07);
             transition: transform 0.35s cubic-bezier(0.34,1.4,0.64,1), box-shadow 0.35s, border-color 0.35s;
+            /* The lobby ships the whole catalogue on one page, so most cards
+               start off-screen. Skipping their paint/layout until they scroll
+               into view keeps first render fast on a phone; the reserved size
+               (from aspect-ratio) keeps the grid from shifting. Browsers without
+               support simply ignore it. */
+            content-visibility: auto;
+            contain-intrinsic-size: auto 320px;
         }
         .game-card:hover {
             transform: translateY(-8px);
@@ -1242,9 +1249,74 @@
         }
         .site-burger:hover { background: rgba(16,185,129,.22); border-color: rgba(16,185,129,.55); }
         .site-burger .material-symbols-outlined { font-size: 24px; }
+        /* Phone-only wallet / account cluster on the right edge of the top bar.
+           Hidden on desktop, where the full link + CTA row takes over. */
+        .site-nav-mobile { display: none; align-items: center; gap: 8px; justify-content: flex-end; min-width: 0; }
+        .site-nav-cta--compact { padding: 0 13px; min-height: 40px; display: inline-flex; align-items: center; font-size: 12px; }
+        .site-nav-wallet {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 0 11px; min-height: 40px; border-radius: 10px; cursor: pointer;
+            background: rgba(16,185,129,.12);
+            border: 1px solid rgba(16,185,129,.35);
+            color: #6ee7b7;
+            transition: background .18s ease, border-color .18s ease;
+        }
+        .site-nav-wallet:hover { background: rgba(16,185,129,.22); border-color: rgba(16,185,129,.6); }
+        .site-nav-wallet .material-symbols-outlined { font-size: 18px; }
+        .site-nav-wallet-amount { font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 12px; color: #fff; }
+        .site-nav-wallet-cur { font-size: 9px; font-weight: 800; color: #6ee7b7; }
+        .site-nav-avatar-btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 36px; height: 36px; border-radius: 11px; cursor: pointer;
+            background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.16);
+            transition: background .18s ease, border-color .18s ease;
+        }
+        .site-nav-avatar-btn:hover { background: rgba(255,255,255,.13); border-color: rgba(255,255,255,.3); }
+        @media (max-width: 1023px) {
+            .site-header-nav { grid-template-columns: 1fr auto 1fr; }
+            .site-nav-mobile { display: flex; }
+        }
         @media (min-width: 1024px) {
             .site-nav-left .site-nav-link { display: inline-block; }
             .site-nav-right { display: flex; }
+        }
+
+        /* Phone bottom dock: frosted app-style tab bar that respects the home
+           indicator. Kept in the layout so the active tab can react to the
+           route without any JS. */
+        .app-dock {
+            position: fixed;
+            left: 12px; right: 12px;
+            bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+            z-index: 40;
+            display: none;
+            align-items: stretch;
+            justify-content: space-around;
+            gap: 2px;
+            padding: 6px 6px;
+            border-radius: 20px;
+            background: rgba(13,17,25,.92);
+            border: 1px solid rgba(255,255,255,.10);
+            box-shadow: 0 18px 46px -14px rgba(0,0,0,.85);
+            backdrop-filter: blur(22px) saturate(1.2);
+        }
+        .app-dock-link {
+            flex: 1 1 0;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 3px;
+            padding: 7px 2px;
+            border-radius: 14px;
+            color: rgba(255,255,255,.55);
+            text-decoration: none;
+            background: transparent; border: 0; cursor: pointer;
+            transition: color .16s ease, background .16s ease;
+        }
+        .app-dock-link:hover { color: #fff; }
+        .app-dock-link.is-active { color: #34d399; background: rgba(16,185,129,.12); }
+        .app-dock-link .material-symbols-outlined { font-size: 23px; }
+        .app-dock-label { font-size: 9.5px; font-weight: 800; letter-spacing: .01em; }
+        @media (max-width: 1023px) {
+            .app-dock { display: flex; }
         }
         /* Slide-in drawer opened from the hamburger (all viewports) */
         .site-drawer-overlay {

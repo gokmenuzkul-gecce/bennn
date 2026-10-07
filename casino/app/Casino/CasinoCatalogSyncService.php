@@ -228,6 +228,7 @@ class CasinoCatalogSyncService
                 'name' => $title,
                 'icon' => (string) ($row['image'] ?? $row['image_url'] ?? $row['icon'] ?? ''),
                 'vendor' => (string) ($row['provider'] ?? $row['vendor'] ?? $row['category'] ?? ''),
+                'type' => $this->normalizeType($row['game_type'] ?? $row['type'] ?? ''),
             ];
         }
 
@@ -262,6 +263,7 @@ class CasinoCatalogSyncService
                 'name' => $title,
                 'icon' => (string) ($row['image_square'] ?? $row['image'] ?? $row['image_portrait'] ?? ''),
                 'vendor' => (string) ($row['category'] ?? $row['subcategory'] ?? ''),
+                'type' => $this->normalizeType($row['game_type'] ?? $row['type'] ?? ''),
             ];
         }
 
@@ -295,6 +297,7 @@ class CasinoCatalogSyncService
                 'name' => $title,
                 'icon' => (string) ($row['image_square'] ?? $row['image'] ?? $row['image_portrait'] ?? ''),
                 'vendor' => (string) ($row['category'] ?? $row['subcategory'] ?? ''),
+                'type' => $this->normalizeType($row['game_type'] ?? $row['type'] ?? ''),
             ];
         }
 
@@ -320,6 +323,12 @@ class CasinoCatalogSyncService
         }
 
         $categoryId = $this->ensureCategory($providerKey, $provider->label());
+        // Shared type hubs so the lobby can offer a single Slot / Canlı Casino
+        // filter across every aggregator, independent of the provider chip.
+        $typeCategories = [
+            'slots' => $this->ensureCategory('slots', 'Slots'),
+            'live' => $this->ensureCategory('live_casino', 'Canlı Casino'),
+        ];
         $linked = 0;
         $created = 0;
         $pruned = 0;
@@ -344,6 +353,7 @@ class CasinoCatalogSyncService
 
             $game->provider_key = $providerKey;
             $game->provider_game_id = $entry['symbol'];
+            $game->game_type = $entry['type'] ?? 'slots';
             $game->launch_code = $entry['gameid'];
             $game->icon_url = $entry['icon'] ?: self::FALLBACK_ICON;
             // The vendor still lists it, so it is launchable: re-show rows a
@@ -352,6 +362,10 @@ class CasinoCatalogSyncService
             $game->save();
 
             $this->attachCategory((int) $game->original_id, $categoryId);
+            $type = $entry['type'] ?? 'slots';
+            if (isset($typeCategories[$type])) {
+                $this->attachCategory((int) $game->original_id, $typeCategories[$type]);
+            }
             $linked++;
         }
 
@@ -370,6 +384,10 @@ class CasinoCatalogSyncService
                 }
                 $game = $this->createGame($entry, $providerKey, $shopId);
                 $this->attachCategory((int) $game->original_id, $categoryId);
+                $type = $entry['type'] ?? 'slots';
+                if (isset($typeCategories[$type])) {
+                    $this->attachCategory((int) $game->original_id, $typeCategories[$type]);
+                }
                 $nameIndex[$key] = $providerKey;
                 $created++;
             }
@@ -480,6 +498,7 @@ class CasinoCatalogSyncService
             'source_type' => 'aggregator',
             'provider_key' => $providerKey,
             'provider_game_id' => $entry['symbol'],
+            'game_type' => $entry['type'] ?? 'slots',
             'launch_code' => $entry['gameid'],
             'icon_url' => $entry['icon'] ?: self::FALLBACK_ICON,
             'bet' => '0.01, 0.02, 0.05, 0.10, 0.20',
@@ -565,5 +584,49 @@ class CasinoCatalogSyncService
     private function normalize(string $title): string
     {
         return strtolower(preg_replace('/[^a-z0-9]/i', '', $title) ?? '');
+    }
+
+    /**
+     * Map an aggregator's raw type onto the fixed Game::GAME_TYPES set.
+     *
+     * Aggregators ship a normalised `game_type` (slots/live/crash/table/...),
+     * but the field is absent on some feeds, so fall back to a best-effort
+     * match against the human `type`/`category` label before defaulting to
+     * slots.
+     */
+    private function normalizeType(string $raw): string
+    {
+        $type = strtolower(trim($raw));
+        if ($type === '') {
+            return 'slots';
+        }
+
+        if (isset(\VanguardLTE\Game::GAME_TYPES[$type])) {
+            return $type;
+        }
+
+        if (str_contains($type, 'live')) {
+            return 'live';
+        }
+        if (str_contains($type, 'crash')) {
+            return 'crash';
+        }
+        if (str_contains($type, 'table') || str_contains($type, 'roulette') || str_contains($type, 'blackjack') || str_contains($type, 'baccarat')) {
+            return 'table';
+        }
+        if (str_contains($type, 'bingo')) {
+            return 'bingo';
+        }
+        if (str_contains($type, 'keno')) {
+            return 'keno';
+        }
+        if (str_contains($type, 'fish')) {
+            return 'fishing';
+        }
+        if (str_contains($type, 'virtual')) {
+            return 'virtual';
+        }
+
+        return 'slots';
     }
 }

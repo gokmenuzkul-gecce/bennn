@@ -162,6 +162,10 @@ return [
         'signature_window' => (int) env('SOFTAGGREGATOR_SIGNATURE_WINDOW', 30),
         'home_url' => env('SOFTAGGREGATOR_HOME_URL', rtrim(env('APP_URL', ''), '/')),
         'cashier_url' => env('SOFTAGGREGATOR_CASHIER_URL', rtrim(env('APP_URL', ''), '/')),
+        // Some studios refuse a launch that omits device; country is enforced
+        // for accounts serving a restricted market (ISO 3166 alpha-2).
+        'device' => env('SOFTAGGREGATOR_DEVICE', 'desktop'),
+        'country' => env('SOFTAGGREGATOR_COUNTRY', 'TR'),
         'branded' => env('SOFTAGGREGATOR_BRANDED', ''),
         'settings_key' => 'casino_provider_softaggregator',
     ],

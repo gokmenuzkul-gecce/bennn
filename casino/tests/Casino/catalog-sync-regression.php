@@ -26,7 +26,19 @@ $controller = $read('app/Http/Controllers/Web/Frontend/GamesController.php');
 $view = $read('resources/views/frontend/Minimal/games/list.blade.php');
 $helper = $read('app/Support/helpers.php');
 $migration = $read('database/migrations/2026_10_01_000002_add_casino_catalog_columns.php');
+$typeMigration = $read('database/migrations/2026_10_07_000001_add_game_type_to_games.php');
+$game = $read('app/Game.php');
+$httpKernel = $read('app/Http/Kernel.php');
+$gzip = $read('app/Http/Middleware/GzipResponse.php');
+$layout = $read('resources/views/frontend/Minimal/layouts/clean.blade.php');
+$header = $read('resources/views/frontend/Minimal/partials/site-header.blade.php');
+$navbar = $read('resources/views/frontend/Minimal/partials/navbar.blade.php');
+$nginx = $read('deploy/nginx-casino.conf.example');
 $config = $read('config/casino_providers.php');
+$logoGen = $read('scripts/gen_provider_logos.py');
+$imageOptimizer = $read('scripts/optimize_game_images.py');
+$logoSvgs = glob($root . '/public/frontend/Default/provider-logos/*.svg') ?: [];
+$logoSamples = array_map(static fn (string $p): string => (string) file_get_contents($p), $logoSvgs);
 
 $checks = [
     'catalog sync pulls the vendor gamelist with bearer auth' => str_contains($sync, 'Authorization: Bearer ')
@@ -80,6 +92,73 @@ $checks = [
         && str_contains($controller, 'Auth::check() ? auth()->user()->shop_id : 1'),
 
     'providers declare a gamelist endpoint' => substr_count($config, "'gamelist_path' => '/gamelist'") === 4,
+
+    'games table gains a game_type column via its own migration' => str_contains($typeMigration, "string('game_type', 24)")
+        && str_contains($typeMigration, "->after('provider_game_id')"),
+
+    'catalog sync persists the vendor game type and links type hubs' => str_contains($sync, '$game->game_type = $entry[\'type\']')
+        && str_contains($sync, "'live' => \$this->ensureCategory('live_casino', 'Canlı Casino')")
+        && str_contains($sync, 'attachCategory'),
+
+    'game model exposes the type vocabulary and live predicate' => str_contains($game, 'public const GAME_TYPES')
+        && str_contains($game, "'live' => 'Canlı Casino'")
+        && str_contains($game, 'public function isLive(): bool'),
+
+    'lobby badge distinguishes live tables from slots' => str_contains($view, '$isLive = $isAggregator && $game->isLive()')
+        && str_contains($view, 'CANLI')
+        && str_contains($view, "'bg-rose-500/25 text-rose-200 border border-rose-400/40'"),
+
+    'lobby renders only the first screenful and defers the rest' => str_contains($view, '$initialCards = 120')
+        && str_contains($view, 'id="games-rest-data"')
+        && str_contains($view, '$restPayload = $restGames->map($cardMeta)')
+        && str_contains($view, 'appendChunk'),
+
+    'deferred cards hydrate in chunks as the player scrolls' => str_contains($view, 'var CHUNK = 120')
+        && str_contains($view, "getElementById('games-load-more')")
+        && str_contains($view, 'rootMargin: \'600px 0px\''),
+
+    'phone top bar exposes a wallet / account cluster' => str_contains($header, 'site-nav-mobile')
+        && str_contains($header, 'site-nav-wallet-amount')
+        && str_contains($layout, '.site-nav-mobile')
+        && str_contains($layout, '.site-nav-wallet'),
+
+    'phone bottom dock uses the app-dock tab bar' => str_contains($layout, '.app-dock-link')
+        && str_contains($layout, '.app-dock-link.is-active')
+        && str_contains($navbar, 'class="app-dock"')
+        && str_contains($navbar, "app-dock-link {{"),
+
+    'gzip middleware is registered and scoped to the built-in server' => str_contains($httpKernel, 'GzipResponse')
+        && str_contains($gzip, "PHP_SAPI !== 'cli-server'")
+        && str_contains($gzip, "headers->set('Content-Encoding', 'gzip')"),
+
+    'gzip middleware leaves already-encoded responses alone' => str_contains($gzip, "has('Content-Encoding')")
+        && str_contains($gzip, 'BinaryFileResponse'),
+
+    'nginx vhost gzips the compressible types' => str_contains($nginx, 'gzip on;')
+        && str_contains($nginx, 'application/javascript')
+        && str_contains($nginx, 'image/svg+xml'),
+
+    'off-screen game cards skip layout until scrolled into view' => str_contains($layout, 'content-visibility: auto')
+        && str_contains($layout, 'contain-intrinsic-size'),
+
+    'navbar live entry opens the consolidated live hub, not one studio' => str_contains($header, "'category1' => 'live_casino'")
+        && !str_contains($header, "'category1' => 'evolution'"),
+
+    'every provider logo ships the modern badge artwork' => count($logoSvgs) >= 27
+        && count(array_filter($logoSamples, static fn (string $s): bool =>
+            str_contains($s, 'stroke="url(#g)"') && str_contains($s, 'font-weight="800"'))) === count($logoSvgs)
+        && count(array_filter($logoSamples, static fn (string $s): bool => str_contains($s, 'url(#w)'))) === 0,
+
+    'provider logo generator keeps the brand palette and glyph set' => str_contains($logoGen, 'BRANDS = {')
+        && str_contains($logoGen, 'linearGradient id="g"')
+        && str_contains($logoGen, '"slot"') && str_contains($logoGen, '"crown"'),
+
+    'cover art is normalised to the card ratio and encoded progressively' => str_contains($imageOptimizer, 'TARGET_W, TARGET_H = 300, 400')
+        && str_contains($imageOptimizer, 'optimize=True, progressive=True')
+        && str_contains($imageOptimizer, 'SKIP_BYTES'),
+
+    'cover downloader stores the same normalised size' => str_contains($read('scripts/localize_game_images.php'), 'imageinterlace($dst, true)')
+        && str_contains($read('scripts/localize_game_images.php'), 'imagejpeg($dst, $dest, 80)'),
 ];
 
 foreach ($checks as $name => $passed) {

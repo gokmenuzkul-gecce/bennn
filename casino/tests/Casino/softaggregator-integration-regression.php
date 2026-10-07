@@ -101,6 +101,18 @@ $checks = [
         && str_contains($envExample, 'SOFTAGGREGATOR_API_LOGIN')
         && str_contains($envExample, 'SOFTAGGREGATOR_SALT_KEY')
         && str_contains($envExample, 'SOFTAGGREGATOR_CALLBACK_PATH'),
+
+    'launch sends a device build derived from the request' => str_contains($waijaClient, 'protected function detectDevice()')
+        && str_contains($waijaClient, 'setUserAgent($ua)')
+        && str_contains($waijaClient, "\$detect->isMobile() ? 'mobile' : 'desktop'"),
+
+    'launch context is merged into both getGame and getGameDemo' => substr_count($waijaClient, '$this->launchContext()') === 2,
+
+    'config exposes optional device and country launch fields' => str_contains($config, "'device' => env('SOFTAGGREGATOR_DEVICE'")
+        && str_contains($config, "'country' => env('SOFTAGGREGATOR_COUNTRY'"),
+
+    'hourly launch-cap refusal is surfaced in Turkish' => str_contains($waijaClient, 'protected function launchErrorMessage(')
+        && str_contains($waijaClient, 'çok fazla oyun açılıyor'),
 ];
 
 $failures = 0;

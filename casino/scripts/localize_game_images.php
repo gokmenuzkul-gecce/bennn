@@ -113,7 +113,10 @@ function saveCard(string $bytes, string $dest): bool
 
     $dst = imagecreatetruecolor($targetW, $targetH);
     imagecopyresampled($dst, $img, 0, 0, $srcX, $srcY, $targetW, $targetH, $cropW, $cropH);
-    $ok = imagejpeg($dst, $dest, 82);
+    // Progressive + optimised so the phone can paint a preview before the whole
+    // file lands; quality 80 is visually lossless at card size.
+    imageinterlace($dst, true);
+    $ok = imagejpeg($dst, $dest, 80);
     imagedestroy($dst);
     imagedestroy($img);
     return (bool) $ok;

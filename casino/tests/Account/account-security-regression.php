@@ -112,6 +112,12 @@ $checks['phone auto-registration lets the User model hash its generated password
     && str_contains($phoneAuthController, "'password' => Str::random(32)")
     && !str_contains($phoneAuthController, "'password' => Hash::make(Str::random");
 
+$litebackUserController = file_get_contents(__DIR__ . '/../../app/Http/Controllers/Web/Liteback/UserController.php');
+$checks['admin user creation lets the User model hash the password once'] = is_string($litebackUserController)
+    && str_contains($litebackUserController, '$user->password = $request->input(\'password\');')
+    && !str_contains($litebackUserController, 'bcrypt(')
+    && !str_contains($litebackUserController, 'Hash::make(');
+
 $settingsController = file_get_contents(__DIR__ . '/../../app/Http/Controllers/Web/Liteback/SystemSettingsController.php');
 $settingsView = file_get_contents(__DIR__ . '/../../resources/views/liteback/settings/index.blade.php');
 $loginController = file_get_contents(__DIR__ . '/../../app/Http/Controllers/Web/Frontend/Auth/AuthController.php');
