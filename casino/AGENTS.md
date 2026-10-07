@@ -57,9 +57,17 @@ Bunun yerine:
 - **SoftAggregator**: Waija protokolüyle birebir aynı agregatör (slot + canlı + crash). Sınıflar
   Waija'yı miras alır (`SoftAggregatorClient extends WaijaClient`,
   `SoftAggregatorWalletService extends WaijaWalletService`); yalnız config bloğu, base URL
-  (`https://api.softaggregator.com/api/v1`) ve callback yolu farklı. Self-service kayıt + ücretsiz
-  sandbox; anahtarlar kayıt anında verilir. Callback: `{APP_URL}/webhooks/softaggregator/callbacks`
-  (`key = md5(timestamp + salt_key)`). `php artisan casino:sync-catalog --provider=softaggregator`.
+  (`https://api.softaggregator.com/api/v1`) ve callback yolu farklı. Callback:
+  `{APP_URL}/webhooks/softaggregator/callbacks` (`key = md5(timestamp + salt_key)`).
+  `php artisan casino:sync-catalog --provider=softaggregator`.
+  - **Ön ödemeli (prepaid)**: komisyon USDT/USDC kredisinden düşer (slot %8, spor %9, canlı %11);
+    kurulum/aylık ücret yok ama kredi 0 olunca oyunlar açılmaz, minimum yükleme 100 USD. Kredi
+    bittiğinde `createPlayer`/`getGame` **"Insufficient operator credit"** döner.
+  - **Yanıt şekli iki türlü**: çoğu stüdyo `{"response":"<url>"}` (düz string), ama Hub-hosted
+    slotlar ve **tüm canlı dealer** `{"response":{"gameurl":"<url>"}}` (obje) döner. `WaijaClient::
+    extractLaunchUrl()` ikisini de kabul eder; yalnız string beklemek canlı masaları kırar.
+  - Canlı dealer (Live Casino ~226 masa) hesap ürün olarak aktif edilince `getGameList`'te
+    görünür; sync otomatik alır.
 - Bağdaştırıcılar: `app/Casino/Providers/{AbstractCasinoProvider,PragmaticProvider,...}.php`,
   kayıt defteri `CasinoProviderRegistry` (`findBySlug`, `callbackUrl`, `catalog`).
 - İmza: HMAC-SHA256, alanlar sabit sırayla birleştirilir, para alanları 2 ondalığa yuvarlanır

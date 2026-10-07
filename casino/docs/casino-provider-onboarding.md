@@ -196,10 +196,10 @@ hareketi; mevcut agregatör markalarında 45/55 geçiyor).
 | OroPlay | Base URL bekliyor | `api.oroplay.com` çözülmüyor; gerçek site `oroplay.io` |
 | Gregmorn Hub | Kapalı (kimlik yok) | Kod hazır, operatör login/secret/IP allowlist gerekli |
 | Waija / Slotsgateway | Kimlik bekliyor | Kod tamamen hazır; base_url + api_login/password + salt_key gerekli. **Not: IP allowlist hâlâ eksik** (`Ip not whitelisted`). |
-| SoftAggregator | **CANLI (kredi bekliyor)** | Kod + cüzdan + katalog tamam. 1095 oyun senkron (1089 slot). `createPlayer` → "Insufficient operator credit" (USDT/USDC yüklemesi gerekli). **Canlı casino ürünü henüz aktif değil** — `@mentionso`'ya başvur. |
+| SoftAggregator | **CANLI (test kredisiyle çalışıyor)** | Kod + cüzdan + katalog tamam. **5171 oyun** senkron (slot + **226 canlı masa** + crash). `createPlayer`/`getGame`/bet/win/rollback **2 USDT test kredisi** ile çalışıyor. Gerçek oyun için **100 USD** minimum kredi gerekli. |
 | smpl core | Kapalı (kimlik yok) | Kod+adapter hazır; `merchant_id` boş |
 
-### D. SoftAggregator (slot + canlı + crash agregatörü) — ✅ ENTEGRE, CANLI TEST EDİLDİ
+### D. SoftAggregator (slot + canlı + crash agregatörü) — ✅ ENTEGRE, ÇALIŞIYOR
 
 Aradığımız "tek API ile her şey" çözümü. Protokolü Waija ile **birebir aynı**; sınıflar Waija'yı
 miras alır (`SoftAggregatorClient extends WaijaClient`,
@@ -207,34 +207,36 @@ miras alır (`SoftAggregatorClient extends WaijaClient`,
 callback yolu farklı.
 
 **Kurulum tamamlandı:** hesap açıldı, `api_login`/`api_password`/`salt_key` `.env`'e yazıldı,
-callback URL backend'de kayıtlı, `TRY` varsayılan oyuncu para birimi.
+callback URL backend'de kayıtlı, `TRY` varsayılan oyuncu para birimi. Hesaba **2 USDT test
+kredisi** tanımlandı.
 
 **Canlı doğrulama (gerçek anahtarlarla):**
 
 | Test | Sonuç |
 |---|---|
-| `getGameList` (TRY) | HTTP 200, `error:0`, **1095 oyun** |
-| `getCurrencies` | `default:TRY`, `currencies:[TRY,EUR]`, `settlement:EUR`, `open:true` |
-| Katalog senkronu | 1095 getirildi, 621 eşleşti, **453 eklendi** (DB'de 1074 satır) |
-| `createPlayer` | HTTP 200, `error:1` "Insufficient operator credit" (beklenen — kredi yok) |
-| `getGame` (launch) | Aynı: kredi yüklenince çalışacak |
-| Wallet `balance` | `{"error":0,"balance":899763200}` (8.997.632,00 TRY) ✓ |
-| Wallet `debit` 1.00 | `{"error":0,"balance":899763100}` ✓ |
-| Wallet `credit` 0.50 | `{"error":0,"balance":899763150}` ✓ |
-| Idempotency (debit tekrar) | Bakiye değişmedi ✓ |
+| `getGameList` (TRY) | HTTP 200, `error:0`, **5171 oyun** (canlı casino dahil) |
+| Katalog senkronu | 5171 getirildi, 622 eşleşti, **4232 eklendi** (DB'de 4854 satır) |
+| `createPlayer` | HTTP 200, **`error:0`** ✓ |
+| `getGame` (slot) | HTTP 200, düz string URL ✓ |
+| `getGame` (canlı) | HTTP 200, `{"gameurl":"..."}` obje URL ✓ |
+| Wallet `balance` | `{"error":0,"balance":1000000}` (10.000,00 TRY) ✓ |
+| Wallet `debit`/`credit` | ✓ / ✓ |
 | İmza `md5(timestamp+salt_key)` | Geçerli ✓ / bozuk & eski reddedildi ✓ |
 
-**Kalan iki iş:**
+**Fiyatlandırma (teyitli):** kurulum ücreti yok, aylık ücret yok. GGR üzerinden **slot %8,
+spor %9, canlı casino %11**. **Sistem ön ödemeli** — komisyon krediden düşer; kredi 0 olunca
+oyunlar açılmaz. **Minimum yükleme 100 USD** (USDT/USDC), iade edilmez.
 
-1. **Operatör kredisi yükle** (USDT/USDC, `@mentionso`) → `createPlayer` + `getGame` çalışır,
-   gerçek oyun oynanır. Katalog ve demo bundan bağımsız çalışıyor.
-2. **Canlı casino ürününü aktive et** (`@mentionso`): Hesapta şu an yalnızca Video Slots (1089),
-   Arcade (4), Betting (1), Bingo (1) var — **canlı dealer yok**. Canlı masalar ürün aktif
-   edilince `getGameList`'te otomatik görünür; kod tarafında değişiklik gerekmez.
+**Kalan iş:**
+
+1. **100 USD kredi yükle** (USDT/USDC, `@mentionso`) → gerçek oyunlar (slot + canlı) oynanır.
+   2 USDT test kredisi yalnızca entegrasyon testi için; üretim için 100 USD şart.
+2. Canlı casino **aktif** (226 masa); canlı masa launch'ı `{"gameurl"}` obje yanıtı nedeniyle
+   düzeltildi (`WaijaClient::extractLaunchUrl`).
 
 **Not:** `createPlayer` + `getGame` her oyuncu için varsayılan para birimini geçersiz kılar;
-callback `username` alanı kullanır (`user_username` değil) ve `X-Signature` başlığı HMAC-SHA256
-taşır (opsiyonel, `md5` yeterli). Ayrıntı: <https://softaggregator.com/docs.html>
+callback `username` alanı kullanır (`user_username` değil). Ayrıntı:
+<https://softaggregator.com/docs.html>
 
 Destek: Telegram `@mentionso` · `support@softaggregator.com`
 

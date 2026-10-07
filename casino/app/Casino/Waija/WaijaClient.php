@@ -345,7 +345,7 @@ class WaijaClient
         }
 
         return [
-            'url' => (string) ($body['response'] ?? ''),
+            'url' => (string) ($this->extractLaunchUrl($body) ?? ''),
             'session_id' => (string) ($body['session_id'] ?? ''),
         ];
     }
@@ -431,13 +431,42 @@ class WaijaClient
         $response = $this->call('getGame', $payload);
         $body = $response['body'] ?? [];
 
-        $url = $body['response'] ?? null;
-        if ($this->failed($response) || !is_string($url) || $url === '') {
+        $url = $this->extractLaunchUrl($body);
+        if ($this->failed($response) || $url === null) {
             $message = $body['message'] ?? 'geçersiz yanıt';
             throw new \RuntimeException($this->label() . ': oyun başlatılamadı (' . $message . ').');
         }
 
         return $url;
+    }
+
+    /**
+     * Pull the playable URL out of a getGame/getGameDemo reply.
+     *
+     * Most Waija-style studios answer with the URL as a bare string, but some —
+     * notably aggregators fronting Hub-hosted slots and live-dealer tables —
+     * wrap it in an object: {"gameurl":"..."}. Accept both shapes.
+     *
+     * @param  array<string, mixed>  $body
+     */
+    protected function extractLaunchUrl(array $body): ?string
+    {
+        $response = $body['response'] ?? null;
+
+        if (is_string($response)) {
+            return $response !== '' ? $response : null;
+        }
+
+        if (is_array($response)) {
+            foreach (['gameurl', 'game_url', 'url'] as $key) {
+                $value = $response[$key] ?? null;
+                if (is_string($value) && $value !== '') {
+                    return $value;
+                }
+            }
+        }
+
+        return null;
     }
 
     public function testConnectivity(): array

@@ -15,6 +15,13 @@ SoftAggregator'ın kendi sayfası bunu açıkça yazıyor
 revenue share on the GGR the games actually produce."* Yani setup/monthly yok ama **prepaid float
 var** — istenen model bu değil.
 
+**SoftAggregator teyitli fiyatlandırma** (hesap açılış mesajından): **kurulum ücreti yok, aylık
+ücret yok**; komisyon GGR üzerinden **slot %8, spor %9, canlı casino %11**; **sistem ön ödemeli**
+(oyuncular oynadıkça komisyon krediden düşer, kredi 0 olunca oyun açılmaz); **minimum yükleme
+100 USD** (USDT/USDC), her yüklemede geçerli, iade edilmez. Test için **2 USDT** kredi verildi —
+`createPlayer`/`getGame`/bet/win/rollback bu kredi ile test edilebilir. Yani "ücret" yok ama
+**peşin float** var: 100 USD'lik ilk yükleme olmadan gerçek oyun açılmaz.
+
 ## Adaylar (postpaid / rev-share)
 
 | Sağlayıcı | Ödeme modeli | Setup | Aylık min. | Rev-share | Onboarding | Canlı + TRY | Lisans şartı |

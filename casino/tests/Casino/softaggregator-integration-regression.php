@@ -60,6 +60,12 @@ $checks = [
     'provider mints a session via createPlayer then getGame' => str_contains($provider, 'createPlayer')
         && str_contains($provider, 'client()->launch'),
 
+    'launch accepts both bare-string and {"gameurl"} replies' => str_contains($waijaClient, 'extractLaunchUrl')
+        && str_contains($waijaClient, "'gameurl'")
+        && str_contains($waijaClient, "'game_url'"),
+
+    'demo launch reuses the same URL extractor' => str_contains($waijaClient, 'extractLaunchUrl($body)'),
+
     'provider is registered in the registry' => str_contains($registry, 'SoftAggregatorProvider::KEY'),
 
     'catalogue sync dispatches to fetchSoftAggregator' => str_contains($sync, 'fetchSoftAggregator')
