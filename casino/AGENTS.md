@@ -149,9 +149,18 @@ Bunun yerine:
   `WAIJA_SALT_KEY`, `WAIJA_PLAYER_PASSWORD`, `WAIJA_PLAYER_NICKNAME`, `WAIJA_REQUEST_FORMAT`,
   `WAIJA_CURRENCY=TRY`, `WAIJA_CALLBACK_PATH`, `WAIJA_SIGNATURE_WINDOW=30`, `WAIJA_BRANDED`).
   Prod base: `https://api-eu-1.waija.com/api/system/operator`. Waija backoffice'te sunucu IP
-  allowlist'i ZORUNLUDUR; eklenmemişse API `401 {"error":"Ip not whitelisted."}` döner.
+  allowlist'i ZORUNLUDUR; eklenmemişse API `401 {"error":"Unauthorized","message":"No valid
+  authentication method found."}` döner. **Sandbox çıkış IP'si her konteyner sıfırlamasında
+  değişir**; `php artisan casino:integration-status` güncel IP'yi gösterir, değişince
+  backoffice'ten yeniden allowlist'e eklenmelidir.
+- `isConfigured()` yalnızca base_url + api_login + api_password ister; **salt_key gerekmez**
+  (o sadece gelen callback imzası içindir → `canVerifyCallbacks()`). Salt'ı zorunlu tutmak
+  katalog senkronunu ve launch'ları sessizce devre dışı bırakıyordu.
+- Waija `error` alanı başarıda `0`, auth hatalarında `"Unauthorized"` (string) döner.
+  `(int)"Unauthorized" === 0` olduğundan ham cast hatayı yutar → `errorCode()`/`failed()`
+  ile normalize edilir; HTTP ≥ 400 da hata sayılır.
 - Katalog senkronizasyonu: `CasinoCatalogSyncService::fetchWaija`; `gameid` = `id_hash`.
-- Testler: `tests/Casino/waija-integration-regression.php` (27 statik kontrol),
+- Testler: `tests/Casino/waija-integration-regression.php` (29 statik kontrol),
   `tests/Casino/waija-wallet-e2e.php` (17 cüzdan kontrolü),
   `tests/Casino/waija-webhook-e2e.php` (12 gerçek rota kontrolü, GET + cents).
 
