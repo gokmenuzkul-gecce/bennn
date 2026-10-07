@@ -103,7 +103,7 @@ class WaijaWalletService
     private function commit(User $user, string $operation, string $transactionId, array $payload, float $delta): array
     {
         return DB::transaction(function () use ($user, $operation, $transactionId, $payload, $delta) {
-            $existing = CasinoWalletTransaction::findFor(self::PROVIDER_KEY, $transactionId);
+            $existing = CasinoWalletTransaction::findFor(static::PROVIDER_KEY, $transactionId);
             if ($existing) {
                 return $this->success($user, (float) $existing->balance_after);
             }
@@ -120,7 +120,7 @@ class WaijaWalletService
             $locked->save();
 
             CasinoWalletTransaction::create([
-                'provider_key' => self::PROVIDER_KEY,
+                'provider_key' => static::PROVIDER_KEY,
                 'user_id' => $locked->id,
                 'transaction_id' => $transactionId,
                 'round_id' => (string) ($payload['round_id'] ?? ''),
@@ -155,10 +155,10 @@ class WaijaWalletService
     {
         $transactionId = (string) ($payload['call_id'] ?? '');
         if ($transactionId !== '') {
-            $existing = CasinoWalletTransaction::findFor(self::PROVIDER_KEY, $transactionId);
+            $existing = CasinoWalletTransaction::findFor(static::PROVIDER_KEY, $transactionId);
             if (!$existing) {
                 CasinoWalletTransaction::create([
-                    'provider_key' => self::PROVIDER_KEY,
+                    'provider_key' => static::PROVIDER_KEY,
                     'user_id' => $user->id,
                     'transaction_id' => $transactionId,
                     'round_id' => (string) ($payload['round_id'] ?? ''),
@@ -184,7 +184,7 @@ class WaijaWalletService
             return null;
         }
 
-        $userId = CasinoProviderPlayer::resolveUserId(self::PROVIDER_KEY, $username);
+        $userId = CasinoProviderPlayer::resolveUserId(static::PROVIDER_KEY, $username);
         if ($userId) {
             return User::find($userId);
         }

@@ -195,8 +195,38 @@ hareketi; mevcut agregatör markalarında 45/55 geçiyor).
 | Pragmatic / PGSoft / Amatic / Amusnet | Çalışıyor (slot) | Launch OK, cüzdan bağlı |
 | OroPlay | Base URL bekliyor | `api.oroplay.com` çözülmüyor; gerçek site `oroplay.io` |
 | Gregmorn Hub | Kapalı (kimlik yok) | Kod hazır, operatör login/secret/IP allowlist gerekli |
-| Waija / Slotsgateway | Kimlik bekliyor | Kod tamamen hazır; base_url + api_login/password + salt_key gerekli |
+| Waija / Slotsgateway | Kimlik bekliyor | Kod tamamen hazır; base_url + api_login/password + salt_key gerekli. **Not: IP allowlist hâlâ eksik** (`Ip not whitelisted`). |
+| SoftAggregator | Kimlik bekliyor (kayıt anında) | Kod tamamen hazır; protokol Waija ile aynı. Self-service kayıt + ücretsiz sandbox: `softaggregator.com` (Telegram `@mentionso`). 40.000+ oyun, canlı casino, TRY. |
 | smpl core | Kapalı (kimlik yok) | Kod+adapter hazır; `merchant_id` boş |
+
+### D. SoftAggregator (slot + canlı + crash agregatörü) — KAYIT ANINDA ANAHTAR
+
+Aradığımız "tek API ile her şey" çözümü: **40.000+ oyun / 200+ stüdyo**, slot + canlı
+dealer + crash, **TRY** dahil onlarca para birimi, seamless wallet. Protokolü Waija ile
+**birebir aynı** (POST `{api_login, api_password, method}`; `getGameList`/`createPlayer`/
+`getGame`/`getGameDemo`; callback `key = md5(timestamp + salt_key)`, 30sn pencere; integer
+cents; `id_hash` launch id). Bu yüzden `SoftAggregatorClient`/`SoftAggregatorWalletService`
+Waija sınıflarını miras alır — sadece config bloğu, base URL ve callback yolu farklı.
+
+**Kurulum (kod bitti, sadece kayıt gerekiyor):**
+1. `https://softaggregator.com` → **signup** (self-service, satış görüşmesi yok)
+2. Operator backend → **API integration → Your other sites** → siteyi ekle
+3. Çıkan `api_login`, `api_password`, `salt_key` + callback URL'i `.env`'e yaz:
+   ```
+   SOFTAGGREGATOR_API_LOGIN=...
+   SOFTAGGREGATOR_API_PASSWORD=...
+   SOFTAGGREGATOR_SALT_KEY=...
+   ```
+4. Callback URL'imizi kaydet: `{APP_URL}/webhooks/softaggregator/callbacks`
+5. Senkron: `php artisan casino:sync-catalog --provider=softaggregator`
+
+- [x] Kod + adapter + cüzdan + webhook + testler (23 kontrol)
+- [ ] **Kayıt** (hesap aç) → anahtarları al
+- [ ] Callback URL'i + TRY'yi backend'de kaydet
+- [ ] Sandbox'ta oyun listesi + launch doğrula
+
+Destek: Telegram `@mentionso` · `support@softaggregator.com` · Doküman:
+<https://softaggregator.com/docs.html>
 
 Canlı masaların görünmesi için **Waija** (tek kimlik, 150-250+ satıcı, slot + canlı),
 **smpl core merchant_id** veya **Gregmorn operatör kimlikleri** gerekli;

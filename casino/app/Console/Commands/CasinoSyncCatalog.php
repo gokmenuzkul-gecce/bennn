@@ -15,7 +15,7 @@ use VanguardLTE\Casino\CasinoCatalogSyncService;
 class CasinoSyncCatalog extends Command
 {
     protected $signature = 'casino:sync-catalog
-        {--provider= : Only sync one provider key (pragmatic, pgsoft, amatic, amusnet)}
+        {--provider= : Only sync one provider key (pragmatic, pgsoft, amatic, amusnet, oroplay, waija, softaggregator)}
         {--link-only : Match existing rows without importing new games}
         {--prune : Hide rows the vendor no longer lists (they fail to launch)}
         {--hide-unlinked : Hide lobby rows no aggregator provider owns (license-gated legacy titles)}

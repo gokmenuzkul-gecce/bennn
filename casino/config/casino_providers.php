@@ -133,6 +133,39 @@ return [
         'settings_key' => 'casino_provider_waija',
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | SoftAggregator — slots + live + crash aggregator, 40k+ games / 200+ studios
+    |--------------------------------------------------------------------------
+    |
+    | SoftAggregator shares Waija's operator protocol (POST {api_login,
+    | api_password, method}, {error, response} reply, md5(timestamp+salt_key)
+    | wallet callbacks, id_hash launch ids). It differs in the base URL, the
+    | callback path and the request encoding: SoftAggregator documents a JSON
+    | body while Waija's reference SDK posts form-encoded.
+    |
+    |   Docs: https://softaggregator.com/docs.html
+    |
+    | Credentials are issued per site in the operator backend (API integration →
+    | Your other sites): api_login, api_password, salt_key and a callback URL.
+    */
+    'softaggregator' => [
+        'base_url' => env('SOFTAGGREGATOR_BASE_URL', 'https://api.softaggregator.com/api/v1'),
+        'api_login' => env('SOFTAGGREGATOR_API_LOGIN', ''),
+        'api_password' => env('SOFTAGGREGATOR_API_PASSWORD', ''),
+        'salt_key' => env('SOFTAGGREGATOR_SALT_KEY', ''),
+        'player_password' => env('SOFTAGGREGATOR_PLAYER_PASSWORD', ''),
+        'player_nickname' => env('SOFTAGGREGATOR_PLAYER_NICKNAME', ''),
+        'request_format' => env('SOFTAGGREGATOR_REQUEST_FORMAT', 'json'),
+        'callback_path' => env('SOFTAGGREGATOR_CALLBACK_PATH', '/webhooks/softaggregator/callbacks'),
+        'currency' => env('SOFTAGGREGATOR_CURRENCY', env('CASINO_WALLET_CURRENCY', 'TRY')),
+        'signature_window' => (int) env('SOFTAGGREGATOR_SIGNATURE_WINDOW', 30),
+        'home_url' => env('SOFTAGGREGATOR_HOME_URL', rtrim(env('APP_URL', ''), '/')),
+        'cashier_url' => env('SOFTAGGREGATOR_CASHIER_URL', rtrim(env('APP_URL', ''), '/')),
+        'branded' => env('SOFTAGGREGATOR_BRANDED', ''),
+        'settings_key' => 'casino_provider_softaggregator',
+    ],
+
     'providers' => [
 
         'pragmatic' => [
@@ -205,6 +238,14 @@ return [
         'waija' => [
             'label' => 'Waija',
             'settings_key' => 'casino_provider_waija',
+            'embeddable' => true,
+        ],
+
+        // SoftAggregator shares Waija's protocol; SoftAggregatorProvider carries
+        // it, this entry only supplies the label + admin toggles.
+        'softaggregator' => [
+            'label' => 'SoftAggregator',
+            'settings_key' => 'casino_provider_softaggregator',
             'embeddable' => true,
         ],
 

@@ -111,7 +111,7 @@ $checks = [
     'wallet does not touch cash on bonus_fs debits' => str_contains($wallet, "'bonus_fs'")
         && str_contains($wallet, 'recordNoop'),
 
-    'wallet is idempotent on repeated call_id' => str_contains($wallet, 'CasinoWalletTransaction::findFor(self::PROVIDER_KEY, $transactionId)')
+    'wallet is idempotent on repeated call_id' => str_contains($wallet, 'CasinoWalletTransaction::findFor(static::PROVIDER_KEY, $transactionId)')
         && str_contains($wallet, 'lockForUpdate'),
 
     'wallet returns error 1 on insufficient funds and error 2 on failure' => str_contains($wallet, 'INSUFFICIENT_FUNDS = 1')

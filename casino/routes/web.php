@@ -331,6 +331,16 @@ foreach (['get', 'post'] as $method) {
     ])->name('webhooks.waija.callbacks' . ($method === 'get' ? '' : '.post'));
 }
 
+// SoftAggregator seamless-wallet callback. Same protocol as Waija: one URL, the
+// action in the query string (action=balance|debit|credit) and a key of
+// md5(timestamp + salt_key). GET and POST are both accepted. Registered as
+// <APP_URL>/webhooks/softaggregator/callbacks.
+foreach (['get', 'post'] as $method) {
+    Route::$method('webhooks/softaggregator/callbacks', [
+        \VanguardLTE\Http\Controllers\Web\Webhooks\SoftAggregatorWebhookController::class, 'handle',
+    ])->name('webhooks.softaggregator.callbacks' . ($method === 'get' ? '' : '.post'));
+}
+
 
 /**
  *

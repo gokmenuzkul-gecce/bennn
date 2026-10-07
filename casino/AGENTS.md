@@ -52,8 +52,14 @@ Bunun yerine:
   Kimlikler `.env`'de (`*_AGENT_ID`/`*_API_TOKEN`/`*_SECRET_KEY`); varsayılanlar
   `config/casino_providers.php` içinde. Callback `CASINO_CALLBACK_BASE` + `CASINO_CALLBACK_SLUG`.
 - Canlı casino masası YOK: bu dört marka yalnızca slot/RNG masa (Rulet) veriyor; baccarat/live
-  dealer yok. Gerçek canlı masa için smpl core (35.000+ oyun) veya Gregmorn Hub canlı vendor'ları
-  yapılandırılmalı (kimlikleri bekliyor).
+  dealer yok. Gerçek canlı masa için **SoftAggregator** (40.000+ oyun, canlı + crash, TRY),
+  Waija/Slotsgateway veya smpl core/Gregmorn yapılandırılmalı (kimlikleri bekliyor).
+- **SoftAggregator**: Waija protokolüyle birebir aynı agregatör (slot + canlı + crash). Sınıflar
+  Waija'yı miras alır (`SoftAggregatorClient extends WaijaClient`,
+  `SoftAggregatorWalletService extends WaijaWalletService`); yalnız config bloğu, base URL
+  (`https://api.softaggregator.com/api/v1`) ve callback yolu farklı. Self-service kayıt + ücretsiz
+  sandbox; anahtarlar kayıt anında verilir. Callback: `{APP_URL}/webhooks/softaggregator/callbacks`
+  (`key = md5(timestamp + salt_key)`). `php artisan casino:sync-catalog --provider=softaggregator`.
 - Bağdaştırıcılar: `app/Casino/Providers/{AbstractCasinoProvider,PragmaticProvider,...}.php`,
   kayıt defteri `CasinoProviderRegistry` (`findBySlug`, `callbackUrl`, `catalog`).
 - İmza: HMAC-SHA256, alanlar sabit sırayla birleştirilir, para alanları 2 ondalığa yuvarlanır

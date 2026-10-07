@@ -10,6 +10,8 @@ use VanguardLTE\Casino\Providers\GregmornProvider;
 use VanguardLTE\Casino\Providers\OroPlayProvider;
 use VanguardLTE\Casino\Providers\SmplCoreProvider;
 use VanguardLTE\Casino\SmplCore\SmplCoreClient;
+use VanguardLTE\Casino\SoftAggregator\SoftAggregatorClient;
+use VanguardLTE\Casino\Providers\SoftAggregatorProvider;
 use VanguardLTE\Casino\Waija\WaijaClient;
 use VanguardLTE\Casino\Providers\WaijaProvider;
 use VanguardLTE\Game;
@@ -55,6 +57,10 @@ class CasinoCatalogSyncService
 
         if ($providerKey === WaijaProvider::KEY) {
             return $this->fetchWaija();
+        }
+
+        if ($providerKey === SoftAggregatorProvider::KEY) {
+            return $this->fetchSoftAggregator();
         }
 
         $provider = $this->registry->make($providerKey);
@@ -241,6 +247,39 @@ class CasinoCatalogSyncService
     private function fetchWaija(): array
     {
         $client = new WaijaClient();
+
+        $games = [];
+        foreach ($client->games() as $row) {
+            $id = (string) ($row['id_hash'] ?? '');
+            $title = trim((string) ($row['name'] ?? ''));
+            if ($id === '' || $title === '') {
+                continue;
+            }
+
+            $games[] = [
+                'gameid' => $id,
+                'symbol' => preg_replace('/[^A-Za-z0-9_]/', '_', $id) ?: $id,
+                'name' => $title,
+                'icon' => (string) ($row['image_square'] ?? $row['image'] ?? $row['image_portrait'] ?? ''),
+                'vendor' => (string) ($row['category'] ?? $row['subcategory'] ?? ''),
+            ];
+        }
+
+        return $games;
+    }
+
+    /**
+     * SoftAggregator catalogue.
+     *
+     * SoftAggregator shares Waija's getGameList shape, so id_hash is the launch
+     * id and the same row mapping applies; only the client (base URL, config
+     * block) differs.
+     *
+     * @return array<int, array{gameid: string, symbol: string, name: string, icon: string, vendor: string}>
+     */
+    private function fetchSoftAggregator(): array
+    {
+        $client = new SoftAggregatorClient();
 
         $games = [];
         foreach ($client->games() as $row) {

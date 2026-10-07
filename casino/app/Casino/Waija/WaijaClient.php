@@ -27,11 +27,35 @@ class WaijaClient
         $this->config = $config ?? $this->resolveConfig();
     }
 
+    /** Human label used in thrown error messages (overridden by subclasses). */
+    protected function label(): string
+    {
+        return 'waija';
+    }
+
+    /** Config block key under casino_providers (overridden by subclasses). */
+    protected function configKey(): string
+    {
+        return 'waija';
+    }
+
+    /** settings() row holding the admin overrides. */
+    protected function defaultSettingsKey(): string
+    {
+        return 'casino_provider_waija';
+    }
+
+    /** Callback path this aggregator is registered with. */
+    protected function defaultCallbackPath(): string
+    {
+        return '/webhooks/waija/callbacks';
+    }
+
     /** @return array<string, mixed> */
     private function resolveConfig(): array
     {
-        $defaults = (array) config('casino_providers.waija', []);
-        $settingsKey = (string) ($defaults['settings_key'] ?? 'casino_provider_waija');
+        $defaults = (array) config('casino_providers.' . $this->configKey(), []);
+        $settingsKey = (string) ($defaults['settings_key'] ?? $this->defaultSettingsKey());
 
         $overrides = [];
         if (function_exists('settings')) {
@@ -129,7 +153,7 @@ class WaijaClient
     public function callbackUrl(): string
     {
         $base = rtrim((string) (config('casino_providers.callback_base') ?: config('app.url')), '/');
-        $path = (string) ($this->config['callback_path'] ?? '/webhooks/waija/callbacks');
+        $path = (string) ($this->config['callback_path'] ?? $this->defaultCallbackPath());
 
         return $base . '/' . ltrim($path, '/');
     }
@@ -207,7 +231,7 @@ class WaijaClient
         curl_close($ch);
 
         if ($raw === false) {
-            throw new \RuntimeException('waija: istek başarısız (' . $error . ').');
+            throw new \RuntimeException($this->label() . ': istek başarısız (' . $error . ').');
         }
 
         $decoded = json_decode((string) $raw, true);
@@ -317,7 +341,7 @@ class WaijaClient
         $body = $response['body'] ?? [];
 
         if ($this->failed($response)) {
-            throw new \RuntimeException('waija: demo oturumu açılamadı (' . ($body['message'] ?? ('http ' . $response['status'])) . ').');
+            throw new \RuntimeException($this->label() . ': demo oturumu açılamadı (' . ($body['message'] ?? ('http ' . $response['status'])) . ').');
         }
 
         return [
@@ -378,7 +402,7 @@ class WaijaClient
         $body = $response['body'] ?? [];
         if ($this->failed($response)) {
             $message = $body['message'] ?? ('http ' . $response['status']);
-            throw new \RuntimeException('waija: gamelist reddedildi (' . $message . ').');
+            throw new \RuntimeException($this->label() . ': gamelist reddedildi (' . $message . ').');
         }
 
         $list = $body['response'] ?? [];
@@ -410,7 +434,7 @@ class WaijaClient
         $url = $body['response'] ?? null;
         if ($this->failed($response) || !is_string($url) || $url === '') {
             $message = $body['message'] ?? 'geçersiz yanıt';
-            throw new \RuntimeException('waija: oyun başlatılamadı (' . $message . ').');
+            throw new \RuntimeException($this->label() . ': oyun başlatılamadı (' . $message . ').');
         }
 
         return $url;
@@ -425,13 +449,13 @@ class WaijaClient
         try {
             $response = $this->call('getGameList', ['list_type' => 1, 'currency' => $this->currency()]);
         } catch (\Throwable $e) {
-            return ['success' => false, 'message' => 'waija: ' . $e->getMessage()];
+            return ['success' => false, 'message' => $this->label() . ': ' . $e->getMessage()];
         }
 
         if ($response['status'] >= 200 && $response['status'] < 500) {
             return ['success' => true, 'message' => 'Sunucuya ulaşıldı (HTTP ' . $response['status'] . ')'];
         }
 
-        return ['success' => false, 'message' => 'waija: beklenmeyen yanıt (HTTP ' . $response['status'] . ')'];
+        return ['success' => false, 'message' => $this->label() . ': beklenmeyen yanıt (HTTP ' . $response['status'] . ')'];
     }
 }
