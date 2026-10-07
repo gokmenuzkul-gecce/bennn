@@ -42,11 +42,48 @@ Kaynaklar: Hub88 `docs.hub88.io` (Invoice Payments, 1-Click Onboarding), `sloteg
   kullanıyor. Gerçek-para lisansı yoksa **Groove** (sweepstakes, lisans yok) veya **Hub88**
   (lisans opsiyonel) en uygun; gerçek-para lisansı varsa Hub88/Slotegrator/SOFTSWISS.
 
+## Bize uyar mı? (Hub88 değerlendirmesi)
+
+**Model olarak tam uyar** — istediğin "peşin para yok, kârdan pay" mantığı Hub88'de var:
+
+| Kriter | Hub88 | Uyum |
+|---|---|---|
+| Ödeme modeli | **Postpaid fatura** (aylık konsolide, backoffice'ten ödeme) | ✅ |
+| Peşin kredi | **Yok** | ✅ |
+| Onboarding | **Self-serve** "1-Click Onboarding" (~3 gün) | ✅ |
+| Kapsam | 26.000+ oyun, 150+ tedarikçi, **canlı dealer dahil** | ✅ |
+| Sosyal casino | **Evet** — ABD sosyal casino **Legendz** ile sweepstake debut (Ara 2024) | ✅ |
+| Cüzdan | Seamless wallet (bizim mimari) | ✅ |
+| Lisans | MGA B2B; **"iş tipine göre lisans atlanabilir"** — satışa bildir | ⚠️ |
+| TRY | Dokümanlarda açık değil; entegrasyonda seçiliyor | ⚠️ doğrula |
+| Fiyat | Rev-share oranı + min. hacim **yayınlanmamış** (pazarlık) | ⚠️ |
+
+**3 engel / yapılacak:**
+
+1. **Sales-led + due diligence**: SoftAggregator gibi anında kayıt yok; parent company, legal
+   entity, registration no, marka bilgisi istenir. Şirket bilgileri hazır olmalı.
+2. **Farklı teknik protokol**: RSA public/private key imzası, `POST /operator/generic/v2/game/url`,
+   cüzdan `POST /user/balance`, `/transaction/bet`, `/transaction/win`, `/transaction/rollback`.
+   Waija/SoftAggregator protokolü **değil** → yeni `Hub88Client` gerekir. Mevcut generic cüzdan
+   rotası (`webhooks/aggregator/{slug}/wallet/{operation?}`) bet/win/rollback desenini zaten
+   destekliyor, iş ~1-2 gün.
+3. **TRY + min. hacim teyidi** gerekli.
+
+**Sorulacak 3 soru** (`sales@hub88.io` veya HubConnect formu):
+1. *"Postpaid invoicing on revenue share, with no prepaid balance required to enable game
+   launch — please confirm in writing."*
+2. *"Our business type is social/sweepstakes; can gaming licences be omitted, and is TRY
+   supported for gameplay?"*
+3. *"Is there a minimum volume commitment or monthly minimum?"*
+
+**Sonuç:** Hub88 birincil aday. Onay gelene kadar SoftAggregator (slot katalogu, canlı için
+`@mentionso`) çalışmaya devam eder; iki agregatör farklı `provider_key` ile yan yana sorunsuz
+çalışır.
+
 ## Öneri
 
-1. **Hub88** (birincil): postpaid fatura, self-serve onboarding, canlı dahil 26k+ oyun, MGA lisanslı.
-   `sales@hub88.io` — *"Postpaid invoicing on revenue share with no prepaid balance, licences
-   omittable for our business type — confirm."*
+1. **Hub88** (birincil): postpaid fatura, self-serve onboarding, canlı dahil 26k+ oyun, MGA lisanslı,
+   sosyal casino deneyimi. `sales@hub88.io`.
 2. **Slotegrator** (yedek): aylık minimum yok, sadece rev-share.
 3. **Groove** (sosyal/sweepstakes ise): lisans gerekmiyor.
 
