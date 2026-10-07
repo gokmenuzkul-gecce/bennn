@@ -115,6 +115,19 @@ Backoffice'ten gelen kimlikler girilince çalışır.
 > Not: Waija cüzdanı **integer cent** kullanır (`$2.50 → 250`); rollback `rb=1` ile normal
 > hareket olarak gelir; `type=bonus_fs` debit'inde nakit düşülmez. Tüm yanıtlar HTTP 200.
 
+### Referans uygulama: Racko (play.racko.app)
+Waija ile çalışan canlı bir uygulama, tasarımımızı doğrulamak için incelendi:
+
+- **Oyun kimliği**: `waija-<vendor>/<game>` **URL slug**'ıdır; gerçek `gameid` yine
+  `vendor/game` (ör. `pragmaticslots/aladdin-and-the-sorcerer`). Bizim `id_hash`'i
+  aynen kullanmamız **doğru** — ekstra önek gerekmez.
+- **Para birimi**: Racko **USD** kullanıyor (`Currency:"USD"`), TRY değil → TRY'nin
+  Waija'da desteklenmediğini bağımsız olarak doğrular.
+- **Kapsam**: ~18 sağlayıcı, yalnızca Waija API'si (Racko "üçüncü taraf aggregator
+  eklenemez" notu taşır).
+- **Launch akışı**: Sunucu tarafında (JS bundle'da API çağrısı yok) — bizimkiyle aynı
+  mimari: `createPlayer` → `getGame` → dönen URL iframe'de açılır.
+
 ### E. smpl core — 35.000+ oyun (slot + CANLI CASINO) — ÖNERİLEN CANLI MASA KAYNAĞI
 Docs: <https://smplcore.com/docs/getting-started>. Entegrasyon tamamen hazır
 (client + cüzdan + webhook + provider adapter); **sadece kimlik eksik**.
