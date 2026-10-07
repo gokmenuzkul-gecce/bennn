@@ -96,6 +96,18 @@ class WaijaClient
         return (string) ($this->config['salt_key'] ?? '');
     }
 
+    /**
+     * Optional operator brand tag Waija echoes back in the launch payload.
+     *
+     * Sent only when configured; Waija rejects an empty string.
+     */
+    public function branded(): ?string
+    {
+        $branded = (string) ($this->config['branded'] ?? '');
+
+        return $branded !== '' ? $branded : null;
+    }
+
     /** Public URL Waija GETs its wallet callbacks to. */
     public function callbackUrl(): string
     {
@@ -254,6 +266,16 @@ class WaijaClient
         ])['body'] ?? [];
     }
 
+    /** @return array<string, mixed> */
+    public function deleteAllFreeRounds(string $username, string $password): array
+    {
+        return $this->call('deleteAllFreeRounds', [
+            'user_username' => $username,
+            'user_password' => $password,
+            'currency' => strtoupper($this->currency()),
+        ])['body'] ?? [];
+    }
+
     /**
      * Open a fun-play (demo) session.
      *
@@ -272,7 +294,7 @@ class WaijaClient
             'cashierurl' => (string) ($this->config['cashier_url'] ?? config('app.url')),
             'lang' => $lang,
             'currency' => strtoupper($this->currency()),
-        ], $extra);
+        ], $this->branded() !== null ? ['branded' => $this->branded()] : [], $extra);
 
         $response = $this->call('getGameDemo', $payload);
         $body = $response['body'] ?? [];
@@ -331,7 +353,7 @@ class WaijaClient
             'cashierurl' => (string) ($this->config['cashier_url'] ?? config('app.url')),
             'play_for_fun' => 0,
             'currency' => strtoupper($this->currency()),
-        ], $extra);
+        ], $this->branded() !== null ? ['branded' => $this->branded()] : [], $extra);
 
         $response = $this->call('getGame', $payload);
         $body = $response['body'] ?? [];

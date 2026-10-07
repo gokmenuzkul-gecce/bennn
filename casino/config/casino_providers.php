@@ -128,6 +128,8 @@ return [
         'signature_window' => (int) env('WAIJA_SIGNATURE_WINDOW', 30),
         'home_url' => env('WAIJA_HOME_URL', rtrim(env('APP_URL', ''), '/')),
         'cashier_url' => env('WAIJA_CASHIER_URL', rtrim(env('APP_URL', ''), '/')),
+        // Optional operator brand tag echoed back in launch/demo payloads.
+        'branded' => env('WAIJA_BRANDED', ''),
         'settings_key' => 'casino_provider_waija',
     ],
 

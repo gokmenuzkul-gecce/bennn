@@ -66,6 +66,17 @@ $checks = [
         && str_contains($client, 'public function demo(')
         && str_contains($provider, 'function demoLaunch('),
 
+    'client mirrors the official SDK method surface' => str_contains($client, "'getGameList'")
+        && str_contains($client, "'createPlayer'")
+        && str_contains($client, "'getGameDemo'")
+        && str_contains($client, "'addFreeRounds'")
+        && str_contains($client, "'getFreeRounds'")
+        && str_contains($client, "'deleteFreeRounds'")
+        && str_contains($client, "'deleteAllFreeRounds'"),
+
+    'client sends play_for_fun and optional branded on launch' => str_contains($client, "'play_for_fun' => 0")
+        && str_contains($client, '$this->branded()'),
+
     'client does not call the deprecated playerExists' => !str_contains($client, "'playerExists'"),
 
     'client mints a session with createPlayer then getGame' => str_contains($client, "'createPlayer'")
