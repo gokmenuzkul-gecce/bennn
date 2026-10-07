@@ -46,6 +46,12 @@ $checks = [
             && !str_contains($m[1], 'salt_key'))
         && str_contains($client, 'function canVerifyCallbacks('),
 
+    'string error codes are not swallowed by an int cast' =>
+        str_contains($client, 'private function errorCode(')
+        && str_contains($client, "is_string(\$error) && is_numeric(\$error)")
+        && str_contains($client, 'private function failed(')
+        && !str_contains($client, "(int) (\$body['error'] ?? -1)"),
+
     'client enforces a freshness window on the callback timestamp' => str_contains($client, 'signature_window')
         && str_contains($client, 'abs(time() - (int) $timestamp)'),
 

@@ -316,7 +316,7 @@ class WaijaClient
         $response = $this->call('getGameDemo', $payload);
         $body = $response['body'] ?? [];
 
-        if (($body['error'] ?? null) !== 0) {
+        if ($this->failed($response)) {
             throw new \RuntimeException('waija: demo oturumu açılamadı (' . ($body['message'] ?? ('http ' . $response['status'])) . ').');
         }
 
@@ -324,6 +324,38 @@ class WaijaClient
             'url' => (string) ($body['response'] ?? ''),
             'session_id' => (string) ($body['session_id'] ?? ''),
         ];
+    }
+
+    /**
+     * Normalise Waija's error field.
+     *
+     * Success is the integer 0. Failures are usually an integer code, but auth
+     * and transport failures come back as a string ("Unauthorized"), and a
+     * plain (int) cast turns that into 0 — which reads as success and silently
+     * returns an empty catalogue. Any non-numeric value counts as an error.
+     *
+     * @param  array<string, mixed>  $body
+     */
+    private function errorCode(array $body): int
+    {
+        $error = $body['error'] ?? -1;
+
+        if (is_int($error)) {
+            return $error;
+        }
+
+        if (is_string($error) && is_numeric($error)) {
+            return (int) $error;
+        }
+
+        return $error === 0 ? 0 : 1;
+    }
+
+    /** @param array{status: int, body: array<string, mixed>|null, raw: string} $response */
+    private function failed(array $response): bool
+    {
+        return $response['status'] >= 400
+            || $this->errorCode($response['body'] ?? []) !== 0;
     }
 
     /**
@@ -344,8 +376,8 @@ class WaijaClient
         ]);
 
         $body = $response['body'] ?? [];
-        if ((int) ($body['error'] ?? -1) !== 0) {
-            $message = $body['message'] ?? 'bilinmeyen hata';
+        if ($this->failed($response)) {
+            $message = $body['message'] ?? ('http ' . $response['status']);
             throw new \RuntimeException('waija: gamelist reddedildi (' . $message . ').');
         }
 
@@ -376,7 +408,7 @@ class WaijaClient
         $body = $response['body'] ?? [];
 
         $url = $body['response'] ?? null;
-        if ((int) ($body['error'] ?? -1) !== 0 || !is_string($url) || $url === '') {
+        if ($this->failed($response) || !is_string($url) || $url === '') {
             $message = $body['message'] ?? 'geçersiz yanıt';
             throw new \RuntimeException('waija: oyun başlatılamadı (' . $message . ').');
         }
