@@ -14,9 +14,14 @@
   `js/promex-legacy-bridge.js`, `PromexInstallationService`. Bunlar lisans/entegrasyon sözleşmesidir.
 
 ## Çalıştırma
-- Yerel sunucu: `php artisan serve --host=0.0.0.0 --port=8000` (pid dosyası yoksa `ps aux | grep artisan`).
-- View derleme: `php artisan view:clear && php artisan view:cache` (blade sözdizimi kontrolü için).
-- Yayın adresi (dev): https://work-1-tlcfjicrlanlyelk.prod-runtime.all-hands.dev/
+- **Konteyner her oturum arasında sıfırlanır** (PHP + MariaDB + veritabanı gider; repo ve
+  `install.sql` kalır). Soğuk başlatma: `bash /workspace/project/scripts/dev-bootstrap.sh`
+  → paketleri kurar, MariaDB'yi başlatır, `install.sql`'i import eder, migrate + katalog
+  senkronu yapar ve sunucuyu `$PORT`te (varsayılan 12000) ayağa kaldırır. Tekrar çalıştırmak güvenli.
+- Sunucu: `php -S 0.0.0.0:12000 -t /workspace/project /workspace/project/index.php`
+  (docroot repo kökü, `index.php` front controller). Log: `/tmp/promex-server.log`.
+- Yayın adresi (dev): https://work-1-tlcfjicrlanlyelk.prod-runtime.all-hands.dev/ (port 12000).
+- DB: MariaDB, veritabanı `promex`, kullanıcı/şifre `promex` (127.0.0.1).
 
 ## Yerelleştirme (tr)
 - Varsayılan dil `tr`: `.env APP_LOCALE=tr`, `config/app.php` `'locale' => env('APP_LOCALE','tr')`.
