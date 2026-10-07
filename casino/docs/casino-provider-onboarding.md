@@ -85,7 +85,13 @@ Backoffice'ten gelen kimlikler girilince çalışır.
 
 - [x] **Base API URL**: `https://api-eu-1.waija.com/api/system/operator` (backoffice'ten alındı)
 - [x] **api_login** / **api_password**: backoffice'ten alındı, `.env`'e yazıldı
-- [x] **IP allowlist**: `34.45.0.142` eklendi (API artık `200` dönüyor)
+- [x] **IP allowlist**: eklendi (API `200` dönüyordu)
+  > ⚠️ **DİKKAT:** Konteyner sıfırlanınca çıkış IP'si **değişiyor**. İlk allowlist `34.45.0.142`
+  > idi; sıfırlama sonrası IP `34.70.174.52` oldu ve API `401 No valid authentication method
+  > found` dönmeye başladı. **IP değişince backoffice'ten yeni IP'yi allowlist'e ekle**:
+  > ```bash
+  > curl -s https://api.ipify.org   # güncel çıkış IP'si
+  > ```
 - [ ] **Salt key** (callback imzası `md5(timestamp + saltkey)`; backoffice → Spinshield detayı)
 - [ ] **Para birimi kararı** — TRY Waija'da DESTEKLENMİYOR (aşağıya bak)
 - [x] **Callback URL kaydı** → `https://work-1-tlcfjicrlanlyelk.prod-runtime.all-hands.dev/webhooks/waija/callbacks`

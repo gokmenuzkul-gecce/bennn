@@ -28,6 +28,8 @@ class CasinoIntegrationStatus extends Command
         $this->line('Callback tabanı (CASINO_CALLBACK_BASE): ' . ($base !== '' ? $base : '(boş!)'));
         $this->line('Aggregator slug (CASINO_CALLBACK_SLUG): ' . $slug);
         $this->line('Para birimi: ' . config('casino_providers.currency', 'TRY'));
+        $ip = $this->outboundIp();
+        $this->line('Çıkış IP (allowlist için): ' . ($ip !== '' ? $ip : '(alınamadı)'));
         if (str_contains($base, 'prod-runtime.all-hands.dev')) {
             $this->warn('UYARI: callback tabanı geçici bir sandbox host. Satıcı portallarına kaydetmeden önce kalıcı bir alan adı kullan.');
         }
@@ -98,5 +100,25 @@ class CasinoIntegrationStatus extends Command
         $this->line('  smpl core: base URL + merchant id + merchant key');
 
         return self::SUCCESS;
+    }
+
+    /**
+     * Current egress IP, so the operator can whitelist it at the vendor.
+     *
+     * The sandbox container rotates this IP on every reset, and vendors answer
+     * 401 until the new address is whitelisted.
+     */
+    private function outboundIp(): string
+    {
+        $ch = curl_init('https://api.ipify.org');
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => 8,
+            CURLOPT_CONNECTTIMEOUT => 5,
+        ]);
+        $ip = curl_exec($ch);
+        curl_close($ch);
+
+        return is_string($ip) ? trim($ip) : '';
     }
 }
