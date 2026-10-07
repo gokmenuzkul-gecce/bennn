@@ -196,37 +196,47 @@ hareketi; mevcut agregatör markalarında 45/55 geçiyor).
 | OroPlay | Base URL bekliyor | `api.oroplay.com` çözülmüyor; gerçek site `oroplay.io` |
 | Gregmorn Hub | Kapalı (kimlik yok) | Kod hazır, operatör login/secret/IP allowlist gerekli |
 | Waija / Slotsgateway | Kimlik bekliyor | Kod tamamen hazır; base_url + api_login/password + salt_key gerekli. **Not: IP allowlist hâlâ eksik** (`Ip not whitelisted`). |
-| SoftAggregator | Kimlik bekliyor (kayıt anında) | Kod tamamen hazır; protokol Waija ile aynı. Self-service kayıt + ücretsiz sandbox: `softaggregator.com` (Telegram `@mentionso`). 40.000+ oyun, canlı casino, TRY. |
+| SoftAggregator | **CANLI (kredi bekliyor)** | Kod + cüzdan + katalog tamam. 1095 oyun senkron (1089 slot). `createPlayer` → "Insufficient operator credit" (USDT/USDC yüklemesi gerekli). **Canlı casino ürünü henüz aktif değil** — `@mentionso`'ya başvur. |
 | smpl core | Kapalı (kimlik yok) | Kod+adapter hazır; `merchant_id` boş |
 
-### D. SoftAggregator (slot + canlı + crash agregatörü) — KAYIT ANINDA ANAHTAR
+### D. SoftAggregator (slot + canlı + crash agregatörü) — ✅ ENTEGRE, CANLI TEST EDİLDİ
 
-Aradığımız "tek API ile her şey" çözümü: **40.000+ oyun / 200+ stüdyo**, slot + canlı
-dealer + crash, **TRY** dahil onlarca para birimi, seamless wallet. Protokolü Waija ile
-**birebir aynı** (POST `{api_login, api_password, method}`; `getGameList`/`createPlayer`/
-`getGame`/`getGameDemo`; callback `key = md5(timestamp + salt_key)`, 30sn pencere; integer
-cents; `id_hash` launch id). Bu yüzden `SoftAggregatorClient`/`SoftAggregatorWalletService`
-Waija sınıflarını miras alır — sadece config bloğu, base URL ve callback yolu farklı.
+Aradığımız "tek API ile her şey" çözümü. Protokolü Waija ile **birebir aynı**; sınıflar Waija'yı
+miras alır (`SoftAggregatorClient extends WaijaClient`,
+`SoftAggregatorWalletService extends WaijaWalletService`) — yalnız config bloğu, base URL ve
+callback yolu farklı.
 
-**Kurulum (kod bitti, sadece kayıt gerekiyor):**
-1. `https://softaggregator.com` → **signup** (self-service, satış görüşmesi yok)
-2. Operator backend → **API integration → Your other sites** → siteyi ekle
-3. Çıkan `api_login`, `api_password`, `salt_key` + callback URL'i `.env`'e yaz:
-   ```
-   SOFTAGGREGATOR_API_LOGIN=...
-   SOFTAGGREGATOR_API_PASSWORD=...
-   SOFTAGGREGATOR_SALT_KEY=...
-   ```
-4. Callback URL'imizi kaydet: `{APP_URL}/webhooks/softaggregator/callbacks`
-5. Senkron: `php artisan casino:sync-catalog --provider=softaggregator`
+**Kurulum tamamlandı:** hesap açıldı, `api_login`/`api_password`/`salt_key` `.env`'e yazıldı,
+callback URL backend'de kayıtlı, `TRY` varsayılan oyuncu para birimi.
 
-- [x] Kod + adapter + cüzdan + webhook + testler (23 kontrol)
-- [ ] **Kayıt** (hesap aç) → anahtarları al
-- [ ] Callback URL'i + TRY'yi backend'de kaydet
-- [ ] Sandbox'ta oyun listesi + launch doğrula
+**Canlı doğrulama (gerçek anahtarlarla):**
 
-Destek: Telegram `@mentionso` · `support@softaggregator.com` · Doküman:
-<https://softaggregator.com/docs.html>
+| Test | Sonuç |
+|---|---|
+| `getGameList` (TRY) | HTTP 200, `error:0`, **1095 oyun** |
+| `getCurrencies` | `default:TRY`, `currencies:[TRY,EUR]`, `settlement:EUR`, `open:true` |
+| Katalog senkronu | 1095 getirildi, 621 eşleşti, **453 eklendi** (DB'de 1074 satır) |
+| `createPlayer` | HTTP 200, `error:1` "Insufficient operator credit" (beklenen — kredi yok) |
+| `getGame` (launch) | Aynı: kredi yüklenince çalışacak |
+| Wallet `balance` | `{"error":0,"balance":899763200}` (8.997.632,00 TRY) ✓ |
+| Wallet `debit` 1.00 | `{"error":0,"balance":899763100}` ✓ |
+| Wallet `credit` 0.50 | `{"error":0,"balance":899763150}` ✓ |
+| Idempotency (debit tekrar) | Bakiye değişmedi ✓ |
+| İmza `md5(timestamp+salt_key)` | Geçerli ✓ / bozuk & eski reddedildi ✓ |
+
+**Kalan iki iş:**
+
+1. **Operatör kredisi yükle** (USDT/USDC, `@mentionso`) → `createPlayer` + `getGame` çalışır,
+   gerçek oyun oynanır. Katalog ve demo bundan bağımsız çalışıyor.
+2. **Canlı casino ürününü aktive et** (`@mentionso`): Hesapta şu an yalnızca Video Slots (1089),
+   Arcade (4), Betting (1), Bingo (1) var — **canlı dealer yok**. Canlı masalar ürün aktif
+   edilince `getGameList`'te otomatik görünür; kod tarafında değişiklik gerekmez.
+
+**Not:** `createPlayer` + `getGame` her oyuncu için varsayılan para birimini geçersiz kılar;
+callback `username` alanı kullanır (`user_username` değil) ve `X-Signature` başlığı HMAC-SHA256
+taşır (opsiyonel, `md5` yeterli). Ayrıntı: <https://softaggregator.com/docs.html>
+
+Destek: Telegram `@mentionso` · `support@softaggregator.com`
 
 Canlı masaların görünmesi için **Waija** (tek kimlik, 150-250+ satıcı, slot + canlı),
 **smpl core merchant_id** veya **Gregmorn operatör kimlikleri** gerekli;
