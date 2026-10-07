@@ -56,19 +56,31 @@ class WaijaClient
         return $this->config;
     }
 
+    /**
+     * Enough to mint sessions and pull the catalogue (base URL + credentials).
+     *
+     * The salt key is deliberately NOT required here: it only signs inbound
+     * wallet callbacks. Gating the whole client on it silently disabled the
+     * catalogue sync and every launch until the operator had the salt.
+     */
     public function isConfigured(): bool
     {
         return !empty($this->config['base_url'])
             && !empty($this->config['api_login'])
-            && !empty($this->config['api_password'])
-            && !empty($this->config['salt_key']);
+            && !empty($this->config['api_password']);
+    }
+
+    /** Whether inbound wallet callbacks can be signature-verified. */
+    public function canVerifyCallbacks(): bool
+    {
+        return $this->isConfigured() && $this->saltKey() !== '';
     }
 
     /** @return array{configured: bool, message: string} */
     public function configStatus(): array
     {
         $missing = [];
-        foreach (['base_url', 'api_login', 'api_password', 'salt_key'] as $field) {
+        foreach (['base_url', 'api_login', 'api_password'] as $field) {
             if (empty($this->config[$field])) {
                 $missing[] = $field;
             }
@@ -78,7 +90,12 @@ class WaijaClient
             return ['configured' => false, 'message' => 'Eksik alanlar: ' . implode(', ', $missing)];
         }
 
-        return ['configured' => true, 'message' => 'Yapılandırıldı · ' . $this->baseUrl()];
+        $message = 'Yapılandırıldı · ' . $this->baseUrl();
+        if ($this->saltKey() === '') {
+            $message .= ' (uyarı: salt_key boş — gelen callback imzaları doğrulanamaz)';
+        }
+
+        return ['configured' => true, 'message' => $message];
     }
 
     public function currency(): string

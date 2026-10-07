@@ -92,7 +92,11 @@ Backoffice'ten gelen kimlikler girilince çalışır.
   > ```bash
   > curl -s https://api.ipify.org   # güncel çıkış IP'si
   > ```
-- [ ] **Salt key** (callback imzası `md5(timestamp + saltkey)`; backoffice → Spinshield detayı)
+- [x] **Salt key**: alındı (`951eaec0e1a0`, 12 karakter), `.env`'e yazıldı. Webhook imzası
+  gerçek salt'la doğrulandı: geçerli `true`, bozuk `false`, eski (>30 sn) `false`.
+  > Not: `isConfigured()` artık salt'ı şart koşmuyor (yalnızca endpoint + login + şifre);
+  > salt sadece gelen callback doğrulaması için gerekli. Bu ayrım olmadan salt gelene
+  > kadar katalog senkronu ve launch'lar sessizce devre dışı kalıyordu.
 - [ ] **Para birimi kararı** — TRY Waija'da DESTEKLENMİYOR (aşağıya bak)
 - [x] **Callback URL kaydı** → `https://work-1-tlcfjicrlanlyelk.prod-runtime.all-hands.dev/webhooks/waija/callbacks`
 - [x] **Kumarhane URL'i** kayıtlı

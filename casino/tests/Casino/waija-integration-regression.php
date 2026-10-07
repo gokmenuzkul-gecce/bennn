@@ -41,6 +41,11 @@ $envExample = $read('.env.example');
 $checks = [
     'client signs callbacks with md5(timestamp + saltkey)' => str_contains($client, "md5(\$timestamp . \$this->saltKey())"),
 
+    'isConfigured only needs endpoint + credentials, not the salt' =>
+        (preg_match('/function isConfigured\(\): bool\s*\{(.*?)\n    \}/s', $client, $m)
+            && !str_contains($m[1], 'salt_key'))
+        && str_contains($client, 'function canVerifyCallbacks('),
+
     'client enforces a freshness window on the callback timestamp' => str_contains($client, 'signature_window')
         && str_contains($client, 'abs(time() - (int) $timestamp)'),
 
