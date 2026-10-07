@@ -80,6 +80,56 @@ Kaynaklar: Hub88 `docs.hub88.io` (Invoice Payments, 1-Click Onboarding), `sloteg
 `@mentionso`) çalışmaya devam eder; iki agregatör farklı `provider_key` ile yan yana sorunsuz
 çalışır.
 
+## Groove Technologies (eski GrooveGaming) — değerlendirme
+
+**En güçlü tarafı: lisanssız sosyal/sweepstakes modelini açıkça destekliyor.**
+
+| Kriter | Groove | Not |
+|---|---|---|
+| Şirket / düzenleyici | Groove Technologies N.V., **Curaçao** (OGL/2024/309/0142) | MGA değil → offshore/esnek |
+| Oyun | 20.000+ oyun, 150+ stüdyo (bazı sayfalar 15.000+/200+) | Hub88 ile benzer |
+| Canlı dealer | **Evet** (slot + canlı + masa + crash) | ✅ |
+| **Sosyal/sweepstakes** | **Ayrı ürün: 4.000+ GC/SC hazır oyun, "no gambling license required"** | ✅✅ bize tam uyar |
+| Para birimi | 200+ (fiat + kripto) | TRY doğrulanmalı |
+| Cüzdan | Seamless (tek Unified Casino API + Marketing API) | ✅ |
+| Protokol | `X-API-Key` + `X-Signature` (HMAC-SHA256), `/balance`, bet/win/rollback | Hub88'e benzer, **yeni client gerekir** |
+| Onboarding | Sales-led, **<4 hafta** (sweepstakes ürünü günler içinde) | Anında kayıt yok |
+| Fiyat | **On request** (rev-share + setup + min. hepsi pazarlık) | ⚠️ belirsiz |
+| **Ön ödeme / postpaid** | **Yayınlanmamış** | ⚠️ **sorulacak** |
+
+**Avantaj:** Groove'un sweepstakes kataloğu **lisans gerektirmiyor** ve Curacao düzenlemesinde.
+"Sosyal Oyun Lobisi" markalı, gerçek-para lisansı olmayan bir site için Hub88'den **daha uygun**
+olabilir.
+
+**Dezavantaj / bilinmeyen:**
+- **Prepaid mi postpaid mi belli değil** — Hub88 postpaid'i yazılı teyit ediyor, Groove etmiyor.
+  Ödeme modelini mutlaka sor.
+- Fiyat tamamen pazarlık (setup + rev-share + min. yayınlanmamış).
+- Sweepstakes kataloğu ağırlıklı **ABD (Gold Coin/Sweeps Coin)** odaklı; TRY/TR pazarı için
+  hangi katalog uygun, teyit lazım.
+
+## Hub88 vs Groove — hangisi?
+
+| | Groove | Hub88 |
+|---|---|---|
+| Operatör lisansı | **Sweepstakes ürününde gerekmez** | Opsiyonel (satış onayı) |
+| Agregatör düzenleyicisi | Curaçao | Malta (MGA) |
+| Oyun | 20.000+ / 150+ stüdyo | 26.000+ / 150+ tedarikçi |
+| Sosyal/sweepstakes | **Ayrı ürün, 4K+ GC/SC** | Kanıtlı (Legendz) |
+| Ödeme modeli | On request (belirsiz) | **Postpaid fatura (teyitli)** |
+| Onboarding | Sales-led | Self-serve 1-click |
+
+**Karar:** Site gerçekten **sosyal/sweepstakes** (gerçek para yok) ise → **Groove**. Gerçek-para
+işi ise → **Hub88**. İkisinde de sales-led + due diligence var, ikisinde de yeni client gerekir.
+
+### Groove'a sorulacak sorular (`sales@groovetech.com`)
+
+1. *"Do you invoice postpaid on revenue share, or is a prepaid credit balance required to
+   enable game launch?"*
+2. *"Our site is a social/sweepstakes model in Turkish (TRY) — which catalogue applies, is TRY
+   supported, and do we need a gaming licence?"*
+3. *"Setup fee, monthly minimum and revenue-share percentage for our volume?"*
+
 ## Öneri
 
 1. **Hub88** (birincil): postpaid fatura, self-serve onboarding, canlı dahil 26k+ oyun, MGA lisanslı,
