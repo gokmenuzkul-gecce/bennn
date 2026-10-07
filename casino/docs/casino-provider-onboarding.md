@@ -51,17 +51,27 @@ Bu markalar çalışıyor (slot). Canlı masa için ek içerik gerekiyor.
 - [ ] **Callback URL'imizi kayıt** → yukarıdaki agregator URL
 - [ ] **Canlı casino (live dealer) içeriği aktivasyonu** — şu an hesapta canlı masa yok
 
-### B. OroPlay (canlı casino + slot + mini oyun) — BASE URL BEKLİYOR
-Yapılandırılan host `api.oroplay.com` **DNS'te yok** (çözülmüyor). Sağlayıcının
-gerçek sitesi `https://oroplay.io` (B2B iGaming API altyapısı); public API
-subdomain'i yok, base URL operatör onboarding'inde veriliyor.
+### B. OroPlay (canlı casino + slot + mini oyun) — SADECE BASE URL BEKLİYOR
 
-- [ ] **Doğru API base URL** (staging + prod) — sağlayıcıdan isteyin
-- [ ] `clientId` (mevcut: `stg-TRY-Geccebet53`)
-- [ ] `clientSecret` (mevcut)
+Yapılandırılan host `api.oroplay.com` **DNS'te yok**: yetkili NS Cloudflare `NXDOMAIN`
+(Status 3) döner — yani host hiç tanımlı değil, geçici bir kesinti değil. `oroplay.io` /
+`oroplay.com` ana siteleri ve bilinen tüm alt alan varyantları denendi, hiçbirinde public
+API yok; base URL operatör onboarding'inde veriliyor (site yalnızca Telegram iletişimi
+sunuyor: <https://t.me/oroplaycs1>).
+
+**Kimlikler doğrulandı ve doğru çalışıyor:**
+- `clientId` = `stg-TRY-Geccebet53` (staging), `clientSecret` mevcut → `isConfigured() === true`
+- Callback URL'imiz kayıtlı ve **çalışıyor**: `POST /webhooks/oroplay/api/balance` Basic auth
+  ile HTTP 200 + `{"success":false,"message":"User does not exist","errorCode":2}` döner
+  (doğru format; "User does not exist" beklenen çünkü test kullanıcısı yok).
+
+- [ ] **Doğru API base URL** (staging + prod) — TEK EKSİK. Sağlayıcıdan isteyin.
+      İsteninceye kadar: `OROPLAY_BASE_URL=https://api.oroplay.com/api/v2` → NXDOMAIN.
+- [x] `clientId` = `stg-TRY-Geccebet53`
+- [x] `clientSecret` = (`.env`'de)
+- [x] Callback URL'imiz → `https://<SITE_ALAN_ADI>/webhooks/oroplay/api` (route'lar hazır)
+- [x] Basic auth başlığı (clientId:clientSecret) — doğrulandı
 - [ ] Agent kaydı + canlı casino vendor/game listesi
-- [ ] Callback URL'imizi kayıt → `https://<SITE_ALAN_ADI>/webhooks/oroplay/api`
-- [ ] Basic auth başlığı (clientId:clientSecret) teyidi
 
 ### C. Gregmorn Hub (çok sağlayıcılı slot + canlı masa) — KİMLİK BEKLİYOR
 Doküman: <https://docs.gregmorn.org>. Entegrasyon kod tarafında hazır; operatör
