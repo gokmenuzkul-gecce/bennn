@@ -108,13 +108,19 @@ $checks = [
         && str_contains($view, 'CANLI')
         && str_contains($view, "'bg-rose-500/25 text-rose-200 border border-rose-400/40'"),
 
-    'lobby renders only the first screenful and defers the rest' => str_contains($view, '$initialCards = 120')
-        && str_contains($view, 'id="games-rest-data"')
-        && str_contains($view, '$restPayload = $restGames->map($cardMeta)')
+    'lobby splits slots and live tables into their own blocks' => str_contains($view, 'id="slots-grid"')
+        && str_contains($view, 'id="live-grid"')
+        && str_contains($view, 'id="slots-rest-data"')
+        && str_contains($view, 'id="live-rest-data"'),
+
+    'lobby renders only the first screenful and defers the rest' => str_contains($view, '$initialCards = 60')
+        && str_contains($view, '$slotPayload = $slotRest->map($cardMeta)')
+        && str_contains($view, '$livePayload = $liveRest->map($cardMeta)')
         && str_contains($view, 'appendChunk'),
 
-    'deferred cards hydrate in chunks as the player scrolls' => str_contains($view, 'var CHUNK = 120')
-        && str_contains($view, "getElementById('games-load-more')")
+    'deferred cards hydrate in chunks as the player scrolls' => str_contains($view, 'var CHUNK = 60')
+        && str_contains($view, "buildBlock('slots', 'OYUN')")
+        && str_contains($view, "buildBlock('live', 'MASA')")
         && str_contains($view, 'rootMargin: \'600px 0px\''),
 
     'phone top bar exposes a wallet / account cluster' => str_contains($header, 'site-nav-mobile')

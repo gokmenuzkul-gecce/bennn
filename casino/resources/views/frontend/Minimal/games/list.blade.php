@@ -272,10 +272,57 @@
 
 <!-- Games Grid Section -->
 <section class="space-y-5 reveal">
+    @php
+        // The catalogue ships thousands of titles. Rendering every card up front
+        // costs a multi-second DOM on a phone, so each block server-renders only
+        // its first screenful; the rest travels as a compact JSON payload and is
+        // appended in chunks as the player scrolls (see the hydration script).
+        $initialCards = 60;
+        $cardMeta = function ($game) use ($cedarBrand) {
+            $isCedarProvider = str_starts_with($game->name, 'Cedar') || $game->name === 'RoyalSteps';
+            $isAggregator = !empty($game->provider_key);
+            $isLive = $isAggregator && $game->isLive();
+            if ($isCedarProvider) {
+                $badge = strtoupper($cedarBrand) . ' ORİJİNAL';
+                $badgeClass = 'bg-amber-400/20 text-amber-300 border border-amber-400/30';
+            } elseif ($isLive) {
+                $badge = 'CANLI';
+                $badgeClass = 'bg-rose-500/25 text-rose-200 border border-rose-400/40';
+            } elseif ($isAggregator) {
+                $badge = \Illuminate\Support\Str::upper($game->typeLabel());
+                $badgeClass = 'bg-black/50 text-emerald-300 border border-emerald-400/25';
+            } else {
+                $badge = strtoupper(substr($game->name, -2) === 'AM' ? 'AMATIC' : (substr($game->name, -3) === 'PGD' ? 'PGD' : 'SLOT'));
+                $badgeClass = 'bg-black/50 text-emerald-300 border border-emerald-400/25';
+            }
+            return [
+                'name' => $game->name,
+                'title' => $game->title,
+                'icon' => game_cover($game),
+                'badge' => $badge,
+                'badgeClass' => $badgeClass,
+                'provider' => $isAggregator,
+            ];
+        };
+        $allGames = $games instanceof \Illuminate\Support\Collection ? $games : collect($games);
+        $isLiveGame = fn($g) => !empty($g->provider_key) && $g->isLive();
+        $liveGames = $allGames->filter($isLiveGame)->values();
+        $slotGames = $allGames->reject($isLiveGame)->values();
+        $slotInitial = $slotGames->take($initialCards);
+        $slotRest = $slotGames->slice($initialCards)->values();
+        $liveInitial = $liveGames->take($initialCards);
+        $liveRest = $liveGames->slice($initialCards)->values();
+        $slotPayload = $slotRest->map($cardMeta)->values();
+        $livePayload = $liveRest->map($cardMeta)->values();
+    @endphp
+
     <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2 flex-wrap">
             <span id="games-count-label" class="font-mono-jet text-xs text-primary font-bold bg-primary/10 border border-primary/20 px-3 py-1 rounded-lg">
-                {{ count($games) }} OYUN ÇEVRİMİÇİ
+                {{ count($slotGames) }} SLOT
+            </span>
+            <span id="live-count-total" class="font-mono-jet text-xs text-rose-300 font-bold bg-rose-500/10 border border-rose-400/25 px-3 py-1 rounded-lg">
+                {{ count($liveGames) }} CANLI MASA
             </span>
         </div>
     </div>
@@ -313,95 +360,65 @@
         @endif
     </div>
 
-    <!-- Games Grid: 3-col mobile, 4-col tablet, 6-col laptop, 7-col wide -->
-    @php
-        // The catalogue ships thousands of titles. Rendering every card up front
-        // costs a multi-second DOM on a phone, so only the first screenful is
-        // server-rendered; the rest travels as a compact JSON payload and is
-        // appended in chunks as the player scrolls (see the hydration script).
-        $initialCards = 120;
-        $initialGames = $games instanceof \Illuminate\Support\Collection ? $games->take($initialCards) : collect($games)->take($initialCards);
-        $restGames = $games instanceof \Illuminate\Support\Collection ? $games->slice($initialCards) : collect($games)->slice($initialCards);
-        $cardMeta = function ($game) use ($cedarBrand) {
-            $isCedarProvider = str_starts_with($game->name, 'Cedar') || $game->name === 'RoyalSteps';
-            $isAggregator = !empty($game->provider_key);
-            $isLive = $isAggregator && $game->isLive();
-            if ($isCedarProvider) {
-                $badge = strtoupper($cedarBrand) . ' ORİJİNAL';
-                $badgeClass = 'bg-amber-400/20 text-amber-300 border border-amber-400/30';
-            } elseif ($isLive) {
-                $badge = 'CANLI';
-                $badgeClass = 'bg-rose-500/25 text-rose-200 border border-rose-400/40';
-            } elseif ($isAggregator) {
-                $badge = \Illuminate\Support\Str::upper($game->typeLabel());
-                $badgeClass = 'bg-black/50 text-emerald-300 border border-emerald-400/25';
-            } else {
-                $badge = strtoupper(substr($game->name, -2) === 'AM' ? 'AMATIC' : (substr($game->name, -3) === 'PGD' ? 'PGD' : 'SLOT'));
-                $badgeClass = 'bg-black/50 text-emerald-300 border border-emerald-400/25';
-            }
-            return [
-                'name' => $game->name,
-                'title' => $game->title,
-                'icon' => game_cover($game),
-                'badge' => $badge,
-                'badgeClass' => $badgeClass,
-                'provider' => $isAggregator,
-            ];
-        };
-        $restPayload = $restGames->map($cardMeta)->values();
-    @endphp
-    <div id="games-grid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-2.5 sm:gap-3">
-        @forelse($initialGames as $game)
-            @php($meta = $cardMeta($game))
-            <div class="game-card group aspect-[3/4] flex flex-col justify-end" data-title="{{ \Illuminate\Support\Str::lower($game->title . ' ' . $game->name) }}">
-                <span class="card-shine"></span>
-                <img src="{{ $meta['icon'] }}"
-                     onerror="this.src='/frontend/Default/ico/DayofDead.jpg'"
-                     alt="{{ $game->title }}"
-                     class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                     loading="lazy" decoding="async">
-
-                <span class="absolute top-1.5 left-1.5 z-10 text-[8px] font-mono-jet font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md backdrop-blur-md {{ $meta['badgeClass'] }}">
-                    {{ $meta['badge'] }}
-                </span>
-
-                <div class="absolute inset-0 bg-gradient-to-t from-black via-black/45 to-transparent opacity-90 group-hover:opacity-95 transition-opacity"></div>
-
-                <div class="relative z-10 p-2 space-y-1.5">
-                    <h4 class="text-[10px] sm:text-[11px] font-bold text-white leading-tight truncate" title="{{ $game->title }}">
-                        {{ $game->title }}
-                    </h4>
-                    @if(!empty($game->provider_key))
-                        <button type="button"
-                                class="btn-glow block w-full text-center bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white py-1.5 rounded-lg font-bold text-[10px] uppercase tracking-wider shadow-md shadow-emerald-500/30 play-game"
-                                data-game="{{ $game->name }}"
-                                data-title="{{ $game->title }}">
-                            Oyna
-                        </button>
-                    @else
-                        <a href="{{ route('frontend.game.go', $game->name) }}"
-                           class="btn-glow block w-full text-center bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white py-1.5 rounded-lg font-bold text-[10px] uppercase tracking-wider no-underline shadow-md shadow-emerald-500/30">
-                            Oyna
-                        </a>
-                    @endif
+    <!-- ===== SLOT OYUNLARI ===== -->
+    <div class="space-y-3">
+        <div class="flex items-center gap-3">
+            <h2 class="text-lg font-extrabold text-white flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-xl">casino</span>
+                Slot Oyunları
+            </h2>
+            <span id="slots-count-label" data-unit="OYUN" class="font-mono-jet text-xs text-primary font-bold bg-primary/10 border border-primary/20 px-3 py-1 rounded-lg">
+                {{ count($slotGames) }} OYUN
+            </span>
+        </div>
+        <div id="slots-grid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-2.5 sm:gap-3">
+            @forelse($slotInitial as $game)
+                @include('frontend.Minimal.games._card', ['meta' => $cardMeta($game)])
+            @empty
+                <div class="col-span-full text-center py-16 glass-card rounded-3xl">
+                    <span class="material-symbols-outlined text-4xl text-on-surface-subtle mb-2">sentiment_dissatisfied</span>
+                    <p class="text-on-surface-muted text-sm font-medium">Bu kategoride slot oyunu bulunamadı.</p>
+                    <a href="{{ route('frontend.game.list') }}" class="btn-glow mt-3 inline-block bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-xs font-bold px-5 py-2.5 rounded-xl no-underline uppercase">
+                        Tüm Oyunları Gör
+                    </a>
                 </div>
+            @endforelse
+        </div>
+        @if($slotPayload->isNotEmpty())
+            <script type="application/json" id="slots-rest-data">@json($slotPayload, 15)</script>
+            <div id="slots-load-more" class="flex justify-center pt-2">
+                <button type="button" class="btn-glow bg-white/[0.06] hover:bg-white/[0.12] text-white border border-white/15 px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all">
+                    Daha Fazla Slot Yükle
+                </button>
             </div>
-        @empty
-            <div class="col-span-full text-center py-16 glass-card rounded-3xl">
-                <span class="material-symbols-outlined text-4xl text-on-surface-subtle mb-2">sentiment_dissatisfied</span>
-                <p class="text-on-surface-muted text-sm font-medium">Bu kategoride oyun bulunamadı.</p>
-                <a href="{{ route('frontend.game.list') }}" class="btn-glow mt-3 inline-block bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-xs font-bold px-5 py-2.5 rounded-xl no-underline uppercase">
-                    Tüm Oyunları Gör
-                </a>
-            </div>
-        @endforelse
+        @endif
     </div>
-    @if($restPayload->isNotEmpty())
-        <script type="application/json" id="games-rest-data">@json($restPayload, 15)</script>
-        <div id="games-load-more" class="flex justify-center pt-2">
-            <button type="button" class="btn-glow bg-white/[0.06] hover:bg-white/[0.12] text-white border border-white/15 px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all">
-                Daha Fazla Yükle
-            </button>
+
+    <!-- ===== CANLI MASALAR ===== -->
+    @if($liveGames->isNotEmpty())
+        <div class="space-y-3 pt-2">
+            <div class="flex items-center gap-3">
+                <h2 class="text-lg font-extrabold text-white flex items-center gap-2">
+                    <span class="material-symbols-outlined text-rose-400 text-xl">live_tv</span>
+                    Canlı Masalar
+                </h2>
+                <span id="live-count-label" data-unit="MASA" class="font-mono-jet text-xs text-rose-300 font-bold bg-rose-500/10 border border-rose-400/25 px-3 py-1 rounded-lg">
+                    {{ count($liveGames) }} MASA
+                </span>
+            </div>
+            <div id="live-grid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-2.5 sm:gap-3">
+                @foreach($liveInitial as $game)
+                    @include('frontend.Minimal.games._card', ['meta' => $cardMeta($game)])
+                @endforeach
+            </div>
+            @if($livePayload->isNotEmpty())
+                <script type="application/json" id="live-rest-data">@json($livePayload, 15)</script>
+                <div id="live-load-more" class="flex justify-center pt-2">
+                    <button type="button" class="btn-glow bg-white/[0.06] hover:bg-white/[0.12] text-white border border-white/15 px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all">
+                        Daha Fazla Masa Yükle
+                    </button>
+                </div>
+            @endif
         </div>
     @endif
 </section>
@@ -680,64 +697,72 @@
 })();
 </script>
 
-<!-- ===== PROGRESSIVE GRID HYDRATION ===== -->
+<!-- ===== PROGRESSIVE GRID HYDRATION (Slots + Live tables) ===== -->
 <script>
 (function () {
-    var dataEl = document.getElementById('games-rest-data');
-    var grid = document.getElementById('games-grid');
-    if (!dataEl || !grid) return;
-    var rest;
-    try { rest = JSON.parse(dataEl.textContent || '[]'); } catch (e) { return; }
-    if (!rest.length) return;
+    var CHUNK = 60;
 
-    var CHUNK = 120;
-    var cursor = 0;
-    var loadMore = document.getElementById('games-load-more');
-    var counter = document.getElementById('games-count-label');
+    // Each block ("slots", "live") has its own data payload, grid, count label
+    // and load-more button, and grows independently as the player scrolls.
+    function buildBlock(prefix, unit) {
+        var dataEl = document.getElementById(prefix + '-rest-data');
+        var grid = document.getElementById(prefix + '-grid');
+        if (!dataEl || !grid) return null;
+        var rest;
+        try { rest = JSON.parse(dataEl.textContent || '[]'); } catch (e) { return null; }
+        if (!rest.length) return null;
 
-    function cardHtml(g) {
-        var action = g.provider
-            ? '<button type="button" class="btn-glow block w-full text-center bg-gradient-to-r from-emerald-500 to-teal-500 text-white py-1.5 rounded-lg font-bold text-[10px] uppercase tracking-wider shadow-md shadow-emerald-500/30 play-game" data-game="' + g.name + '" data-title="' + g.title + '">Oyna</button>'
-            : '<a href="/game/' + encodeURIComponent(g.name) + '" class="btn-glow block w-full text-center bg-gradient-to-r from-emerald-500 to-teal-500 text-white py-1.5 rounded-lg font-bold text-[10px] uppercase tracking-wider no-underline shadow-md shadow-emerald-500/30">Oyna</a>';
-        return '<div class="game-card group aspect-[3/4] flex flex-col justify-end" data-title="' + (g.title + ' ' + g.name).toLowerCase() + '">' +
-            '<span class="card-shine"></span>' +
-            '<img src="' + g.icon + '" onerror="this.src=\'/frontend/Default/ico/DayofDead.jpg\'" alt="' + g.title + '" class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" loading="lazy" decoding="async">' +
-            '<span class="absolute top-1.5 left-1.5 z-10 text-[8px] font-mono-jet font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md backdrop-blur-md ' + g.badgeClass + '">' + g.badge + '</span>' +
-            '<div class="absolute inset-0 bg-gradient-to-t from-black via-black/45 to-transparent opacity-90 group-hover:opacity-95 transition-opacity"></div>' +
-            '<div class="relative z-10 p-2 space-y-1.5">' +
-            '<h4 class="text-[10px] sm:text-[11px] font-bold text-white leading-tight truncate" title="' + g.title + '">' + g.title + '</h4>' +
-            action + '</div></div>';
+        var cursor = 0;
+        var loadMore = document.getElementById(prefix + '-load-more');
+        var counter = document.getElementById(prefix + '-count-label');
+
+        function cardHtml(g) {
+            var action = g.provider
+                ? '<button type="button" class="btn-glow block w-full text-center bg-gradient-to-r from-emerald-500 to-teal-500 text-white py-1.5 rounded-lg font-bold text-[10px] uppercase tracking-wider shadow-md shadow-emerald-500/30 play-game" data-game="' + g.name + '" data-title="' + g.title + '">Oyna</button>'
+                : '<a href="/game/' + encodeURIComponent(g.name) + '" class="btn-glow block w-full text-center bg-gradient-to-r from-emerald-500 to-teal-500 text-white py-1.5 rounded-lg font-bold text-[10px] uppercase tracking-wider no-underline shadow-md shadow-emerald-500/30">Oyna</a>';
+            return '<div class="game-card group aspect-[3/4] flex flex-col justify-end" data-title="' + (g.title + ' ' + g.name).toLowerCase() + '">' +
+                '<span class="card-shine"></span>' +
+                '<img src="' + g.icon + '" onerror="this.src=\'/frontend/Default/ico/DayofDead.jpg\'" alt="' + g.title + '" class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" loading="lazy" decoding="async">' +
+                '<span class="absolute top-1.5 left-1.5 z-10 text-[8px] font-mono-jet font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md backdrop-blur-md ' + g.badgeClass + '">' + g.badge + '</span>' +
+                '<div class="absolute inset-0 bg-gradient-to-t from-black via-black/45 to-transparent opacity-90 group-hover:opacity-95 transition-opacity"></div>' +
+                '<div class="relative z-10 p-2 space-y-1.5">' +
+                '<h4 class="text-[10px] sm:text-[11px] font-bold text-white leading-tight truncate" title="' + g.title + '">' + g.title + '</h4>' +
+                action + '</div></div>';
+        }
+
+        function appendChunk() {
+            var slice = rest.slice(cursor, cursor + CHUNK);
+            if (!slice.length) return;
+            var frag = document.createElement('div');
+            frag.innerHTML = slice.map(cardHtml).join('');
+            while (frag.firstChild) grid.appendChild(frag.firstChild);
+            cursor += slice.length;
+            if (counter) counter.textContent = grid.querySelectorAll('.game-card:not(.search-extra)').length + ' ' + unit;
+            if (cursor >= rest.length && loadMore) loadMore.remove();
+        }
+
+        // The label counts what is actually on screen, not the whole catalogue.
+        if (counter) counter.textContent = grid.querySelectorAll('.game-card:not(.search-extra)').length + ' ' + unit;
+
+        if (loadMore) loadMore.querySelector('button').addEventListener('click', appendChunk);
+
+        // Auto-reveal the next chunk a screen before the footer, so scrolling
+        // keeps going without the player having to hunt for the button.
+        if ('IntersectionObserver' in window && loadMore) {
+            var sentinel = new IntersectionObserver(function (entries) {
+                if (entries[0].isIntersecting) {
+                    appendChunk();
+                    if (cursor >= rest.length) sentinel.disconnect();
+                }
+            }, { rootMargin: '600px 0px' });
+            sentinel.observe(loadMore);
+        }
+
+        return grid;
     }
 
-    function appendChunk() {
-        var slice = rest.slice(cursor, cursor + CHUNK);
-        if (!slice.length) return;
-        var frag = document.createElement('div');
-        frag.innerHTML = slice.map(cardHtml).join('');
-        while (frag.firstChild) grid.appendChild(frag.firstChild);
-        cursor += slice.length;
-        if (counter) counter.textContent = grid.querySelectorAll('.game-card').length + ' OYUN ÇEVRİMİÇİ';
-        if (cursor >= rest.length && loadMore) loadMore.remove();
-    }
-
-    // The label counts what is actually on screen, not the whole catalogue.
-    if (counter) counter.textContent = grid.querySelectorAll('.game-card').length + ' OYUN ÇEVRİMİÇİ';
-
-    if (loadMore) {
-        loadMore.querySelector('button').addEventListener('click', appendChunk);
-    }
-
-    // Auto-reveal the next chunk a screen before the footer, so scrolling keeps
-    // going without the player having to hunt for the button.
-    if ('IntersectionObserver' in window && loadMore) {
-        var sentinel = new IntersectionObserver(function (entries) {
-            if (entries[0].isIntersecting) {
-                appendChunk();
-                if (cursor >= rest.length) sentinel.disconnect();
-            }
-        }, { rootMargin: '600px 0px' });
-        sentinel.observe(loadMore);
-    }
+    buildBlock('slots', 'OYUN');
+    buildBlock('live', 'MASA');
 })();
 </script>
 
@@ -770,40 +795,56 @@
 (function () {
     var input = document.getElementById('home-game-search');
     if (!input) return;
-    var grid = document.getElementById('games-grid');
+    var blocks = [
+        { grid: document.getElementById('slots-grid'), counter: document.getElementById('slots-count-label'), unit: 'OYUN' },
+        { grid: document.getElementById('live-grid'), counter: document.getElementById('live-count-label'), unit: 'MASA' }
+    ].filter(function (b) { return b.grid; });
     var clearBtn = document.getElementById('home-game-search-clear');
     var spinner = document.getElementById('home-game-search-spinner');
-    var counter = document.getElementById('games-count-label');
     var timer = null;
 
     function allCards() {
-        return grid ? Array.prototype.slice.call(grid.querySelectorAll('.game-card')) : [];
+        var out = [];
+        blocks.forEach(function (b) {
+            out = out.concat(Array.prototype.slice.call(b.grid.querySelectorAll('.game-card')));
+        });
+        return out;
+    }
+
+    function updateCounters() {
+        blocks.forEach(function (b) {
+            if (!b.counter) return;
+            var shown = b.grid.querySelectorAll('.game-card:not(.hidden)').length;
+            b.counter.textContent = shown + ' ' + b.unit;
+        });
     }
 
     function applyFilter(query) {
         var q = query.trim().toLowerCase();
-        var shown = 0;
-        allCards().forEach(function (card) {
-            var match = q === '' || (card.dataset.title || '').indexOf(q) !== -1;
-            card.classList.toggle('hidden', !match);
-            if (match) shown++;
+        blocks.forEach(function (b) {
+            Array.prototype.forEach.call(b.grid.querySelectorAll('.game-card'), function (card) {
+                var match = q === '' || (card.dataset.title || '').indexOf(q) !== -1;
+                card.classList.toggle('hidden', !match);
+            });
         });
-        if (counter) counter.textContent = shown + ' OYUN ÇEVRİMİÇİ';
+        updateCounters();
         if (clearBtn) clearBtn.classList.toggle('hidden', q === '');
     }
 
     function remoteSearch(query) {
         // Titles outside the current category still exist in the catalogue, so
-        // fall back to the server search and append the extra matches.
+        // fall back to the server search and append the extra matches to the
+        // slot block (the generic catalogue view).
         if (spinner) spinner.classList.remove('hidden');
+        var target = blocks[0];
         fetch('{{ route('frontend.search.json') }}?q=' + encodeURIComponent(query))
             .then(function (r) { return r.json(); })
             .then(function (data) {
                 if (spinner) spinner.classList.add('hidden');
-                if (!data || !data.success || !grid) return;
-                grid.querySelectorAll('.game-card.search-extra').forEach(function (n) { n.remove(); });
+                if (!data || !data.success || !target) return;
+                target.grid.querySelectorAll('.game-card.search-extra').forEach(function (n) { n.remove(); });
                 (data.data || []).forEach(function (g) {
-                    if (grid.querySelector('[data-title="' + g.title.toLowerCase() + '"]')) return;
+                    if (target.grid.querySelector('[data-title="' + g.title.toLowerCase() + '"]')) return;
                     var card = document.createElement('div');
                     card.className = 'game-card group aspect-[3/4] flex flex-col justify-end search-extra';
                     card.dataset.title = g.title.toLowerCase();
@@ -818,8 +859,9 @@
                         '<h4 class="text-[10px] sm:text-[11px] font-bold text-white leading-tight truncate">' + g.title + '</h4>' +
                         playBtn +
                         '</div>';
-                    grid.appendChild(card);
+                    target.grid.appendChild(card);
                 });
+                updateCounters();
             })
             .catch(function () { if (spinner) spinner.classList.add('hidden'); });
     }
@@ -836,8 +878,10 @@
         clearBtn.addEventListener('click', function () {
             input.value = '';
             applyFilter('');
-            if (grid) grid.querySelectorAll('.game-card.search-extra').forEach(function (n) { n.remove(); });
-            if (counter) counter.textContent = allCards().length + ' OYUN ÇEVRİMİÇİ';
+            blocks.forEach(function (b) {
+                b.grid.querySelectorAll('.game-card.search-extra').forEach(function (n) { n.remove(); });
+            });
+            updateCounters();
             input.focus();
         });
     }

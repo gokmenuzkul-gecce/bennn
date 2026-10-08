@@ -79,7 +79,8 @@ $checks = [
     'wins ticker, provider marquee and games grid survive' => str_contains($blade, 'class="wins-bar"')
         && str_contains($blade, 'marquee-track')
         && str_contains($blade, 'provider-tile')
-        && str_contains($blade, 'id="games-grid"')
+        && str_contains($blade, 'id="slots-grid"')
+        && str_contains($blade, 'id="live-grid"')
         && str_contains($blade, 'id="home-game-search"'),
 
     'lobby section headers stay removed' => !str_contains($blade, 'Oyun Arenası')
