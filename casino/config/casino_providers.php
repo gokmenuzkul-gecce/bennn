@@ -170,6 +170,47 @@ return [
         'settings_key' => 'casino_provider_softaggregator',
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | 01.tech Aggregator (A8R) — Twirp v7, HMAC-SHA256 body signing
+    |--------------------------------------------------------------------------
+    |
+    | 01.tech Aggregator (docs.aggregator.01.tech) fronts many game providers
+    | behind one credential set and uses Twirp Wire Protocol v7: every call is
+    | HTTP POST to "<base>/v2/<Service>/<Method>" with an application/json body
+    | signed by hex HMAC-SHA256 over the exact raw body, keyed by AUTH_TOKEN and
+    | sent in the "X-REQUEST-SIGN" header. The reply is JSON, and errors are
+    | Twirp errors carrying meta.api_code.
+    |
+    | The wallet is seamless: the Aggregator posts Player/Balance, Round/BetWin,
+    | Round/Rollback and Round/Finish to the callback URL, each signed the same
+    | way. Amounts are decimal strings (18 integer / 12 fractional digits), not
+    | cents, so they are processed with BCMath.
+    |
+    | casino_id is the tenant identifier ("gecce").
+    */
+    'aggregator01' => [
+        // Base URL up to but excluding "/v2"; the client appends the method path.
+        'base_url' => env('AGGREGATOR01_BASE_URL', ''),
+        // HMAC-SHA256 signing key issued by the Aggregator (AUTH_TOKEN).
+        'auth_token' => env('AGGREGATOR01_AUTH_TOKEN', ''),
+        // Tenant identifier assigned by the Aggregator.
+        'casino_id' => env('AGGREGATOR01_CASINO_ID', 'gecce'),
+        'callback_path' => env('AGGREGATOR01_CALLBACK_PATH', '/webhooks/aggregator01/callbacks'),
+        'currency' => env('AGGREGATOR01_CURRENCY', env('CASINO_WALLET_CURRENCY', 'TRY')),
+        // Default player country/jurisdiction/locale sent on launch.
+        'country' => env('AGGREGATOR01_COUNTRY', 'TR'),
+        'jurisdiction' => env('AGGREGATOR01_JURISDICTION', 'TR'),
+        'locale' => env('AGGREGATOR01_LOCALE', 'tr'),
+        // Redirect targets for the launcher (deposit usually equals return).
+        'return_url' => env('AGGREGATOR01_RETURN_URL', rtrim(env('APP_URL', ''), '/')),
+        'deposit_url' => env('AGGREGATOR01_DEPOSIT_URL', rtrim(env('APP_URL', ''), '/')),
+        // Fallbacks used when the local user row lacks an email / birth date.
+        'default_email' => env('AGGREGATOR01_DEFAULT_EMAIL', 'player@casino.local'),
+        'default_date_of_birth' => env('AGGREGATOR01_DEFAULT_DOB', '1990-01-01T00:00:00Z'),
+        'settings_key' => 'casino_provider_aggregator01',
+    ],
+
     'providers' => [
 
         'pragmatic' => [
@@ -250,6 +291,14 @@ return [
         'softaggregator' => [
             'label' => 'SoftAggregator',
             'settings_key' => 'casino_provider_softaggregator',
+            'embeddable' => true,
+        ],
+
+        // 01.tech Aggregator (A8R) is an aggregator; Aggregator01Provider carries
+        // its Twirp/HMAC protocol, this entry only supplies the label + toggles.
+        'aggregator01' => [
+            'label' => '01.tech Aggregator',
+            'settings_key' => 'casino_provider_aggregator01',
             'embeddable' => true,
         ],
 

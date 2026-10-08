@@ -3,8 +3,10 @@
 namespace VanguardLTE\Casino;
 
 use Illuminate\Support\Facades\DB;
+use VanguardLTE\Casino\Aggregator01\Aggregator01Client;
 use VanguardLTE\Casino\Gregmorn\GregmornClient;
 use VanguardLTE\Casino\OroPlay\OroPlayClient;
+use VanguardLTE\Casino\Providers\Aggregator01Provider;
 use VanguardLTE\Casino\Providers\CasinoProviderRegistry;
 use VanguardLTE\Casino\Providers\GregmornProvider;
 use VanguardLTE\Casino\Providers\OroPlayProvider;
@@ -61,6 +63,10 @@ class CasinoCatalogSyncService
 
         if ($providerKey === SoftAggregatorProvider::KEY) {
             return $this->fetchSoftAggregator();
+        }
+
+        if ($providerKey === Aggregator01Provider::KEY) {
+            return $this->fetchAggregator01();
         }
 
         $provider = $this->registry->make($providerKey);
@@ -298,6 +304,40 @@ class CasinoCatalogSyncService
                 'icon' => (string) ($row['image_square'] ?? $row['image'] ?? $row['image_portrait'] ?? ''),
                 'vendor' => (string) ($row['category'] ?? $row['subcategory'] ?? ''),
                 'type' => $this->normalizeType($row['game_type'] ?? $row['type'] ?? ''),
+            ];
+        }
+
+        return $games;
+    }
+
+    /**
+     * 01.tech Aggregator (A8R) catalogue.
+     *
+     * The client already flattens the nested providers/games reply and maps each
+     * game onto Game::GAME_TYPES (live tables flagged live=true become "live"),
+     * so the rows drop straight into the shared sync pipeline.
+     *
+     * @return array<int, array{gameid: string, symbol: string, name: string, icon: string, vendor: string}>
+     */
+    private function fetchAggregator01(): array
+    {
+        $client = new Aggregator01Client();
+
+        $games = [];
+        foreach ($client->games() as $row) {
+            $id = (string) ($row['gameid'] ?? '');
+            $title = trim((string) ($row['name'] ?? ''));
+            if ($id === '' || $title === '') {
+                continue;
+            }
+
+            $games[] = [
+                'gameid' => $id,
+                'symbol' => (string) ($row['symbol'] ?? $id),
+                'name' => $title,
+                'icon' => (string) ($row['icon'] ?? ''),
+                'vendor' => (string) ($row['vendor'] ?? ''),
+                'type' => (string) ($row['type'] ?? 'slots'),
             ];
         }
 

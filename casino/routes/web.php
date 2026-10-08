@@ -341,6 +341,33 @@ foreach (['get', 'post'] as $method) {
     ])->name('webhooks.softaggregator.callbacks' . ($method === 'get' ? '' : '.post'));
 }
 
+// 01.tech Aggregator (A8R) seamless-wallet callbacks. The Aggregator POSTs JSON
+// signed with X-REQUEST-SIGN (hex HMAC-SHA256 over the raw body, key AUTH_TOKEN).
+// Its own method paths are mirrored under the callback base, plus a single
+// flattened URL that reads the operation from the body. Registered as
+// <APP_URL>/webhooks/aggregator01/callbacks.
+Route::prefix('webhooks/aggregator01')->group(function () {
+    Route::post('callbacks', [
+        \VanguardLTE\Http\Controllers\Web\Webhooks\Aggregator01WebhookController::class, 'handle',
+    ])->name('webhooks.aggregator01.callbacks');
+
+    Route::post('callbacks/Player/Balance', [
+        \VanguardLTE\Http\Controllers\Web\Webhooks\Aggregator01WebhookController::class, 'balance',
+    ])->name('webhooks.aggregator01.balance');
+
+    Route::post('callbacks/Round/BetWin', [
+        \VanguardLTE\Http\Controllers\Web\Webhooks\Aggregator01WebhookController::class, 'betWin',
+    ])->name('webhooks.aggregator01.betwin');
+
+    Route::post('callbacks/Round/Rollback', [
+        \VanguardLTE\Http\Controllers\Web\Webhooks\Aggregator01WebhookController::class, 'rollback',
+    ])->name('webhooks.aggregator01.rollback');
+
+    Route::post('callbacks/Round/Finish', [
+        \VanguardLTE\Http\Controllers\Web\Webhooks\Aggregator01WebhookController::class, 'finish',
+    ])->name('webhooks.aggregator01.finish');
+});
+
 
 /**
  *

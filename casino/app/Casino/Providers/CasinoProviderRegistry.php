@@ -27,6 +27,7 @@ class CasinoProviderRegistry
             SmplCoreProvider::KEY => static fn (): CasinoProvider => new SmplCoreProvider(),
             WaijaProvider::KEY => static fn (): CasinoProvider => new WaijaProvider(),
             SoftAggregatorProvider::KEY => static fn (): CasinoProvider => new SoftAggregatorProvider(),
+            Aggregator01Provider::KEY => static fn (): CasinoProvider => new Aggregator01Provider(),
         ];
     }
 

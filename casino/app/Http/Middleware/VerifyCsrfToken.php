@@ -35,6 +35,10 @@ namespace VanguardLTE\Http\Middleware
             '/webhooks/oroplay/*',
             'webhooks/waija/*',
             '/webhooks/waija/*',
+            'webhooks/softaggregator/*',
+            '/webhooks/softaggregator/*',
+            'webhooks/aggregator01/*',
+            '/webhooks/aggregator01/*',
             'register'
         ];
     }
