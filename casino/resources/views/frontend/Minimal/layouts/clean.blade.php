@@ -607,6 +607,68 @@
             filter: drop-shadow(0 10px 22px rgba(0,0,0,0.6)) brightness(1.06);
         }
 
+        /* ============ LOBBY BLOCKS (Slot vs Live) ============ */
+        .lobby-block {
+            position: relative;
+            border-radius: 22px;
+            padding: 16px;
+            border: 1px solid rgba(255,255,255,0.07);
+            background: rgba(255,255,255,0.02);
+        }
+        .lobby-block--slots {
+            background: linear-gradient(180deg, rgba(16,185,129,0.07), rgba(255,255,255,0.015));
+            border-color: rgba(16,185,129,0.18);
+        }
+        .lobby-block--live {
+            background: linear-gradient(180deg, rgba(244,63,94,0.07), rgba(255,255,255,0.015));
+            border-color: rgba(244,63,94,0.2);
+        }
+        .block-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 42px;
+            height: 42px;
+            border-radius: 13px;
+            flex-shrink: 0;
+        }
+        .block-icon .material-symbols-outlined { font-size: 24px; }
+        .block-icon--slots { background: rgba(16,185,129,0.14); border: 1px solid rgba(16,185,129,0.32); color: #34d399; }
+        .block-icon--live { background: rgba(244,63,94,0.14); border: 1px solid rgba(244,63,94,0.32); color: #fb7185; }
+
+        /* ============ PROMO BANNERS ============ */
+        .promo-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+        @media (min-width: 640px) {
+            .promo-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+        }
+        .promo-card {
+            position: relative;
+            display: block;
+            border-radius: 14px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.08);
+            aspect-ratio: 16 / 10;
+            background: #0b0e17;
+            transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.35s, border-color 0.35s;
+        }
+        .promo-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.5s ease;
+        }
+        .promo-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(16,185,129,0.4);
+            box-shadow: 0 22px 44px -20px rgba(0,0,0,0.8);
+        }
+        .promo-card:hover img { transform: scale(1.05); }
+
         .marquee-mask {
             -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
             mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
@@ -1509,6 +1571,35 @@
             });
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'Escape') closeMenu();
+            });
+        });
+
+        // Left hamburger drawer
+        document.addEventListener('DOMContentLoaded', function() {
+            var drawer = document.getElementById('site-drawer');
+            var overlay = document.getElementById('site-drawer-overlay');
+            var openBtn = document.getElementById('btn-open-site-drawer');
+            var closeBtn = document.getElementById('btn-close-site-drawer');
+            if (!drawer || !overlay || !openBtn) return;
+
+            function openDrawer() {
+                drawer.classList.add('is-open');
+                overlay.classList.add('is-open');
+                drawer.setAttribute('aria-hidden', 'false');
+                document.body.style.overflow = 'hidden';
+            }
+            function closeDrawer() {
+                drawer.classList.remove('is-open');
+                overlay.classList.remove('is-open');
+                drawer.setAttribute('aria-hidden', 'true');
+                document.body.style.overflow = '';
+            }
+
+            openBtn.addEventListener('click', openDrawer);
+            if (closeBtn) closeBtn.addEventListener('click', closeDrawer);
+            overlay.addEventListener('click', closeDrawer);
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') closeDrawer();
             });
         });
     </script>

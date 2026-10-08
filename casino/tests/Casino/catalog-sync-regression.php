@@ -113,15 +113,17 @@ $checks = [
         && str_contains($view, 'id="slots-rest-data"')
         && str_contains($view, 'id="live-rest-data"'),
 
-    'lobby renders only the first screenful and defers the rest' => str_contains($view, '$initialCards = 60')
+    'lobby renders only the first four rows and defers the rest' => str_contains($view, '$rowsPerPage = 4')
+        && str_contains($view, '$initialCards = $rowsPerPage * 7')
         && str_contains($view, '$slotPayload = $slotRest->map($cardMeta)')
         && str_contains($view, '$livePayload = $liveRest->map($cardMeta)')
         && str_contains($view, 'appendChunk'),
 
-    'deferred cards hydrate in chunks as the player scrolls' => str_contains($view, 'var CHUNK = 60')
+    'deferred cards hydrate four rows per click, never on scroll' => str_contains($view, 'var ROWS_PER_CLICK = 4')
         && str_contains($view, "buildBlock('slots', 'OYUN')")
         && str_contains($view, "buildBlock('live', 'MASA')")
-        && str_contains($view, 'rootMargin: \'600px 0px\''),
+        && str_contains($view, 'Daha Fazla Oyun Yükle')
+        && !str_contains($view, 'rootMargin: \'600px 0px\''),
 
     'phone top bar exposes a wallet / account cluster' => str_contains($header, 'site-nav-mobile')
         && str_contains($header, 'site-nav-wallet-amount')

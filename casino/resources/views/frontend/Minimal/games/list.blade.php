@@ -192,64 +192,6 @@
     </div>
 </div>
 
-<!-- ===== QUICK ACCESS ===== -->
-<section class="reveal">
-    <div class="quick-tiles">
-        <a href="{{ route('frontend.sports.index') }}" class="quick-tile" style="--qc:#06b6d4;">
-            <span class="quick-tile-icon"><span class="material-symbols-outlined">sports_soccer</span></span>
-            <span class="quick-tile-title">Spor Bahisleri</span>
-            <span class="quick-tile-sub">Canlı oranlar</span>
-        </a>
-        <a href="{{ route('frontend.lotto.index') }}" class="quick-tile" style="--qc:#f59e0b;">
-            <span class="quick-tile-icon"><span class="material-symbols-outlined">auto_awesome</span></span>
-            <span class="quick-tile-title">Jackpot Bölgesi</span>
-            <span class="quick-tile-sub">Saatlik çekiliş</span>
-        </a>
-        <a href="{{ route('frontend.predictions.index') }}" class="quick-tile" style="--qc:#a855f7;">
-            <span class="quick-tile-icon"><span class="material-symbols-outlined">query_stats</span></span>
-            <span class="quick-tile-title">Tahmin Piyasaları</span>
-            <span class="quick-tile-sub">Gelecek oyu</span>
-        </a>
-        <a href="{{ route('frontend.vip.index') }}" class="quick-tile" style="--qc:#eab308;">
-            <span class="quick-tile-icon"><span class="material-symbols-outlined">workspace_premium</span></span>
-            <span class="quick-tile-title">VIP Kulübü</span>
-            <span class="quick-tile-sub">6 kademe ayrıcalık</span>
-        </a>
-        <a href="{{ route('frontend.bonuses') }}" class="quick-tile" style="--qc:#10b981;">
-            <span class="quick-tile-icon"><span class="material-symbols-outlined">card_giftcard</span></span>
-            <span class="quick-tile-title">Bonuslar</span>
-            <span class="quick-tile-sub">Kampanyalar</span>
-        </a>
-        <a href="{{ route('frontend.affiliates.index') }}" class="quick-tile" style="--qc:#f43f5e;">
-            <span class="quick-tile-icon"><span class="material-symbols-outlined">groups</span></span>
-            <span class="quick-tile-title">Ortaklık</span>
-            <span class="quick-tile-sub">Gelir paylaşımı</span>
-        </a>
-    </div>
-</section>
-
-<!-- ===== LIVE STATS STRIP ===== -->
-<section class="reveal">
-    <div class="stat-strip">
-        <div class="stat-card" style="--sc:#10b981;">
-            <div class="stat-value">{{ number_format(count($games), 0, ',', '.') }}+</div>
-            <div class="stat-label">Oyun</div>
-        </div>
-        <div class="stat-card" style="--sc:#06b6d4;">
-            <div class="stat-value">{{ $providerList->count() }}+</div>
-            <div class="stat-label">Sağlayıcı</div>
-        </div>
-        <div class="stat-card" style="--sc:#f59e0b;">
-            <div class="stat-value">7/24</div>
-            <div class="stat-label">Canlı Destek</div>
-        </div>
-        <div class="stat-card" style="--sc:#a855f7;">
-            <div class="stat-value">Anında</div>
-            <div class="stat-label">{{ $coinLabel }} Ödeme</div>
-        </div>
-    </div>
-</section>
-
 <!-- ===== PROVIDERS / OYUN SAĞLAYICILARI ===== -->
 <section class="space-y-4 reveal">
     <div class="marquee-mask overflow-hidden">
@@ -270,14 +212,29 @@
     </div>
 </section>
 
+<!-- ===== PROMO BANNERS ===== -->
+<section class="reveal">
+    <div class="promo-grid">
+        @foreach([1, 2, 3, 4] as $n)
+            <a href="{{ route('frontend.bonuses') }}" class="promo-card" aria-label="Kampanya {{ $n }}">
+                <img src="/frontend/Default/promos/promo-{{ $n }}.webp"
+                     alt="Casino Gecce kampanya {{ $n }}"
+                     loading="lazy" decoding="async">
+            </a>
+        @endforeach
+    </div>
+</section>
+
 <!-- Games Grid Section -->
 <section class="space-y-5 reveal">
     @php
         // The catalogue ships thousands of titles. Rendering every card up front
         // costs a multi-second DOM on a phone, so each block server-renders only
-        // its first screenful; the rest travels as a compact JSON payload and is
-        // appended in chunks as the player scrolls (see the hydration script).
-        $initialCards = 60;
+        // its first four rows; the rest travels as a compact JSON payload and is
+        // appended four rows at a time from the "load more" button (see below).
+        // Four rows: the grid shows 7 columns on desktop, 3 on the smallest phones.
+        $rowsPerPage = 4;
+        $initialCards = $rowsPerPage * 7;
         $cardMeta = function ($game) use ($cedarBrand) {
             $isCedarProvider = str_starts_with($game->name, 'Cedar') || $game->name === 'RoyalSteps';
             $isAggregator = !empty($game->provider_key);
@@ -318,12 +275,16 @@
 
     <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div class="flex items-center gap-2 flex-wrap">
-            <span id="games-count-label" class="font-mono-jet text-xs text-primary font-bold bg-primary/10 border border-primary/20 px-3 py-1 rounded-lg">
-                {{ count($slotGames) }} SLOT
-            </span>
-            <span id="live-count-total" class="font-mono-jet text-xs text-rose-300 font-bold bg-rose-500/10 border border-rose-400/25 px-3 py-1 rounded-lg">
-                {{ count($liveGames) }} CANLI MASA
-            </span>
+            @if(count($slotGames))
+                <span id="games-count-label" class="font-mono-jet text-xs text-primary font-bold bg-primary/10 border border-primary/20 px-3 py-1 rounded-lg">
+                    {{ count($slotGames) }} SLOT
+                </span>
+            @endif
+            @if(count($liveGames))
+                <span id="live-count-total" class="font-mono-jet text-xs text-rose-300 font-bold bg-rose-500/10 border border-rose-400/25 px-3 py-1 rounded-lg">
+                    {{ count($liveGames) }} CANLI MASA
+                </span>
+            @endif
         </div>
     </div>
 
@@ -361,47 +322,47 @@
     </div>
 
     <!-- ===== SLOT OYUNLARI ===== -->
-    <div class="space-y-3">
-        <div class="flex items-center gap-3">
-            <h2 class="text-lg font-extrabold text-white flex items-center gap-2">
-                <span class="material-symbols-outlined text-primary text-xl">casino</span>
-                Slot Oyunları
-            </h2>
-            <span id="slots-count-label" data-unit="OYUN" class="font-mono-jet text-xs text-primary font-bold bg-primary/10 border border-primary/20 px-3 py-1 rounded-lg">
-                {{ count($slotGames) }} OYUN
-            </span>
-        </div>
-        <div id="slots-grid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-2.5 sm:gap-3">
-            @forelse($slotInitial as $game)
-                @include('frontend.Minimal.games._card', ['meta' => $cardMeta($game)])
-            @empty
-                <div class="col-span-full text-center py-16 glass-card rounded-3xl">
-                    <span class="material-symbols-outlined text-4xl text-on-surface-subtle mb-2">sentiment_dissatisfied</span>
-                    <p class="text-on-surface-muted text-sm font-medium">Bu kategoride slot oyunu bulunamadı.</p>
-                    <a href="{{ route('frontend.game.list') }}" class="btn-glow mt-3 inline-block bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-xs font-bold px-5 py-2.5 rounded-xl no-underline uppercase">
-                        Tüm Oyunları Gör
-                    </a>
+    @if(count($slotGames))
+        <div class="lobby-block lobby-block--slots space-y-4">
+            <div class="flex items-center justify-between gap-3 flex-wrap">
+                <div class="flex items-center gap-3">
+                    <span class="block-icon block-icon--slots"><span class="material-symbols-outlined">casino</span></span>
+                    <div>
+                        <h2 class="text-lg font-extrabold text-white leading-tight">Slot Oyunları</h2>
+                        <p class="text-[11px] text-on-surface-muted">Binlerce slot, anında oyna</p>
+                    </div>
                 </div>
-            @endforelse
-        </div>
-        @if($slotPayload->isNotEmpty())
-            <script type="application/json" id="slots-rest-data">@json($slotPayload, 15)</script>
-            <div id="slots-load-more" class="flex justify-center pt-2">
-                <button type="button" class="btn-glow bg-white/[0.06] hover:bg-white/[0.12] text-white border border-white/15 px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all">
-                    Daha Fazla Slot Yükle
-                </button>
+                <span id="slots-count-label" data-unit="OYUN" class="font-mono-jet text-xs text-primary font-bold bg-primary/10 border border-primary/20 px-3 py-1 rounded-lg">
+                    {{ count($slotGames) }} OYUN
+                </span>
             </div>
-        @endif
-    </div>
+            <div id="slots-grid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-2.5 sm:gap-3">
+                @foreach($slotInitial as $game)
+                    @include('frontend.Minimal.games._card', ['meta' => $cardMeta($game)])
+                @endforeach
+            </div>
+            @if($slotPayload->isNotEmpty())
+                <script type="application/json" id="slots-rest-data">@json($slotPayload, 15)</script>
+                <div id="slots-load-more" class="flex justify-center pt-2">
+                    <button type="button" class="btn-glow bg-white/[0.06] hover:bg-white/[0.12] text-white border border-white/15 px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all">
+                        Daha Fazla Oyun Yükle
+                    </button>
+                </div>
+            @endif
+        </div>
+    @endif
 
     <!-- ===== CANLI MASALAR ===== -->
-    @if($liveGames->isNotEmpty())
-        <div class="space-y-3 pt-2">
-            <div class="flex items-center gap-3">
-                <h2 class="text-lg font-extrabold text-white flex items-center gap-2">
-                    <span class="material-symbols-outlined text-rose-400 text-xl">live_tv</span>
-                    Canlı Masalar
-                </h2>
+    @if(count($liveGames))
+        <div class="lobby-block lobby-block--live space-y-4">
+            <div class="flex items-center justify-between gap-3 flex-wrap">
+                <div class="flex items-center gap-3">
+                    <span class="block-icon block-icon--live"><span class="material-symbols-outlined">live_tv</span></span>
+                    <div>
+                        <h2 class="text-lg font-extrabold text-white leading-tight">Canlı Masalar</h2>
+                        <p class="text-[11px] text-on-surface-muted">Gerçek krupiyelerle canlı casino</p>
+                    </div>
+                </div>
                 <span id="live-count-label" data-unit="MASA" class="font-mono-jet text-xs text-rose-300 font-bold bg-rose-500/10 border border-rose-400/25 px-3 py-1 rounded-lg">
                     {{ count($liveGames) }} MASA
                 </span>
@@ -415,12 +376,66 @@
                 <script type="application/json" id="live-rest-data">@json($livePayload, 15)</script>
                 <div id="live-load-more" class="flex justify-center pt-2">
                     <button type="button" class="btn-glow bg-white/[0.06] hover:bg-white/[0.12] text-white border border-white/15 px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all">
-                        Daha Fazla Masa Yükle
+                        Daha Fazla Oyun Yükle
                     </button>
                 </div>
             @endif
         </div>
     @endif
+
+    <!-- ===== QUICK ACCESS ===== -->
+    <div class="quick-tiles">
+        <a href="{{ route('frontend.sports.index') }}" class="quick-tile" style="--qc:#06b6d4;">
+            <span class="quick-tile-icon"><span class="material-symbols-outlined">sports_soccer</span></span>
+            <span class="quick-tile-title">Spor Bahisleri</span>
+            <span class="quick-tile-sub">Canlı oranlar</span>
+        </a>
+        <a href="{{ route('frontend.lotto.index') }}" class="quick-tile" style="--qc:#f59e0b;">
+            <span class="quick-tile-icon"><span class="material-symbols-outlined">auto_awesome</span></span>
+            <span class="quick-tile-title">Jackpot Bölgesi</span>
+            <span class="quick-tile-sub">Saatlik çekiliş</span>
+        </a>
+        <a href="{{ route('frontend.predictions.index') }}" class="quick-tile" style="--qc:#a855f7;">
+            <span class="quick-tile-icon"><span class="material-symbols-outlined">query_stats</span></span>
+            <span class="quick-tile-title">Tahmin Piyasaları</span>
+            <span class="quick-tile-sub">Gelecek oyu</span>
+        </a>
+        <a href="{{ route('frontend.vip.index') }}" class="quick-tile" style="--qc:#eab308;">
+            <span class="quick-tile-icon"><span class="material-symbols-outlined">workspace_premium</span></span>
+            <span class="quick-tile-title">VIP Kulübü</span>
+            <span class="quick-tile-sub">6 kademe ayrıcalık</span>
+        </a>
+        <a href="{{ route('frontend.bonuses') }}" class="quick-tile" style="--qc:#10b981;">
+            <span class="quick-tile-icon"><span class="material-symbols-outlined">card_giftcard</span></span>
+            <span class="quick-tile-title">Bonuslar</span>
+            <span class="quick-tile-sub">Kampanyalar</span>
+        </a>
+        <a href="{{ route('frontend.affiliates.index') }}" class="quick-tile" style="--qc:#f43f5e;">
+            <span class="quick-tile-icon"><span class="material-symbols-outlined">groups</span></span>
+            <span class="quick-tile-title">Ortaklık</span>
+            <span class="quick-tile-sub">Gelir paylaşımı</span>
+        </a>
+    </div>
+
+    <!-- ===== LIVE STATS STRIP ===== -->
+    <div class="stat-strip">
+        <div class="stat-card" style="--sc:#10b981;">
+            <div class="stat-value">{{ number_format(count($games), 0, ',', '.') }}+</div>
+            <div class="stat-label">Oyun</div>
+        </div>
+        <div class="stat-card" style="--sc:#06b6d4;">
+            <div class="stat-value">{{ $providerList->count() }}+</div>
+            <div class="stat-label">Sağlayıcı</div>
+        </div>
+        <div class="stat-card" style="--sc:#f59e0b;">
+            <div class="stat-value">7/24</div>
+            <div class="stat-label">Canlı Destek</div>
+        </div>
+        <div class="stat-card" style="--sc:#a855f7;">
+            <div class="stat-value">Anında</div>
+            <div class="stat-label">{{ $coinLabel }} Ödeme</div>
+        </div>
+    </div>
 </section>
 
 <!-- ===== IN-SITE GAME PLAYER (keeps header + left menu visible) ===== -->
@@ -700,10 +715,10 @@
 <!-- ===== PROGRESSIVE GRID HYDRATION (Slots + Live tables) ===== -->
 <script>
 (function () {
-    var CHUNK = 60;
+    var ROWS_PER_CLICK = 4;
 
     // Each block ("slots", "live") has its own data payload, grid, count label
-    // and load-more button, and grows independently as the player scrolls.
+    // and load-more button, and grows independently when the player clicks.
     function buildBlock(prefix, unit) {
         var dataEl = document.getElementById(prefix + '-rest-data');
         var grid = document.getElementById(prefix + '-grid');
@@ -715,6 +730,14 @@
         var cursor = 0;
         var loadMore = document.getElementById(prefix + '-load-more');
         var counter = document.getElementById(prefix + '-count-label');
+
+        // The grid is responsive (7 cols desktop -> 3 on the smallest phones),
+        // so read the live column count to append exactly four rows per click.
+        function columnsPerRow() {
+            var tpl = window.getComputedStyle(grid).gridTemplateColumns || '';
+            var n = tpl.split(' ').filter(Boolean).length;
+            return n > 0 ? n : 7;
+        }
 
         function cardHtml(g) {
             var action = g.provider
@@ -731,32 +754,23 @@
         }
 
         function appendChunk() {
-            var slice = rest.slice(cursor, cursor + CHUNK);
+            var perClick = ROWS_PER_CLICK * columnsPerRow();
+            var slice = rest.slice(cursor, cursor + perClick);
             if (!slice.length) return;
             var frag = document.createElement('div');
             frag.innerHTML = slice.map(cardHtml).join('');
             while (frag.firstChild) grid.appendChild(frag.firstChild);
             cursor += slice.length;
             if (counter) counter.textContent = grid.querySelectorAll('.game-card:not(.search-extra)').length + ' ' + unit;
+            // Only hide the button once the whole catalogue has been rendered.
             if (cursor >= rest.length && loadMore) loadMore.remove();
         }
 
         // The label counts what is actually on screen, not the whole catalogue.
         if (counter) counter.textContent = grid.querySelectorAll('.game-card:not(.search-extra)').length + ' ' + unit;
 
+        // Strictly click-driven: no scroll/auto loading, four rows per press.
         if (loadMore) loadMore.querySelector('button').addEventListener('click', appendChunk);
-
-        // Auto-reveal the next chunk a screen before the footer, so scrolling
-        // keeps going without the player having to hunt for the button.
-        if ('IntersectionObserver' in window && loadMore) {
-            var sentinel = new IntersectionObserver(function (entries) {
-                if (entries[0].isIntersecting) {
-                    appendChunk();
-                    if (cursor >= rest.length) sentinel.disconnect();
-                }
-            }, { rootMargin: '600px 0px' });
-            sentinel.observe(loadMore);
-        }
 
         return grid;
     }
