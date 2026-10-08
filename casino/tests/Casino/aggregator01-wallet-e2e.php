@@ -51,7 +51,13 @@ if (!$user) {
 }
 
 $playerId = CasinoProviderPlayer::codeFor((int) $user->id, 'aggregator01', 'u');
-$startBalance = (float) $user->balance;
+// The deficit scenario below needs a known balance with enough headroom for
+// the win/bet sequence to overdraw; the live wallet is not guaranteed to hold
+// that, so pin a deterministic working balance and restore it afterwards.
+$originalBalance = (float) $user->balance;
+$startBalance = 10000.0;
+DB::table('users')->where('id', $user->id)->update(['balance' => $startBalance]);
+$user->refresh();
 $startTxnId = (int) DB::table('transactions')->max('id');
 $failures = 0;
 $checks = 0;
@@ -209,11 +215,11 @@ try {
     DB::table('casino_wallet_deficits')->where('provider_key', 'aggregator01')->delete();
     DB::table('casino_freespins')->where('provider_key', 'aggregator01')->delete();
     DB::table('transactions')->where('id', '>', $startTxnId)->delete();
-    DB::table('users')->where('id', $user->id)->update(['balance' => $startBalance]);
+    DB::table('users')->where('id', $user->id)->update(['balance' => $originalBalance]);
 }
 
 $final = (float) User::find($user->id)->balance;
-$check('balance restored after cleanup', abs($final - $startBalance) < 0.001, 'balance=' . $final);
+$check('balance restored after cleanup', abs($final - $originalBalance) < 0.001, 'balance=' . $final);
 
 echo PHP_EOL . $checks . ' kontrol, ' . $failures . ' hata' . PHP_EOL;
 exit($failures === 0 ? 0 : 1);
