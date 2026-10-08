@@ -39,6 +39,8 @@ namespace VanguardLTE\Http\Middleware
             '/webhooks/softaggregator/*',
             'webhooks/aggregator01/*',
             '/webhooks/aggregator01/*',
+            'v2/a8r_casino.*',
+            '/v2/a8r_casino.*',
             'register'
         ];
     }

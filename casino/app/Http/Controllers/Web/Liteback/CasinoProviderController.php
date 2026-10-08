@@ -4,8 +4,11 @@ namespace VanguardLTE\Http\Controllers\Web\Liteback;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use VanguardLTE\Casino\Aggregator01\Aggregator01FreespinsService;
+use VanguardLTE\Casino\Models\CasinoFreespin;
 use VanguardLTE\Casino\Providers\CasinoProviderRegistry;
 use VanguardLTE\Http\Controllers\Controller;
+use VanguardLTE\User;
 
 /**
  * Casino game provider management for Liteback.
@@ -127,5 +130,65 @@ class CasinoProviderController extends Controller
         }
 
         return view('liteback.casino.transactions', compact('transactions', 'providerLabels'));
+    }
+
+    /** Free spins console: list campaigns and issue/cancel new ones. */
+    public function freespins(Request $request)
+    {
+        $search = trim((string) $request->query('q', ''));
+
+        $campaigns = CasinoFreespin::query()
+            ->when($search !== '', function ($query) use ($search) {
+                $userId = User::where('username', $search)->value('id');
+                $query->where(function ($q) use ($search, $userId) {
+                    $q->where('issue_id', 'like', "%{$search}%")
+                        ->orWhere('game_id', 'like', "%{$search}%");
+                    if ($userId) {
+                        $q->orWhere('user_id', $userId);
+                    }
+                });
+            })
+            ->latest('id')
+            ->paginate(25);
+
+        $usernames = User::whereIn('id', $campaigns->pluck('user_id')->unique()->filter())
+            ->pluck('username', 'id');
+
+        $games = DB::table('games')
+            ->where('provider_key', Aggregator01FreespinsService::PROVIDER_KEY)
+            ->orderBy('name')
+            ->get(['name', 'provider_game_id', 'game_type']);
+
+        return view('liteback.casino.freespins', compact('campaigns', 'usernames', 'games', 'search'));
+    }
+
+    /** Issue a free spins campaign to a user. */
+    public function issueFreespins(Request $request, Aggregator01FreespinsService $service)
+    {
+        $data = $request->validate([
+            'username' => 'required|string|max:191',
+            'game_id' => 'required|string|max:64',
+            'quantity' => 'required|integer|min:1|max:1000',
+            'bet_amount' => 'required|string|max:32',
+            'valid_until' => 'required|date',
+        ]);
+
+        $user = User::where('username', $data['username'])->first();
+        if (!$user) {
+            return redirect()->back()->with('error', 'Kullanici bulunamadi.');
+        }
+
+        $result = $service->issue($user, $data);
+
+        return redirect()->back()->with($result['success'] ? 'success' : 'error', $result['message']);
+    }
+
+    /** Cancel an issued free spins campaign. */
+    public function cancelFreespins($id, Aggregator01FreespinsService $service)
+    {
+        $campaign = CasinoFreespin::findOrFail($id);
+        $result = $service->cancel($campaign);
+
+        return redirect()->back()->with($result['success'] ? 'success' : 'error', $result['message']);
     }
 }

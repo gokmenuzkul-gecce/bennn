@@ -290,6 +290,12 @@
                                     <p>Cüzdan İşlemleri</p>
                                 </a>
                             </li>
+                            <li class="nav-item">
+                                <a href="{{ route('liteback.casino.freespins') }}" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Freespin Yönetimi</p>
+                                </a>
+                            </li>
                         </ul>
                     </li>
                     <li class="nav-item">

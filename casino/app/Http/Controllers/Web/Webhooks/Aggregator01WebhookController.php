@@ -60,6 +60,12 @@ class Aggregator01WebhookController extends Controller
         return $this->run($request, 'Finish');
     }
 
+    /** Freespins/Finish. */
+    public function freespinsFinish(Request $request)
+    {
+        return $this->run($request, 'FreespinsFinish');
+    }
+
     /**
      * Flattened entry point: the operation travels in the body ("type").
      *
@@ -135,6 +141,7 @@ class Aggregator01WebhookController extends Controller
 
         return match (true) {
             str_contains($raw, 'balance') => 'Balance',
+            str_contains($raw, 'freespin') => 'FreespinsFinish',
             str_contains($raw, 'betwin') || str_contains($raw, 'bet') || str_contains($raw, 'win') => 'BetWin',
             str_contains($raw, 'rollback') => 'Rollback',
             str_contains($raw, 'finish') => 'Finish',

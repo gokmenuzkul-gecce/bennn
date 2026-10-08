@@ -366,6 +366,38 @@ Route::prefix('webhooks/aggregator01')->group(function () {
     Route::post('callbacks/Round/Finish', [
         \VanguardLTE\Http\Controllers\Web\Webhooks\Aggregator01WebhookController::class, 'finish',
     ])->name('webhooks.aggregator01.finish');
+
+    Route::post('callbacks/Freespins/Finish', [
+        \VanguardLTE\Http\Controllers\Web\Webhooks\Aggregator01WebhookController::class, 'freespinsFinish',
+    ])->name('webhooks.aggregator01.freespins.finish');
+});
+
+// Canonical 01.tech method paths (exactly as documented), so onboarding can
+// register either the /webhooks/aggregator01/callbacks base or these URLs:
+//   POST /v2/a8r_casino.Player/Balance
+//   POST /v2/a8r_casino.Round/BetWin
+//   POST /v2/a8r_casino.Round/Rollback
+//   POST /v2/a8r_casino.Round/Finish
+Route::prefix('v2')->group(function () {
+    Route::post('a8r_casino.Player/Balance', [
+        \VanguardLTE\Http\Controllers\Web\Webhooks\Aggregator01WebhookController::class, 'balance',
+    ])->name('aggregator01.v2.balance');
+
+    Route::post('a8r_casino.Round/BetWin', [
+        \VanguardLTE\Http\Controllers\Web\Webhooks\Aggregator01WebhookController::class, 'betWin',
+    ])->name('aggregator01.v2.betwin');
+
+    Route::post('a8r_casino.Round/Rollback', [
+        \VanguardLTE\Http\Controllers\Web\Webhooks\Aggregator01WebhookController::class, 'rollback',
+    ])->name('aggregator01.v2.rollback');
+
+    Route::post('a8r_casino.Round/Finish', [
+        \VanguardLTE\Http\Controllers\Web\Webhooks\Aggregator01WebhookController::class, 'finish',
+    ])->name('aggregator01.v2.finish');
+
+    Route::post('a8r_casino.Freespins/Finish', [
+        \VanguardLTE\Http\Controllers\Web\Webhooks\Aggregator01WebhookController::class, 'freespinsFinish',
+    ])->name('aggregator01.v2.freespins.finish');
 });
 
 
@@ -445,6 +477,9 @@ Route::prefix('liteback')
             Route::post('/providers/toggle', ['as' => 'liteback.casino.providers.toggle', 'uses' => 'CasinoProviderController@toggle']);
             Route::post('/providers/test', ['as' => 'liteback.casino.providers.test', 'uses' => 'CasinoProviderController@test']);
             Route::get('/transactions', ['as' => 'liteback.casino.transactions', 'uses' => 'CasinoProviderController@transactions']);
+            Route::get('/freespins', ['as' => 'liteback.casino.freespins', 'uses' => 'CasinoProviderController@freespins']);
+            Route::post('/freespins', ['as' => 'liteback.casino.freespins.issue', 'uses' => 'CasinoProviderController@issueFreespins']);
+            Route::post('/freespins/{id}/cancel', ['as' => 'liteback.casino.freespins.cancel', 'uses' => 'CasinoProviderController@cancelFreespins']);
         });
 
         // Payments Admin routes

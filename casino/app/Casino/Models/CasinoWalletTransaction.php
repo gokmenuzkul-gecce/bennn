@@ -43,4 +43,20 @@ class CasinoWalletTransaction extends Model
             ->where('transaction_id', $transactionId)
             ->first();
     }
+
+    /**
+     * Whether a rollback targeting this id has already been recorded.
+     *
+     * A late bet/win whose id was rolled back (sometimes before the original
+     * arrived) must be ignored. Rollbacks store their target in
+     * reference_transaction_id, so we look for a rollback row referencing it.
+     */
+    public static function isRolledBack(string $providerKey, string $transactionId): bool
+    {
+        return static::query()
+            ->where('provider_key', $providerKey)
+            ->where('operation', 'rollback')
+            ->where('reference_transaction_id', $transactionId)
+            ->exists();
+    }
 }

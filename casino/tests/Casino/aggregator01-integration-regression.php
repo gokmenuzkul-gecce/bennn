@@ -81,12 +81,13 @@ $checks = [
 
     'wallet validates the 18/12 money pattern' => str_contains($wallet, '/^\\d{1,18}(\\.\\d{1,12})?$/'),
 
-    'wallet is idempotent per transaction id' => str_contains($wallet, "CasinoWalletTransaction::findFor(self::PROVIDER_KEY, \$id)"),
+    'wallet is idempotent per transaction id' => str_contains($wallet, "CasinoWalletTransaction::findFor(self::PROVIDER_KEY, \$txn['id'])")
+        && str_contains($wallet, 'ConflictException'),
 
-    'wallet refunds a bet rollback and deducts a win rollback' => str_contains($wallet, "refund a bet")
-        && str_contains($wallet, "deduct a win"),
+    'wallet refunds a bet rollback and deducts a win rollback' => str_contains($wallet, "original->operation === 'bet'")
+        && str_contains($wallet, "original->operation === 'win'"),
 
-    'wallet leaves a rollback tombstone for missing originals' => str_contains($wallet, "operation' => 'rollback'"),
+    'wallet leaves a rollback tombstone for missing originals' => str_contains($wallet, 'isRolledBack'),
 
     'wallet refuses an over-drawing bet with api_code 100' => str_contains($wallet, 'API_INSUFFICIENT_FUNDS')
         && str_contains($wallet, 'InsufficientFundsException'),
@@ -94,7 +95,7 @@ $checks = [
     'wallet errors use the Twirp envelope with meta.api_code' => str_contains($wallet, "'api_code' => \$apiCode")
         && str_contains($wallet, "'api_message' => \$message"),
 
-    'wallet responds balance as a decimal string' => str_contains($wallet, "'balance' => \$this->money("),
+    'wallet responds balance as a decimal string' => str_contains($wallet, "'balance' => \$this->visibleBalance("),
 
     'insufficient-funds exception carries the balance' => str_contains($exception, 'public function balance()'),
 

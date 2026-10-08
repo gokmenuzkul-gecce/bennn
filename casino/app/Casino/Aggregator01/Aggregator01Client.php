@@ -368,18 +368,7 @@ class Aggregator01Client
             'ip' => '127.0.0.1',
             'jurisdiction' => (string) ($this->config['jurisdiction'] ?? 'TR'),
             'locale' => (string) ($this->config['locale'] ?? 'tr'),
-            'player' => array_merge([
-                'id' => $playerId,
-                'currency' => $this->currency(),
-                'country' => (string) ($this->config['country'] ?? 'TR'),
-                'firstname' => 'Player',
-                'lastname' => $playerId,
-                'nickname' => $playerId,
-                'gender' => 'm',
-                'email' => (string) ($this->config['default_email'] ?? 'player@casino.local'),
-                'date_of_birth' => (string) ($this->config['default_date_of_birth'] ?? '1990-01-01T00:00:00Z'),
-                'registered_at' => gmdate('Y-m-d\TH:i:s\Z'),
-            ], $this->playerOverrides($player)),
+            'player' => $this->playerPayload($playerId, $player),
             'urls' => [
                 'deposit_url' => (string) ($this->config['deposit_url'] ?? rtrim((string) config('app.url'), '/')),
                 'return_url' => (string) ($this->config['return_url'] ?? rtrim((string) config('app.url'), '/')),
@@ -418,6 +407,85 @@ class Aggregator01Client
         }
 
         return $url;
+    }
+
+    /**
+     * Build the `player` object shared by Launcher/Real and Freespins/Issue.
+     *
+     * Every field the Aggregator marks required is always present (with sane
+     * defaults), and any real value the caller passes overrides the default.
+     *
+     * @param  array<string, mixed>  $player
+     * @return array<string, mixed>
+     */
+    private function playerPayload(string $playerId, array $player = []): array
+    {
+        return array_merge([
+            'id' => $playerId,
+            'currency' => $this->currency(),
+            'country' => (string) ($this->config['country'] ?? 'TR'),
+            'firstname' => 'Player',
+            'lastname' => $playerId,
+            'nickname' => $playerId,
+            'gender' => 'm',
+            'email' => (string) ($this->config['default_email'] ?? 'player@casino.local'),
+            'date_of_birth' => (string) ($this->config['default_date_of_birth'] ?? '1990-01-01T00:00:00Z'),
+            'registered_at' => gmdate('Y-m-d\TH:i:s\Z'),
+        ], $this->playerOverrides($player));
+    }
+
+    /**
+     * Issue a free spins campaign (casino_a8r.Freespins/Issue).
+     *
+     * The player gets `freespins_quantity` free rounds in total across the listed
+     * games (not per game), so we issue one game at a time by default.
+     *
+     * @param  string[]  $games   Aggregator game ids ("provider:game")
+     * @param  array<string, mixed>  $player  per-player fields (id required)
+     * @return array{success: bool, message: string, raw: string}
+     */
+    public function issueFreespins(string $issueId, int $quantity, string $betAmount, array $games, array $player, string $validUntil): array
+    {
+        $payload = [
+            'casino_id' => $this->casinoId(),
+            'issue_id' => $issueId,
+            'freespins_quantity' => $quantity,
+            'bet_amount' => $betAmount,
+            'games' => array_values($games),
+            'valid_until' => $validUntil,
+            'player' => $this->playerPayload((string) ($player['id'] ?? ''), $player),
+        ];
+
+        return $this->freespinsCall('Issue', $payload);
+    }
+
+    /**
+     * Cancel a free spins campaign (casino_a8r.Freespins/Cancel).
+     *
+     * @return array{success: bool, message: string, raw: string}
+     */
+    public function cancelFreespins(string $issueId, string $provider): array
+    {
+        return $this->freespinsCall('Cancel', [
+            'casino_id' => $this->casinoId(),
+            'issue_id' => $issueId,
+            'provider' => $provider,
+        ]);
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     * @return array{success: bool, message: string, raw: string}
+     */
+    private function freespinsCall(string $method, array $payload): array
+    {
+        $response = $this->call('casino_a8r.Freespins', $method, $payload);
+
+        if ($this->failed($response)) {
+            return ['success' => false, 'message' => $this->errorMessage($response), 'raw' => $response['raw']];
+        }
+
+        return ['success' => true, 'message' => '', 'raw' => $response['raw']];
     }
 
     /**
